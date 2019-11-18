@@ -17,7 +17,7 @@ struct graph{
 };
 
 struct short_path{
-	int length;				//node the path is to
+	int length;			//node the path is to
 	int route[SIZE];	//array of the path to the node
 };
 
@@ -26,9 +26,13 @@ void rand_plot(struct graph *node, int);
 void update_weight(int, struct short_path *path, struct graph *node);
 
 int update_curr(struct graph *node);
+
+void get_nbrs();
 	
 int main() {
 	srand(time(NULL));				//seeds the random number table
+	get_nbrs();
+	/*
 	struct graph node[SIZE];		//initializes an array of graph nodes
 	struct short_path path[SIZE];	//struct of short_path for each node on the graph
 	rand_plot(node, 1);				//create a random plot of nodes
@@ -53,7 +57,7 @@ int main() {
 	for(int i=1; i<SIZE; i++){
 		node[i].weight = SIZE * MAX_DIST;					//Sets all other distances to SIZE * MAX_DIST to ensure a greater value than possible
 		node[i].vis = 0;									//remove all other nodes from visited list
-		path[i].length=1;
+		path[i].length=1;									//Add node 0 as first node in route to all nodes
 		path[i].route[0]=0;
 	}
 	int curr_node = 0;										//set current node to 0 (first node)
@@ -71,6 +75,7 @@ int main() {
 		}
 		printf("%d->",path[SIZE-2].route[i]);
 	}
+	*/
 	return 0;												//END OF PROGRAM
 }
 
@@ -135,4 +140,18 @@ int update_curr(struct graph *node){
 		}
 	}
 	return nxt;
+}
+
+void get_nbrs(){
+	for (int i=0; i<SIZE; i++){
+		int off_set = i+1;												//Creates off set for possible nbrs
+		printf("node: %d\tpossible nbrs (SIZE-off_set): %d\t", i, (SIZE-off_set));
+		int num_nbrs = rand()%(SIZE-off_set)+1;
+		printf("num_nbrs: %d\n", num_nbrs);
+		//for(int n=0; n<(SIZE-off_set); n++){						//Loops through nbrs not assigned nbrs yet
+			//int num_nbrs = rand()%(SIZE-off_set)+off_set;					//Creates rand nbrs of nodes not assigned nbrs
+			
+		//}
+	}
+	return;
 }
