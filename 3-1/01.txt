@@ -1,0 +1,51 @@
+a. The main() function is the first function that is called when a c program is executed. All other functions and operations are children of the main() function. Other than that, it acts very similar to anyother function. It has a return type and can be passed parameters.
+
+b. 
+
+c. 
+
+d. 
+
+e. Functions and procedures are very similar in that they both preform a set of commands and can be executed many times by the parent function to avoid repition, however, they differ in that a funtion returns a value while a procedure does not. In C the type of value a function returns is defined when the function is created such as: 
+
+	int main(){
+		
+		return 0;
+	}
+
+	void function(){
+		
+		return;
+	}
+
+f. Parameters are variables that are passed into a function. Every function can be setup to use parameters but not all are. When the function is decleared the parameters are set including their type. Parameters are the values found in the parenthesis when calling a function and the parameter's names and types are found when the function is created.
+
+g. Scope is the body that a variable is known to. The scope of a variable is only as large as the body that it was declared in. Global variables can be used in any function since they are created in the Global body and therefore have a Gobal scope. Variables declared in a for loop such as shown below are only known to that for loop and will not affect anything outside of the for loop. This is typically an issue when trying to use variables in function which is why you have to pass them as parameters. 
+
+	for (int i; i < 5; i++){
+		printf(%d, i);
+	}
+
+h. 
+
+i. Header files are used to organize various items in a C program. They are included at the beginning of the program so the compiler knows where to find the informaion. They can be used to store functions or declarations that will be used later in the program. The libraries that you include such as <time>, <stdio>, and <stdlib> are all header files that contain useful functions to make your program easier to use such as printf() and time().
+
+j. 
+
+k. A pointer is a variable that stores a memory location, typically of another variable. They are used in C to help navigate arrays and to pass values of variables to functions when the sitiuation calles for it, such as the value of an array.
+
+l. An array is a series of memory blocks that are used for the same purpose such as storing intigers. In C arrays can be created to store variables of the same type and then indexed through to move from one variable to the next. Pointers can also be created to store the memory location of variable which is very useful when working with arrays since the memory the variables are stored in are stored sequentially. Multi-dimentional arrays can also be created which can be thought of as arrays of arrays.
+
+m. 
+
+n. Casting is the process of changing a variables type for a single operation. A common use case is when dividing with intigers. Typically when dividing by an intiger the result of the division will be an intiger, however, if you cast a float to the variables being divided, the result will be floating point value.
+
+o. 
+
+p. 
+
+q. 
+
+r. 
+
+s. Hashing is taking a variable length string and outputting a one-way, usually static length, string that is always linked to the original string, meaning that if the same string is passed into the function, the same output will be produced. This is a great method of storing and comparing passwords. Every time a user enters their password it will get passed through the hashing function. The output will be compared to the stored output and if they are a match the user will be granted access. This does leave a flaw in hashing; if the hash is not complex enough, the same output could be produced by different inputs. Take a hash that will always output a single char 0-9. That only leaves 10 possible outputs for an infinite number of possible inputs. There will be collisions. The same is true for outputs that are 64 characters long, they are just much more rare and many are documented on rainbow tables. If the password hashes for a service is leaked, a person only needs to compare these hashes against the rainbow tables to find a password that will allow them access to the account.
