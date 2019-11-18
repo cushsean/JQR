@@ -31,9 +31,9 @@ void get_nbrs();
 	
 int main() {
 	srand(time(NULL));				//seeds the random number table
+	struct graph node[SIZE];		//initializes an array of graph nodes
 	get_nbrs();
 	/*
-	struct graph node[SIZE];		//initializes an array of graph nodes
 	struct short_path path[SIZE];	//struct of short_path for each node on the graph
 	rand_plot(node, 1);				//create a random plot of nodes
 	fprintf(stderr,"GRAPH CREATED\n");
@@ -143,15 +143,13 @@ int update_curr(struct graph *node){
 }
 
 void get_nbrs(){
-	for (int i=0; i<SIZE; i++){
-		int off_set = i+1;												//Creates off set for possible nbrs
-		printf("node: %d\tpossible nbrs (SIZE-off_set): %d\t", i, (SIZE-off_set));
-		int num_nbrs = rand()%(SIZE-off_set)+1;
-		printf("num_nbrs: %d\n", num_nbrs);
-		//for(int n=0; n<(SIZE-off_set); n++){						//Loops through nbrs not assigned nbrs yet
-			//int num_nbrs = rand()%(SIZE-off_set)+off_set;					//Creates rand nbrs of nodes not assigned nbrs
-			
-		//}
+	for (int curr_node=0; curr_node<SIZE; curr_node++){
+		//int offSet = i+1;												//Creates off set for possible nbrs
+		//printf("node: %d\tpossible nbrs (SIZE-offSet): %d\t", i, (SIZE-offSet));
+		
+		
+
+
 	}
 	return;
 }
