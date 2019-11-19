@@ -3,36 +3,41 @@
 #include <math.h>
 #include <time.h>
 
-enum SIZE {SIZE = 10};			//How many nodes will be in the plot
+enum SIZE {SIZE = 5};			//How many nodes will be in the plot
 enum MAX_DIST {MAX_DIST = 10};	//Maximum distance between each node
 const int ADJ = 0;				//Standin for node.wt array parameter - adjacent node
 const int DIST = 1;				//Standin for node.wt array parameter - distance between nodes
 
 struct graph{
-	int id;				//name of node
-	int wt[SIZE-1][2];	//adjacent nodes and distance
-	int nbrs;			//number of adjacent(neighbor) nodes
-	int vis;			//Boolean has the node been visited
-	int weight;			//Stored distance to the node
+	//int id;					//name of node
+	int nbrs[SIZE-1][2];	//adjacent nodes and distance
+	int nbrs_count;			//number of adjacent(neighbor) nodes
+	//int vis;				//Boolean has the node been visited
+	//int weight;				//Stored distance to the node
 };
 
 struct short_path{
 	int length;			//node the path is to
 	int route[SIZE];	//array of the path to the node
 };
-
+/*
 void rand_plot(struct graph *node, int);
 
 void update_weight(int, struct short_path *path, struct graph *node);
 
 int update_curr(struct graph *node);
+*/
+void get_nbrs(struct graph *node);
 
-void get_nbrs();
+void assign_nbr(int, int, struct graph *node);
+
+void set_inital_values(struct graph *node);
 	
 int main() {
 	srand(time(NULL));				//seeds the random number table
 	struct graph node[SIZE];		//initializes an array of graph nodes
-	get_nbrs();
+	set_inital_values(node);		//sets the initial vales for all node varialbes
+	get_nbrs(node);					//generates neighbors for all nodes
 	/*
 	struct short_path path[SIZE];	//struct of short_path for each node on the graph
 	rand_plot(node, 1);				//create a random plot of nodes
@@ -78,7 +83,7 @@ int main() {
 	*/
 	return 0;												//END OF PROGRAM
 }
-
+/*
 void rand_plot(struct graph *node, int prt){
 	for(int i=0; i<SIZE; i++){							//cycles through all nodes
 		node[i].id = i;									//sets id of each node
@@ -141,15 +146,49 @@ int update_curr(struct graph *node){
 	}
 	return nxt;
 }
-
-void get_nbrs(){
-	for (int curr_node=0; curr_node<SIZE; curr_node++){
-		//int offSet = i+1;												//Creates off set for possible nbrs
-		//printf("node: %d\tpossible nbrs (SIZE-offSet): %d\t", i, (SIZE-offSet));
-		
-		
-
+*/
+void get_nbrs(graph_t *node){
+	for (int curr_node = 0; curr_node < SIZE-1; curr_node++){
+		int off_set;
+		int new_nbr_count;
+		if (node[curr_node].nbrs_count == 0){
+			off_set = curr_node + 2;
+			new_nbr_count = rand() % (SIZE - off_set) + 1;
+		}
+		else{
+			off_set = curr_node + 1;
+			new_nbr_count = rand() % (SIZE - off_set);
+		}
+		printf("Node: %d\n", curr_node);
+		printf("New_nbr: ");
+		while (new_nbr_count >= 0){			
+			off_set = curr_node + 1;
+			int new_nbr = rand() % (SIZE - off_set) + off_set;
+			printf(" %d", new_nbr);
+			assign_nbr(curr_node, new_nbr, node);
+			new_nbr_count--;
+		}
+		printf("\n");
 
 	}
 	return;
+}
+
+void assign_nbr(nd1, nd2, *node){
+	int count_1 = node[nd1].nbrs_count;
+	int count_2 = node[nd2].nbrs_count;
+	node[n1].nbrs[count_1][ADJ] = nd2;
+	node[n1].nbrs[count_1][DIST] = rand() % MAX_DIST + 1;
+	node[n2].nbrs[count_2][ADJ] = nd1;
+	node[n2].nbrs[count_2][DIST] = rand() % MAX_DIST + 1;
+}
+
+void set_inital_values(*node){
+	for (int i = 0; i < sizeof(node); i++){
+		node[i].nbrs_count = 0;
+		for (int k = 0; k < sizeof(node[i].nbrs[0][0]); k++){
+			node[i].nbrs[k][0] = NULL;
+			node[i].nbrs[k][1] = NULL;
+		}
+	}
 }
