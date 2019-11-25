@@ -7,7 +7,7 @@ void fun1(int *arr1){
     arr1[0] = 1;
     arr1[1] = 2;
     arr1[2] = 3;
-    return 0;
+    return;
 }
 
 void fun2(int arr2[3][3]){
@@ -15,7 +15,7 @@ void fun2(int arr2[3][3]){
     for(int i=0;i<3;i++)
         for(int n=0;n<3;n++)
             arr2[i][n] = ++k;
-    return 0;
+    return;
 }
 
 int main()

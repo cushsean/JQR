@@ -4,27 +4,96 @@
 #include <time.h>
 #include <unistd.h>
 
+void state(int);
+int selection();
+void pay(float);
+void process_payment(float);
+void give_item();
+void refund(float);
+void maintenance();
+
+int main(){
+	printf("Welcome to the vending machine.\n");
+	if (selection() == 1)
+		pay(1.15);	
+	else
+		maintenance();
+	return 0;
+} 
+
 void state(int state){
-	printf("The current state is: ");
-	switch(state){
-		case 0:
-		printf("Waiting for selection.\n");
-		break;
-		case 1:
-		printf("Receiving payment.\n");
-		break;
-		case 2:
-		printf("Processing payment.\n");
-		break;
-		case 3:
-		printf("Dispensing item.\n");
-		break;
-		case 4:
-		printf("Issuing refund.\n");
-		break;
-		case 5:
-		printf("Maintenance issue.\n");
+	char *sys_states[] = {
+		"Waiting for selection.",
+		"Receiving payment.",
+		"Processing payment.",
+		"Dispensing item.",
+		"Issuing refund.",
+		"Maintenance issue."
+	};
+	printf("%s\n", sys_states[state]);
+	return;
+}
+
+int selection(){
+	state(0);
+	int item;
+	printf("Please select a product.\n");
+	printf("0: Kick the Machine.\n");
+	printf("1: Coke\n");
+	item = getchar() - 48;
+	getchar();	//Catch ENTER key
+	return item;
+}
+
+void pay(float cost){
+	state(1);
+	int input;
+	printf("Please input your payment menthod:\n");
+	while(cost > 0){
+		printf("Balance: %.2f\n", cost);
+		printf("1: Nickel\n");
+		printf("2: Dime\n");
+		printf("3: Quarter\n");
+		printf("4: Refund\n");
+		input = getchar() - 48;
+		getchar();
+		switch(input){
+			case 1:
+				cost -= 0.05;
+			break;
+			case 2:
+				cost -= 0.10;
+			break;
+			case 3:
+				cost -= 0.25;
+			break;
+			case 4:
+				process_payment(cost);
+				return;
+			break;
+			default:
+			printf("Invalid form of payment.\n");
+		}
 	}
+	process_payment(cost);
+	return;
+}
+
+void process_payment(float cost){
+	state(2);
+	sleep(2);
+	if(cost <= 0){
+		give_item();
+		refund(cost * (-1));
+	}
+	else
+		refund(1.15 - cost);
+	return;
+}
+
+void give_item(){
+	state(3);
+	sleep(2);
 	return;
 }
 
@@ -47,73 +116,7 @@ void refund(float cost){
 	return;
 }
 
-int pay(float cost){
-	int input;
-	state(1);
-	printf("Please input your payment menthod:\n");
-	while(cost > 0){
-		printf("Balance: %.2f\n", cost);
-		printf("1: Nickel\n");
-		printf("2: Dime\n");
-		printf("3: Quarter\n");
-		printf("4: Refund\n");
-		input = getchar() - 48;
-		getchar();
-		switch(input){
-			case 1:
-				cost -= 0.05;
-			break;
-			case 2:
-				cost -= 0.10;
-			break;
-			case 3:
-				cost -= 0.25;
-			break;
-			case 4:
-				refund(cost);
-				return 0;
-			break;
-			default:
-			printf("Invalid form of payment.\n");
-		}
-	}
-	if(cost < 0){
-		refund(cost * -1);
-	}
-	return 1;
+void maintenance(){
+	state(5);
+	return;
 }
-
-int main(){
-
-	int item;
-	float cost;
-	float payment;
-	float running_total;
-
-	printf("Welcome to the vending machine.\n");
-	state(0);
-	printf("Please select a product.\n");
-	printf("0: Kick the Machine.\n");
-	printf("1: Coke\n");
-
-	item = getchar() - 48;
-	getchar();
-
-	switch(item){
-		case 0:
-			state(5);
-		break;
-		case 1:
-			if(pay(1.15)){
-				state(2);
-				sleep(2);
-				state(3);
-				printf("Enjoy your Coke!\n");
-			}
-		break;
-		default:
-			printf("ERROR: Invalid input.\n\n");
-			printf("NO DRINK FOR YOU!\n");
-	}
-	return 0;
-} 
