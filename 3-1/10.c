@@ -7,19 +7,19 @@
 void fun1(){
     printf("fun1\n");
 }
+typedef void (*func_t)(void);
 
 int main()
 {
-    int *ptr;
-    int num = 16;
-
-    ptr = &num;
-
+    void *mem = malloc(sizeof(int));
+    int *ptr = (int *)mem;
+    *ptr = 16;
+    
     printf("%d\n", *ptr);
-    printf("%d\n", &ptr);
+    printf("%p\n", &ptr);
     printf("%d\n", ++ptr[0]);
 
-    void (*fun_ptr)(void) = &fun1;
+    func_t fun_ptr = &fun1;
     (*fun_ptr)();
 
     int arr[100];
@@ -32,6 +32,6 @@ int main()
     ptr+=50;
     printf("%d\n", *ptr);
 
-
+    free(mem);
     return 0;
 }

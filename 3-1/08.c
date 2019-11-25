@@ -5,17 +5,17 @@
 
 void fun_b(){
     printf("This function returns a void.\n");
-    return 0;
+    return;
 }
 
 void fun_c(int num){
     printf("This function is passed the value %d.\n", num);
-    return 0;
+    return;
 }
 
 void fun_d(int *num){
     printf("This function is passed the reference of %d.\n", num[0]);
-    return 0;
+    return;
 }
 
 int fun_e(int a, int b){
@@ -35,28 +35,27 @@ void fun_g(){
     printf("Please enter the second number you want to add: ");
     scanf("%d", &b);
     printf("Answer: %d\n", a+b);
+    return;
 }
 
 void fun_h(){
     printf("This function is call by a function pointer.\n");
     return;
 }
+typedef void (*func_t)(void);
 
-void fun_i(){
-    printf("\nTime Loop\n\n");
-    fun_b();
-    int num = 5;
-    fun_c(num);
-    fun_d(&num);
-    int num2 = 4;
-    printf("This function adds %d and %d and returns the answer %d.\n", num, num2, fun_e(num,num2));
-    printf("This function receives the value %d, adds %d to it and return the answer, ", num, num2);
-    fun_f(&num, &num2);
-    printf("%d, by reference.\n", num);
-    fun_g();
-    void (*fun_ptr)(void) = &fun_h;
-    (*fun_ptr)();
-    fun_i();
+void recursion(int i, int end){
+    if (i > end){
+        int tmp = i;
+        i = end;
+        end = tmp;
+    }
+    if (i++ == end){
+        printf("End of recursion\n");
+        return;
+    }
+    else return recursion(i, end);
+    //For a more practical application refer to 3.3.2
 }
 
 int main()
@@ -71,9 +70,8 @@ int main()
     fun_f(&num, &num2);
     printf("%d, by reference.\n", num);
     fun_g();
-    void (*fun_ptr)(void) = &fun_h;
+    func_t fun_ptr = &fun_h;
     (*fun_ptr)();
-    fun_i();
-
+    recursion(0, 20);
     return 0;
 }
