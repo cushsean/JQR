@@ -15,12 +15,12 @@ int main(int argc, char* argv[], char* envp[])
     }
 
     char *home;
-    char *host;
+    //char *host;
 
     home = getenv("HOME");
-    host = getenv("HOSTNAME");
+    //host = getenv("HOSTNAME");
 
-    printf("Your home dir is %s on %s.\n", home, host);
+    printf("Your home dir is %s.\n", home);
 
 
 
