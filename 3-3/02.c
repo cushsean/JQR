@@ -6,7 +6,7 @@
 typedef struct Node{
 	int data;
 	struct Node *next;
-} node_t;
+}node_t;
 
 //INSERT AN ITEM INTO A SPECIFIED LOCATION SATISFIES 3.3.2.f
 void insert_node(node_t *insert_after, node_t *new_node){
@@ -52,10 +52,9 @@ node_t* mklist(int num){
 //Navigating through a list SATISFIES 3.3.2.b
 void ptlist(node_t *list){
 	node_t *tmp;
-	int i = 0;
 	tmp = list;
-	while(tmp != NULL){
-		printf("node %d\t%d\n",i++, tmp->data);
+	for (int i = 0; tmp != NULL; i++){
+		printf("node %d\t%d\n", i, tmp->data);
 		tmp = tmp->next;
 	}
 	printf("\n");
