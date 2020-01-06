@@ -105,7 +105,7 @@ void rmdNode(dNode_t *list, int value, int all){
 }
 
 //3.3.3.f Insert node at secified location
-dNode_t *insert_at_head(dNode_t *head, dNode_t *insert){
+dNode_t* insert_at_head(dNode_t *head, dNode_t *insert){
 	insert->next = head;
 	if (head != NULL)
 		head->prev = insert;
