@@ -23,7 +23,7 @@ void mvNode_after(node_t*, node_t*);
 void mvNode_before(node_t*, node_t*);
 node_t* find_sm(node_t*);
 int find_low_pivot(int*, int);
-int find_high_pivot(int*, int);
+int find_high_pivot(int*, int, int);
 
 void sort_bubble(int*);
 void sort_merge(int*, int);
@@ -67,17 +67,17 @@ void sort_quick(int *arr, int size){
 		cmp = find_node_by_id(head, 0);
 	
 	//Loop through until all nodes are sorted by value
-	int *nodes_sorted = (int *)malloc(size);
+	int *sorted = (int *)malloc(size);
 	int pivot_id;
 	int count = 0;
 	while(count < size){
 		//Get pivot id that has not been placed
 		do{
 			pivot_id = rand()%size;
-		}while(nodes_sorted[pivot_id]);
+		}while(sorted[pivot_id]);
 		
-		//Add pivot to nodes_sorted
-		nodes_sorted[pivot_id] = 1;
+		//Add pivot to sorted
+		sorted[pivot_id] = 1;
 		count++;
 		printf("Sorted: %d\n\n", pivot_id);
 		
@@ -88,7 +88,7 @@ void sort_quick(int *arr, int size){
 		fprintf(stderr, "PIVOT VALUE: %d\n\n", pivot->data); 
 		
 		//send all large values right of pivot
-		for(int i=find_low_pivot(nodes_sorted, pivot_id); i<pivot_id; i++){
+		for(int i=find_low_pivot(sorted, pivot_id); i<pivot_id; i++){
 			//compare cmp node and pivot node
 			if(cmp->data > pivot->data){
 				tmp = cmp->next;
@@ -100,11 +100,13 @@ void sort_quick(int *arr, int size){
 				tmp = cmp->next;
 			cmp = tmp;
 		}
+		
 		//send all small values left of pivot
 		//for loop set in if to check for head position and minimize checks
+		int high_stop = find_high_pivot(sorted, pivot_id, size);
 		if(head->id == pivot_id){
 			head_set = 0;
-			for(int i=pivot_id; i<find_high_pivot(nodes_sorted, pivot_id); i++){
+			for(int i=pivot_id; i<high_stop; i++){
 				if(cmp->data < pivot->data){
 					tmp = cmp->next;
 					mvNode_before(cmp, pivot);
@@ -119,7 +121,7 @@ void sort_quick(int *arr, int size){
 			}
 		}
 		else{
-			for(int i=pivot_id; i<find_high_pivot(nodes_sorted, pivot_id); i++){
+			for(int i=pivot_id; i<high_stop; i++){
 				if(cmp->data < pivot->data){
 					tmp = cmp->next;
 					mvNode_before(cmp, pivot);
@@ -129,16 +131,17 @@ void sort_quick(int *arr, int size){
 				cmp = tmp;
 			}
 		}
+		printf("HEAD_NODE: %d\n\n", head->id);
 		ptList(head);
 		//Look at adjacent nodes to determine if sorted
 		tmp = find_node_by_id(head, pivot_id);
-		if(nodes_sorted[tmp->next->next->id] || (tmp->next->next == NULL && tmp->next != NULL)){
-			nodes_sorted[tmp->next->id] = 1;
+		if(sorted[tmp->next->next->id] || (tmp->next->next == NULL && tmp->next != NULL)){
+			sorted[tmp->next->id] = 1;
 			count++;
 			printf("\n\n*Sorted: %d\n\n", tmp->next->id);
 		}
-		if(nodes_sorted[tmp->prev->prev->id] || (tmp->prev->prev == NULL && tmp->prev != NULL)){
-			nodes_sorted[tmp->prev->id] = 1;
+		if(sorted[tmp->prev->prev->id] || (tmp->prev->prev == NULL && tmp->prev != NULL)){
+			sorted[tmp->prev->id] = 1;
 			count++;
 			printf("\n\n*Sorted: %d\n\n", tmp->prev->id);
 		}
@@ -148,22 +151,28 @@ void sort_quick(int *arr, int size){
 	return;
 }
 
-int find_high_pivot(int *sorted, int pivot){
-	int i;
-	for(i=pivot+1; i<(sizeof(sorted)/sizeof(sorted[0])); i++){
-		if(sorted[i])
+int find_high_pivot(int *sorted, int pivot, int size){
+	int max = size-1;
+	printf("MAX: %d\n", max);
+	for(int i=pivot; i<max; i++){
+		if(sorted[i+1]==1){
+			printf("HIGH: %d\n\n", i);
 			return i;
+		}
 	}
-	return i-1;
+	printf("HIGH: %d\n\n", max);
+	return max;
 }
 
 int find_low_pivot(int *sorted, int pivot){
-	int i;
-	for(i=pivot-1; i>=0; i--){
-		if(sorted[i])
-			return i+1;	
+	for(int i=pivot; i>0; i--){
+		if(sorted[i-1]==1){
+			printf("LOW: %d\n", i);
+			return i;
+		}
 	}
-	return i;	
+	printf("LOW: %d\n", 0);
+	return 0;
 }
 
 node_t* find_sm(node_t *head){

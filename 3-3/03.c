@@ -13,17 +13,23 @@ dNode_t* mkdList(int);
 void ptdList(dNode_t*);
 void ptdList_rev(dNode_t*, int);
 dNode_t* find_dNode(dNode_t*, int);
+void sortNode();
+typedef dNode_t* (*func_t)(dNode_t*);
 void rmdNode(dNode_t*, int, int);
 dNode_t* insert_at_head(dNode_t*, dNode_t*);
 void insert_dNode(dNode_t*, int, int);
 void rm_all_dNodes(dNode_t*);
 
 int main(){
+	func_t sort_ptr = &sortNode;
 	dNode_t *list =	mkdList(5);
 	insert_dNode(list, 2, 10);
 	ptdList(list);
+	(*sort_ptr)(list);
+	ptdList(list);
 	rmdNode(list, 10, 0);
 	ptdList(list);
+	
 	rm_all_dNodes(list);
 	
 	return 0;	
@@ -85,7 +91,32 @@ dNode_t* find_dNode(dNode_t *head, int value){
 	else return find_dNode(tmp->next, value);
 }
 
-//3.3.3.d Sort a d_list alphanumerically
+//3.3.3.d Sort a d_list alphanumerically with fn_ptr
+void node_swap(dNode_t *a, dNode_t *b){
+	int tmp = a->data;
+	a->data = b->data;
+	b->data = tmp;
+	return;	
+}
+
+void sortNode(dNode_t *head){
+	dNode_t *curr = head;
+	dNode_t *last = NULL;
+	int swap;
+	do{
+		swap = 0;
+		curr = head;
+		while(curr->next != last){
+			if(curr->data > curr->next->data){
+				node_swap(curr, curr->next);
+				swap = 1;
+			}
+			curr = curr->next;
+		}
+		last = curr;
+	}while(swap);
+	return;	
+}
 
 //3.3.3.e Removing selected items from d_list
 void rmdNode(dNode_t *list, int value, int all){
@@ -94,8 +125,12 @@ void rmdNode(dNode_t *list, int value, int all){
 	dNode_t *rm_node = find_dNode(list, value);
 	if(rm_node != NULL){
 		do{
-			rm_node->prev->next = rm_node->next;
-			rm_node->next->prev = rm_node->prev;
+			if(rm_node->prev == NULL)
+				list = rm_node->next;
+			else
+				rm_node->prev->next = rm_node->next;
+			if(rm_node->next != NULL)
+				rm_node->next->prev = rm_node->prev;
 			free(rm_node);
 		}while(rm_node != NULL && all);
 	}
