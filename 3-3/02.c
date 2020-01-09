@@ -122,10 +122,6 @@ node_t* sort_by_node(node_t *head){
 	node_t *last = NULL;
 	int swapped = 0;
 	
-	//Get the size of the list
-	int size;
-	for(size=0; curr != NULL; size++, curr = curr->next);
-		
 	//reassign curr to head of list
 	curr = head;
 
@@ -141,7 +137,7 @@ node_t* sort_by_node(node_t *head){
 					prev->next = tmp;
 				prev = tmp;
 				if(prev->next == head)
-					head = prev;	
+					head = prev;
 				swapped = 1;
 			}
 			else{

@@ -2,64 +2,64 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-typedef struct dNode{
+typedef struct node{
 	int data;
-	struct dNode *next;
-	struct dNode *prev;
-}dNode_t;
+	struct node *next;
+	struct node *prev;
+}node_t;
 
-dNode_t* mkdNode(int);
-dNode_t* mkdList(int);
-void ptdList(dNode_t*);
-void ptdList_rev(dNode_t*, int);
-dNode_t* find_dNode(dNode_t*, int);
-void sortNode();
-typedef dNode_t* (*func_t)(dNode_t*);
-void rmdNode(dNode_t*, int, int);
-dNode_t* insert_at_head(dNode_t*, dNode_t*);
-void insert_dNode(dNode_t*, int, int);
-void rm_all_dNodes(dNode_t*);
+node_t* mkNode(int);
+node_t* mkList(int);
+void ptList(node_t*);
+void ptList_rev(node_t*, int);
+node_t* find_Node(node_t*, int);
+node_t* sort_Node(node_t*);
+typedef node_t* (*func_t)(node_t*);
+void rmNode(node_t*, int, int);
+node_t* insert_at_head(node_t*, node_t*);
+void insert_node(node_t*, int, int);
+void rm_all_nodes(node_t*);
 
 int main(){
-	func_t sort_ptr = &sortNode;
-	dNode_t *list =	mkdList(5);
-	insert_dNode(list, 2, 10);
-	ptdList(list);
-	(*sort_ptr)(list);
-	ptdList(list);
-	rmdNode(list, 10, 0);
-	ptdList(list);
+	func_t sort_ptr = &sort_Node;
+	node_t *list =	mkList(5);
+	insert_node(list, 2, 10);
+	ptList(list);
+	list = (*sort_ptr)(list);
+	ptList(list);
+	rmNode(list, 10, 0);
+	ptList(list);
 	
-	rm_all_dNodes(list);
+	rm_all_nodes(list);
 	
 	return 0;	
 }
 
 //3.3.3.a Create d_list with n number of items
-dNode_t* mkdNode(int num){
-	dNode_t *fn_node = (dNode_t*)malloc(sizeof(dNode_t));
+node_t* mkNode(int num){
+	node_t *fn_node = (node_t*)malloc(sizeof(node_t));
 	fn_node->data = num;
 	fn_node->next = NULL;
 	fn_node->prev = NULL;
 	return fn_node;
 }
 
-dNode_t* mkdList(int num){
-	dNode_t *head = NULL;
-	//dNode_t *tail = NULL;
+node_t* mkList(int num){
+	node_t *head = NULL;
+	//node_t *tail = NULL;
 	//printf("%s\t%d\t%s\n", head->prev, head->data, head->next);
 	for (int i = 0; i < num; i++){
-		head = insert_at_head(head, mkdNode(i));
+		head = insert_at_head(head, mkNode(i));
 		//printf("node %d\t%d\n", i, head->data);
 	}
-	ptdList(head);
+	ptList(head);
 	return head;
 }
 
 //3.3.3.b Navigate through a d_list
-void ptdList(dNode_t *head){
-	dNode_t *tmp = head;
-	dNode_t *tail;
+void ptList(node_t *head){
+	node_t *tmp = head;
+	node_t *tail;
 	int i = 0;
 	for (i; tmp != NULL; i++){
 		printf("node %d\t%d\n", i, tmp->data);
@@ -67,12 +67,12 @@ void ptdList(dNode_t *head){
 		tmp = tmp->next;
 	}
 	printf("\n");
-	ptdList_rev(tail, --i);
+	ptList_rev(tail, --i);
 	return;	
 }
 
-void ptdList_rev(dNode_t *tail, int i){
-	dNode_t *tmp = tail;
+void ptList_rev(node_t *tail, int i){
+	node_t *tmp = tail;
 	for (i; tmp != NULL; i--){
 		printf("node %d\t%d\n", i, tmp->data);
 		tmp = tmp->prev;
@@ -82,47 +82,57 @@ void ptdList_rev(dNode_t *tail, int i){
 }
 
 //3.3.3.c Find the first occurance in d_list
-dNode_t* find_dNode(dNode_t *head, int value){
-	dNode_t *tmp = head;
+node_t* find_node(node_t *head, int value){
+	node_t *tmp = head;
 	if (tmp == NULL)
 		return NULL;
 	else if (tmp->data == value)
 		return tmp;
-	else return find_dNode(tmp->next, value);
+	else return find_node(tmp->next, value);
 }
 
 //3.3.3.d Sort a d_list alphanumerically with fn_ptr
-void node_swap(dNode_t *a, dNode_t *b){
-	int tmp = a->data;
-	a->data = b->data;
-	b->data = tmp;
-	return;	
-}
-
-void sortNode(dNode_t *head){
-	dNode_t *curr = head;
-	dNode_t *last = NULL;
-	int swap;
+node_t* sort_Node(node_t *head){
+	node_t *curr = head;
+	node_t *last = NULL;
+	node_t *NX = NULL;
+	int swapped;
+		
+	//reassign curr to head
+	curr = head;
+	
+	//sort
 	do{
-		swap = 0;
-		curr = head;
+		swapped = 0;
 		while(curr->next != last){
-			if(curr->data > curr->next->data){
-				node_swap(curr, curr->next);
-				swap = 1;
+			NX = curr->next;
+			if(curr->data > NX->data){
+				if(curr->prev != NULL)
+					curr->prev->next = NX;
+				NX->prev = curr->prev;
+				if(NX->next != NULL)
+					NX->next->prev = curr;
+				curr->next = NX->next;
+				NX->next = curr;
+				curr->prev = NX;
+				if(head == curr)
+					head = curr->prev;
+				swapped = 1;
 			}
-			curr = curr->next;
+			else
+				curr = curr->next;
 		}
 		last = curr;
-	}while(swap);
-	return;	
+		curr = head;
+	}while(swapped);
+	return head;	
 }
 
 //3.3.3.e Removing selected items from d_list
-void rmdNode(dNode_t *list, int value, int all){
+void rmNode(node_t *list, int value, int all){
 	//Removes node with data equal to value
 	//Non-zero all will remove all nodes with value
-	dNode_t *rm_node = find_dNode(list, value);
+	node_t *rm_node = find_node(list, value);
 	if(rm_node != NULL){
 		do{
 			if(rm_node->prev == NULL)
@@ -140,16 +150,16 @@ void rmdNode(dNode_t *list, int value, int all){
 }
 
 //3.3.3.f Insert node at secified location
-dNode_t* insert_at_head(dNode_t *head, dNode_t *insert){
+node_t* insert_at_head(node_t *head, node_t *insert){
 	insert->next = head;
 	if (head != NULL)
 		head->prev = insert;
 	return insert;
 }
 
-void insert_dNode(dNode_t *list, int after, int value){
-	dNode_t *insert_after = find_dNode(list, after);
-	dNode_t *new_node = mkdNode(value);
+void insert_node(node_t *list, int after, int value){
+	node_t *insert_after = find_node(list, after);
+	node_t *new_node = mkNode(value);
 	new_node->next = insert_after->next;
 	insert_after->next->prev = new_node;
 	insert_after->next = new_node;
@@ -158,12 +168,12 @@ void insert_dNode(dNode_t *list, int after, int value){
 }
 
 //3.3.3.g-h Destroy d_list
-void rm_all_dNodes(dNode_t *head){
-	dNode_t *tmp;
+void rm_all_nodes(node_t *head){
+	node_t *tmp;
 	tmp = head->next;
 	free(head);
 	if (tmp != NULL)
-		return rm_all_dNodes(tmp);
+		return rm_all_nodes(tmp);
 	printf("ALL NODES REMOVED. LIST IS DESTROYED!\n");
 	return;
 }
