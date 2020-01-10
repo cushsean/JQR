@@ -39,7 +39,7 @@ tree_t* mkTree(int num){
 }
 
 tree_b* mkTree_bin(int num){
-	int value = 1;
+	int* values = (int*)malloc(sizeof(int));
 	tree_b* root = (tree_b*)malloc(sizeof(tree_b));
 	root->data = value++;
 	while(value <= num){
@@ -75,12 +75,6 @@ void mkLeaf_bin(tree_b* root, int value){
 
 void ptTree(tree_t* root){
 	
-	return;
-}
-
-void insert_tabs(int lvl){
-	for(int i=lvl; i>1; i--)
-		printf("\t");
 	return;
 }
 
