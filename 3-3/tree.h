@@ -1,10 +1,11 @@
 #ifndef TREE_H_CUHSMAN
 #define TREE_H_CUSHMAN
 
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <time.h>
 
+#include "util.h"
 #include "list.h"
 
 typedef struct tree{
@@ -23,7 +24,8 @@ typedef struct bin_tree{
 tree_t* mkTree(int);
 tree_b* mkTree_bin(int);
 void mkLeaf(tree_t*, int);
-void mkLeaf_bin(tree_b*, int);
+tree_b* mkLeaf_bin(int);
+void insert_leaf_bin(tree_b*, int);
 void ptTree(tree_t*);
 void ptTree_bin(tree_b*);
 void ptTree_bin_util(tree_b*, int);
@@ -39,12 +41,9 @@ tree_t* mkTree(int num){
 }
 
 tree_b* mkTree_bin(int num){
-	int* values = (int*)malloc(sizeof(int));
-	tree_b* root = (tree_b*)malloc(sizeof(tree_b));
-	root->data = value++;
-	while(value <= num){
-		mkLeaf_bin(root, value++);
-	}
+	tree_b* root = NULL;
+	for(int i = 0; i < num; i++)
+		insert_leaf_bin(root, i);
 	return root;
 }
 
@@ -53,20 +52,33 @@ void mkLeaf(tree_t* root, int value){
 	return;
 }
 
-void mkLeaf_bin(tree_b* root, int value){
-	tree_b* leaf = (tree_b*)malloc(sizeof(tree_b));
+tree_b* mkLeaf_bin(int value){
+	tree_b* leaf = (tree_b*)malloc(sizeof(tree_b*));
+	leaf->left = NULL;
+	leaf->right = NULL;
+	leaf->parent = NULL;
 	leaf->data = value;
-	if(root->left == NULL){
-		root->left = leaf;
-		leaf->parent = root;
-	}
-	else if(root->right == NULL){
-		root->right = leaf;
-		leaf->parent = root;
-	}
-	else{
-		fprintf(stderr, "ERROR: Parent has two children aready.\n");
-		free(leaf);
+	return leaf;
+}
+
+void insert_leaf_bin(tree_b* root, int value){
+	if(root == NULL)
+		root = mkLeaf_bin(value);
+		return;
+	int cmp = cmp_int(value, root->data);
+	switch(cmp){
+		case 1:
+			//value > root->data
+			return insert_leaf_bin(root->right, value);
+			break;
+		case -1:
+			//value < root->data
+			return insert_leaf_bin(root->left, value);
+			break;
+		default:
+			//value == root->data
+			printf("No leaf created.\n");
+			break;
 	}
 	return;
 }
@@ -125,4 +137,5 @@ tree_b* find_emptyLeaf(tree_b* root){
 	return parent;
 }
 */
+
 #endif /* TREE_H_CUSHMAN */

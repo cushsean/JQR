@@ -1,8 +1,8 @@
 #ifndef QUE_H_CUSHMAN
 #define QUE_H_CUSHMAN
 
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "list.h"
 
@@ -94,5 +94,6 @@ node_t* dQue(node_t* head){
 		
 	return tmp;
 }
+
 
 #endif /* QUE_H_CUSHMAN */
