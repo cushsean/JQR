@@ -12,7 +12,7 @@ typedef void (*func_t)(void);
 int main()
 {
     void *mem = malloc(sizeof(int));
-    int *ptr = (int *)mem;
+    int *ptr = mem;
     *ptr = 16;
     
     printf("%d\n", *ptr);

@@ -3,25 +3,22 @@
 #include <math.h>
 #include <time.h>
 
-void sort_bubble(int *arr){
-	for(int i=0; i<20; i++){
-		for(int n=0; n<19; n++){
-			if(arr[i] < arr[n]){
-				int temp = arr[n];
-				arr[n] = arr[i];
-				arr[i] = temp;
-			}
+#include "../inc/util.h"
+
+void sort_bubble(void*, size_t, void (*cmp_ptr)(void*, void*));
+//int (*dfgdhgfd)(void*, void*);
+
+void sort_bubble(void *arr, size_t nmemb, void (*cmp_ptr)(void*, void*)){
+	printf("THE BUBBLE\n");
+	//int* array = (int *)arr;
+	
+	for(int i=0; i<nmemb; i++){
+		for(int n=0; n<nmemb-1; n++){
+			(*cmp_ptr)((arr+i), (arr+n));
 		}
 	}
-}
-
-void sort_merge(int *arr){
-	int size = sizeof(arr);
-	while (size > 1){
-		size /= 2;
-	}
-	
-	
+	printf("\n\n");
+	return;
 }
 
 int main(){
@@ -36,8 +33,7 @@ int main(){
 		list[i] = arr[i];
 	}
 	
-	sort_bubble(arr);
-	//sort_merge(arr);
+	sort_bubble(arr, sizeof(arr), swap_int);
 	
 
 	for(int i=0; i<20; i++){
@@ -45,4 +41,4 @@ int main(){
 	}
 
 	return 0;
-} 
+}

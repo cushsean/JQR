@@ -70,8 +70,7 @@ int main()
     fun_f(&num, &num2);
     printf("%d, by reference.\n", num);
     fun_g();
-    func_t fun_ptr = &fun_h;
-    (*fun_ptr)();
+    func_t fun_ptr = fun_ptr();
     recursion(0, 20);
     return 0;
 }
