@@ -4,6 +4,13 @@
 #include <time.h>
 #include <unistd.h>
 
+#define STATE_WAITING (0)
+#define STATE_RECEIVING (1)
+#define STATE_PROCESSING (2)
+#define STATE_DISPENSING (3)
+#define STATE_REFUND (4)
+#define STATE_MAINTENANCE (5)
+
 void state(int);
 int selection();
 void pay(float);
@@ -13,11 +20,14 @@ void refund(float);
 void maintenance();
 
 int main(){
-	printf("Welcome to the vending machine.\n");
-	if (selection() == 1)
-		pay(1.15);	
-	else
-		maintenance();
+	int shutdown = 0;
+	while(shutdown == 0){
+		printf("\nWelcome to the vending machine.\n");
+		if (selection() == 1)
+			pay(1.15);	
+		else
+			maintenance(&shutdown);
+	}
 	return 0;
 } 
 
@@ -35,18 +45,18 @@ void state(int state){
 }
 
 int selection(){
-	state(0);
+	state(STATE_WAITING);
 	int item;
 	printf("Please select a product.\n");
 	printf("0: Kick the Machine.\n");
 	printf("1: Coke\n");
-	item = getchar() - 48;
+	item = getchar() - '0';
 	getchar();	//Catch ENTER key
 	return item;
 }
 
 void pay(float cost){
-	state(1);
+	state(STATE_RECEIVING);
 	int input;
 	printf("Please input your payment menthod:\n");
 	while(cost > 0){
@@ -55,7 +65,7 @@ void pay(float cost){
 		printf("2: Dime\n");
 		printf("3: Quarter\n");
 		printf("4: Refund\n");
-		input = getchar() - 48;
+		input = getchar() - '0';
 		getchar();
 		switch(input){
 			case 1:
@@ -80,7 +90,7 @@ void pay(float cost){
 }
 
 void process_payment(float cost){
-	state(2);
+	state(STATE_PROCESSING);
 	sleep(2);
 	if(cost <= 0){
 		give_item();
@@ -92,13 +102,13 @@ void process_payment(float cost){
 }
 
 void give_item(){
-	state(3);
+	state(STATE_DISPENSING);
 	sleep(2);
 	return;
 }
 
 void refund(float cost){
-	state(4);
+	state(STATE_REFUND);
 	cost *= 100;
 	printf("Your change is below.\n");
 	while(cost >= 25){
@@ -116,7 +126,8 @@ void refund(float cost){
 	return;
 }
 
-void maintenance(){
-	state(5);
+void maintenance(int* shutdown){
+	state(STATE_MAINTENANCE);
+	*shutdown = 1;
 	return;
 }
