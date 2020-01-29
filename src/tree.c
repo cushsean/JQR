@@ -6,7 +6,8 @@
 #include "util.h"
 #include "list.h"
 
-tree_t* mkTree(void* num){
+/*
+tree_t* mkTree(int num){
 	tree_t* root;
 	mkLeaf(root, num--);
 	while(num > 0){
@@ -14,21 +15,20 @@ tree_t* mkTree(void* num){
 	}
 	return root;
 }
+*/
 
 tree_b* mkTree_bst(int num){
 	srand(time(NULL));
 	tree_b* root = NULL;
-	for(int i = 0; i < num; i++)
-		insert_leaf_bst(&root, rand()%20);
+	for(int i = 0; i < num; i++){
+		int rnum = rand()%20;
+		void* ptr = &rnum;
+		insert_leaf_bst(&root, ptr);
+	}
 	return root;
 }
 
-void mkLeaf(tree_t* root, int value){
-	
-	return;
-}
-
-tree_b* mkLeaf_bst(int value){
+tree_b* mkLeaf_bst(void* value){
 	tree_b* leaf = (tree_b*)malloc(sizeof(tree_b));
 	leaf->left = NULL;
 	leaf->right = NULL;
@@ -36,7 +36,7 @@ tree_b* mkLeaf_bst(int value){
 	return leaf;
 }
 
-void insert_leaf_bst(tree_b** root, int value){
+void insert_leaf_bst(tree_b** root, void* value){
 	if(*root == NULL){
 		*root = mkLeaf_bst(value);
 		return;
@@ -59,7 +59,7 @@ void insert_leaf_bst(tree_b** root, int value){
 	return;
 }
 
-tree_b* find_leaf_bst(tree_b* root, int value){
+tree_b* find_leaf_bst(tree_b* root, void* value){
 	tree_b* leaf = root;
 	if(leaf == NULL){
 		printf("Leaf not found, returned NULL\n");
@@ -75,7 +75,7 @@ tree_b* find_leaf_bst(tree_b* root, int value){
 	}
 }
 
-void rmLeaf_bst(tree_b* root, int value){
+void rmLeaf_bst(tree_b* root, void* value){
 	//case 1: has no children
 	//case 2: has 1 child
 	//case 3: has 2 children
@@ -125,32 +125,26 @@ void rmLeaf_bst(tree_b* root, int value){
 }
 
 //Utils
-
-void ptTree(tree_t* root){
-	
-	return;
-}
-
-void ptTree_bst(tree_b* root){
+void ptTree_bst_int(tree_b* root){
 	printf("\nPrinting Tree...");
-	ptTree_bst_util(root, 0);
+	ptTree_bst_util_int(root, 0);
 	return;
 }
 
-void ptTree_bst_util(tree_b* root, int num){	
+void ptTree_bst_util_int(tree_b* root, int num){	
 	if(root == NULL)
 		return;
 	
 	num += 1;
 	
-	ptTree_bst_util(root->right, num);
+	ptTree_bst_util_int(root->right, num);
 	
 	printf("\n");
 	for(int i=0; i<num; i++)
 		printf("\t");
-	printf("%d\n", root->data);
+	printf("%d\n", *((int*)root->data));
 	
-	ptTree_bst_util(root->left, num);
+	ptTree_bst_util_int(root->left, num);
 	
 	return;
 }

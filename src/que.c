@@ -1,21 +1,24 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "que.h"
 #include "list.h"
+#include "que.h"
 
 
 //3.3.5.a
-node_t* mkQue(int num){
+node_t* mkQue(int num){ //num is number of elements to create.
 	if(num < 1){
 		fprintf(stderr, "ERROR: Que length less than 1. NO QUE FORMED.\n");
 		return NULL;
 	}
-	node_t* front = mkNode(0);
+	int tmp = 0;
+	void* ptr = &tmp;
+	node_t* front = mkNode(ptr);
 	node_t* end = front;
 	front->next = end;
 	for(int i=1; i<num; i++){
-		node_t* new_node = mkNode(i);
+		ptr = &i;
+		node_t* new_node = mkNode(ptr);
 		new_node->prev = end;
 		end->next = new_node;
 		end = new_node;
@@ -36,10 +39,10 @@ node_t* que_find_by_elem(node_t* first, int num){
 	return first;
 }
 
-node_t* que_find_by_val(node_t* first, int num){
+node_t* que_find_by_val(node_t* first, void* value){
 	if(first != NULL){
 		do{
-			if(first->data == num)
+			if(first->data == value)
 				return first;
 			first = dQue(first);
 		}while(first->next != first && first->next != NULL);
@@ -48,8 +51,8 @@ node_t* que_find_by_val(node_t* first, int num){
 	return NULL;
 }
 
-node_t* rm_que_item(node_t* first, int num){
-	while(first->data != num){
+node_t* rm_que_item(node_t* first, void* value){
+	while(first->data != value){
 		first = dQue(first);
 	}
 	first = dQue(first);
