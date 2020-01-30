@@ -1,11 +1,8 @@
-#include <stdlib.h>
-#include <stdio.h>
-
 #include "list.h"
 
-node_t* mkNode(void* num){
+node_t* mkNode(void* value){
 	node_t* fn_node = (node_t*)malloc(sizeof(node_t));
-	fn_node->data = num;
+	fn_node->data = value;
 	fn_node->next = NULL;
 	fn_node->prev = NULL;
 	return fn_node;

@@ -1,6 +1,9 @@
 #ifndef LIST_H_CUSHMAN
 #define LIST_H_CUSHMAN
 
+#include <stdlib.h>
+#include <stdio.h>
+
 typedef struct node{
 	void* data;
 	struct node *next;

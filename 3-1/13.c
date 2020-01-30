@@ -4,6 +4,7 @@
 #include <math.h>
 #include <time.h>
 
+#include "list.h"
 #include "hash.h"
 
 //////////////////////////////////////////////
@@ -18,8 +19,8 @@
 int main(int argc, char* argv[]){
 
 	if (argc == 2){
-		unsigned int hex = hash(argv[1]);
-		printf("%08u\n", hex);
+		unsigned long hex = hash(argv[1]);
+		printf("%08lu\n", hex);
 	}
 	else{
 		FILE *dict;
@@ -32,23 +33,26 @@ int main(int argc, char* argv[]){
 			printf("Failed to retrieve file\n");
 			return 0;
 		}
-		unsigned int outputs[102305];
+		node_t** outputs = hash_table();
 		printf("Words in Dictionary: 102305\n");
 		while(fgets(word, 128, dict)){
-			outputs[word_count] = hash(word);
 			printf("Current Word: %d\r",word_count);
-			for(int i=0; i<word_count; i++){
-				if(outputs[i] == outputs[word_count]){
-					collisions++;
-					break;
-				}
-			}
+			hash_insert(outputs, word, &collisions);
 			word_count++;
 		}
 		printf("Current Word: 102305\n");
 		printf("Collisions: %d\n", collisions);
+		char* str = "apples";
+		void* ptr = str;
+		char* tmp = (char*)ptr;
+		printf("%s\n",(char*)ptr);
+		printf("%s\n", tmp);
+		unsigned long hex = hash("apples\0");
+		//hash_find_byValue(outputs, str, 1);
+		printf("close\n");
 		if (fclose(dict) != 0)
 			printf("Failed to close file\n");
+		hash_free(outputs);
 	}
 	return 0;
 }

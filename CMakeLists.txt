@@ -1,17 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
-
 project(JQR VERSION 1.0)
-
 include_directories(inc)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin)
-
-#set(SRC 
-#	src/tree.c
-#	src/list.c
-#	src/que.c
-#	src/util.c
-#	src/hash.c
-#)
+set(CMAKE_BUILD_TYPE Debug)
 
 set(QUE
 	src/list.c
@@ -26,6 +17,8 @@ set(TREE
 
 set(HASH
 	src/hash.c
+	src/list.c
+	src/util.c
 )
 	
 add_executable(02 "3-3/02.c")

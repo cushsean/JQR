@@ -1,10 +1,4 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <time.h>
-
 #include "tree.h"
-#include "util.h"
-#include "list.h"
 
 /*
 tree_t* mkTree(int num){

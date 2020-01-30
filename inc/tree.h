@@ -1,6 +1,13 @@
 #ifndef TREE_H_CUHSMAN
 #define TREE_H_CUSHMAN
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
+
+#include "list.h"
+#include "util.h"
+
 typedef struct tree{
 	void* data;
 	struct tree *parent;
