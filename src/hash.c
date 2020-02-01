@@ -1,30 +1,20 @@
 #include "hash.h"
 
 unsigned long hash(char *input){
-	printf("CHECK-1\n");
 	const int MULT = 97;
-	printf("CHECK-2\n");
 	unsigned long h = 5;
-	printf("CHECK-3\n");
 	unsigned char* str = (unsigned char*)input;
-	printf("CHECK-4\n");
 	for(int flag=0; flag < 2; flag++){
-		printf("CHECK-5\n");
 		while(*str != '\0'){\
 			h = h * MULT + *str;
 			str++;
 		}
-		printf("CHECK-6\n");
 		
 		if(flag == 0){
-			printf("CHECK-7\n");
-			printf("%lu\n",h);
-			snprintf(str, sizeof(unsigned char), "%lu", h);
+			sprintf(str, "%lu", h);
 		}
 	}
-	printf("CHECK-8\n");
 	h = h%LIMITER; //limits output LIMITER defined in hash.h
-	printf("CHECK-9\n");
 	return h;
 }
 
@@ -35,7 +25,7 @@ node_t** hash_table(){
 	return table;	
 }
 
-void hash_insert(node_t** table, void* str, int* collisions){
+node_t** hash_insert(node_t** table, void* str, int* collisions){
 	unsigned long index = hash((char*)str);
 	if(table[index]->data == NULL)
 		table[index]->data = str;
@@ -47,7 +37,7 @@ void hash_insert(node_t** table, void* str, int* collisions){
 		curr->next = mkNode(str);
 		curr->next->prev = curr;
 	}
-	return;
+	return table;
 }
 
 void hash_free(node_t** table){
@@ -58,14 +48,12 @@ void hash_free(node_t** table){
 }
 
 node_t* hash_find_byValue(node_t** table, void* str, int loud){
-	printf("check\n");
-	printf("%s\n", (char*)str);
+	printf("String to hash: %s\n", (char*)str);
 	unsigned long index = hash((char*)str);
-	printf("%lu\n", index);
+	printf("Hash: %lu\n", index);
 	int level = 0;
-	//node_t* curr = table[index];
-	/*
-	while(!cmp_ulong(curr->data, str)){
+	node_t* curr = table[index];
+	while(!cmp_str(curr->data, str)){
 		if(curr->next != NULL)
 			curr = curr->next;
 		else{
@@ -73,7 +61,6 @@ node_t* hash_find_byValue(node_t** table, void* str, int loud){
 			break;
 		}
 	}
-	/*
 	if(loud){
 		printf("Find by Value...\n");
 		if(curr == NULL)
@@ -84,7 +71,6 @@ node_t* hash_find_byValue(node_t** table, void* str, int loud){
 			printf("Level: %d\n", level);
 		}
 	}
-	*/
 	return NULL;
 }
 

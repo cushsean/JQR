@@ -30,6 +30,10 @@ int cmp_ulong(void *var1, void *var2){
 	}
 }
 
+int cmp_str(void *var1, void *var2){
+	return strcmp((char*)var1, (char*)var2);
+}
+
 void swap_int(void *num1, void* num2){
 	if(cmp_int(num1, num2)){
 		int tmp = *(int*)num1;

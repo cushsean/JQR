@@ -12,7 +12,7 @@
 
 unsigned long hash(char*);
 node_t** hash_table();
-void hash_insert(node_t**, void*, int*);
+node_t** hash_insert(node_t**, void*, int*);
 void hash_free(node_t**);
 node_t* hash_find_byValue(node_t**, void*, int);
 node_t* hash_find_byNumber(node_t**, unsigned long);
