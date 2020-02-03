@@ -8,13 +8,15 @@
 #include "list.h"
 #include "util.h"
 
+#define MATCH 0
 #define LIMITER 99999999
+#define WORD_SIZE 128
 
 unsigned long hash(char*);
-node_t** hash_table();
-node_t** hash_insert(node_t**, void*, int*);
-void hash_free(node_t**);
-node_t* hash_find_byValue(node_t**, void*, int);
-node_t* hash_find_byNumber(node_t**, unsigned long);
-
+char** hash_table();
+char** hash_insert(char**, void*, int*);
+void hash_free(char**);
+long hash_find_byValue(char**, void*);
+long hash_find_byNumber(char**, unsigned long);
+char** hash_rmItem(char**, void*);
 #endif /* HASH_H_CUSHMAN */
