@@ -8,17 +8,18 @@
 int main(){
 	srand(time(NULL));
 	tree_b* root = mkTree_bst(15);
-	ptTree_bst(root);
+	ptTree_bst_int(root);
 	int tmp = rand()%20;
 	printf("finding %d...\n", tmp);
-	tree_b* leaf = find_leaf_bst(root, tmp);
+	void* ptr = &tmp;
+	tree_b* leaf = find_leaf_bst(root, ptr);
 	if(leaf != NULL)
 		printf("The node with value %d has children %d(l) and %d(r)\n",
-			leaf->data,
-			(leaf->left == NULL ? -1 : leaf->left->data),
-			(leaf->right == NULL ? -1 : leaf->right->data)
+			*((int*)leaf->data),
+			(leaf->left == NULL ? -1 : *((int*)leaf->left->data)),
+			(leaf->right == NULL ? -1 : *((int*)leaf->right->data))
 		);
 	rmLeaf_bst(root, leaf->data);
-	ptTree_bst(root);
+	ptTree_bst_int(root);
 	return 0;
 }

@@ -1,11 +1,17 @@
 #!/bin/bash
 
-if [ -e build ] 
+if [ -e build ] && [ $1 == 'clean' ]
 then
-	rm -rf build
+	rm -rf build && \
+	mkdir build
 fi
 
-mkdir build && \
 cd build && \
 cmake ../ && \
-make
+make && \
+cd ..
+
+if [ ! -e bin ]
+then
+	ln -s build/bin ./bin
+fi

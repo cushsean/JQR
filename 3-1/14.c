@@ -33,8 +33,7 @@ int main(){
 		list[i] = arr[i];
 	}
 	
-	sort_bubble(arr, sizeof(arr), swap_int);
-	
+	sort_bubble(arr, sizeof(arr), cmp_int);
 
 	for(int i=0; i<20; i++){
 		printf("%d\t%d\n",list[i],arr[i]);

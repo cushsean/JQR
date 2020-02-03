@@ -1,6 +1,13 @@
 #ifndef TREE_H_CUHSMAN
 #define TREE_H_CUSHMAN
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
+
+#include "list.h"
+#include "util.h"
+
 typedef struct tree{
 	void* data;
 	struct tree *parent;
@@ -17,11 +24,13 @@ typedef struct bst_tree{
 tree_t* mkTree(int);
 tree_b* mkTree_bst(int);
 void mkLeaf(tree_t*, int);
-tree_b* mkLeaf_bst(int);
-void insert_leaf_bst(tree_b**, int);
+tree_b* mkLeaf_bst(void*);
+void insert_leaf_bst(tree_b**, void*);
+tree_b* find_leaf_bst(tree_b*, void*);
+void rmLeaf_bst(tree_b*, void*);
 void ptTree(tree_t*);
-void ptTree_bst(tree_b*);
-void ptTree_bst_util(tree_b*, int);
+void ptTree_bst_int(tree_b*);
+void ptTree_bst_util_int(tree_b*, int);
 tree_b* find_min_bst(tree_b*);
 tree_b* find_max_bst(tree_b*);
 

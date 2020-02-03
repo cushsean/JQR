@@ -1,11 +1,8 @@
-#include <stdlib.h>
-#include <stdio.h>
-
 #include "list.h"
 
-node_t* mkNode(int num){
+node_t* mkNode(void* value){
 	node_t* fn_node = (node_t*)malloc(sizeof(node_t));
-	fn_node->data = num;
+	fn_node->data = value;
 	fn_node->next = NULL;
 	fn_node->prev = NULL;
 	return fn_node;
@@ -15,7 +12,8 @@ node_t* mkList(int num, int circle){
 	node_t* head = NULL;
 	node_t* tail = NULL;
 	for (int i=0; i<num; i++){
-		head = insert_at_head(head, tail, mkNode(i));
+		void* ptr = &i;
+		head = insert_at_head(head, tail, mkNode(ptr));
 		if(tail == NULL && circle)
 			tail = head;
 	}
@@ -28,14 +26,14 @@ void ptList(node_t *head){
 	node_t* tmp = head;
 	printf("Printing List...\n");
 	do{
-		printf("\t%d\n", tmp->data);
+		printf("\t%d\n", *((int*)tmp->data));
 		tmp = tmp->next;
 	}while(tmp != head && tmp != NULL);
 	printf("\n");
 	return;	
 }
 
-node_t* find_node(node_t *head, int value){
+node_t* find_node(node_t *head, void* value){
 	node_t* tmp = head;
 	if (tmp != NULL)
 		do{
@@ -83,7 +81,7 @@ node_t* sort_node(node_t *head){
 	return head;	
 }
 
-node_t* rmNode(node_t *head, int value, int all){
+node_t* rmNode(node_t *head, void* value, int all){
 	//Removes node with data equal to value
 	//Non-zero all will remove all nodes with value
 	node_t* tail = get_tail(head);
@@ -127,7 +125,7 @@ node_t* insert_at_head(node_t* head, node_t* tail, node_t* insert){
 	return insert;
 }
 
-void insert_node(node_t *list, int after, int value){
+void insert_node(node_t *list, void* after, void* value){
 	node_t* insert_after = find_node(list, after);
 	if(insert_after != NULL){
 		node_t* new_node = mkNode(value);

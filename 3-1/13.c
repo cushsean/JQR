@@ -4,48 +4,28 @@
 #include <math.h>
 #include <time.h>
 
+#include "list.h"
+#include "hash.h"
+#include "util.h"
+
 //////////////////////////////////////////////
 //	DICTIONARY USED: /usr/share/dict/words	//
 //	TOTAL WORD COUNT: 102305				//
+//	HASH LENGTH: 16 DIGITS 					//
 //	TOTAL COLLISIONS: 0						//
+//	HASH LENGTH: 08 DIGITS 					//
+//	TOTAL COLLISIONS: 39					//
 //////////////////////////////////////////////
-void padding(char* s){
-	memmove(s + 1, s, strlen(s) + 1);
-	memcpy(s, "0", 1);
-}
-
-char* hash(char *input){
-	const int MULT = 97;
-	unsigned long h = 5;
-	unsigned char* str = (unsigned char*)input;
-	int flag = 0;
-	doubleHash:
-	while(*str != '\0'){
-		h = h * MULT + *str;
-		str++;
-	}
-	
-	char* hex = (char*)malloc(16*sizeof(char*));
-	sprintf(hex, "%lx", h);
-	while(strlen(hex)<16)
-		padding(hex);
-	if(flag == 0){
-		flag = 1;
-		strcpy(str,hex);
-		goto doubleHash;
-	}
-	
-	return hex;
-}
 
 int main(int argc, char* argv[]){
 
-	if (argv[1] != NULL){
-		printf("%s\n", hash(argv[1]));
+	if (argc == 2){
+		unsigned long hex = hash(argv[1]);
+		printf("%08lu\n", hex);
 	}
 	else{
 		FILE *dict;
-		char word[128];
+		char* word = malloc(WORD_SIZE);
 		int word_count = 0;
 		int collisions = 0;
 		
@@ -54,29 +34,53 @@ int main(int argc, char* argv[]){
 			printf("Failed to retrieve file\n");
 			return 0;
 		}
-		char **outputs = (char**)malloc(sizeof(char*) * 102305);
-		for(int i=0;i<102305;i++)
-			outputs[i] = (char*)malloc(sizeof(char) * 128);
+		char** table = hash_table();
 		printf("Words in Dictionary: 102305\n");
 		while(fgets(word, 128, dict)){
-			outputs[word_count] = hash(word);
 			printf("Current Word: %d\r",word_count);
-			for(int i=0; i<word_count; i++){
-				if(!strcmp(outputs[i], outputs[word_count])){
-					collisions++;
-					break;
-				}
-			}
+			table = hash_insert(table, word, &collisions);
 			word_count++;
 		}
 		printf("Current Word: 102305\n");
 		printf("Collisions: %d\n", collisions);
+		////////////////////////////
+		printf("Find by Value...\n");
+		char* hstr = malloc(WORD_SIZE);
+		hstr = "hos";
+		unsigned long hstr_hash = hash(hstr);
+		long index = hash_find_byValue(table, hstr);
+		if(index != -1){
+			printf("Key: %s\n", hstr);
+			printf("Hash: %08lu\n", hstr_hash);
+			printf("Index: %08ld\n", index);
+		}
+		/////////////////////////////
+		printf("Find by Number...\n");
+		index = hash_find_byNumber(table, 13);
+		if(index != -1){
+			char* key = table[index];
+			hstr_hash = hash(key);
+			printf("Key: %s\n", table[index]);
+			printf("Hash: %08lu\n", hstr_hash);
+			printf("Index: %08ld\n", index);
+		}
+		////////////////////////////
+		hstr = "algebras";
+		table = hash_rmItem(table, hstr);
+		////////////////////////////
+		printf("Find by Value...\n");
+		hstr = "hos";
+		hstr_hash = hash(hstr);
+		index = hash_find_byValue(table, hstr);
+		if(index != -1){
+			printf("Key: %s\n", hstr);
+			printf("Hash: %08lu\n", hstr_hash);
+			printf("Index: %08ld\n", index);
+		}
+		////////////////////////////
 		if (fclose(dict) != 0)
 			printf("Failed to close file\n");
-		
-		for(int i=0;i<102305;i++)
-			free(outputs[i]);
-		free(outputs);
+		hash_free(table);
 	}
 	return 0;
 }
