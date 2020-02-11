@@ -34,16 +34,18 @@ int main(int argc, char* argv[]){
 			printf("Failed to retrieve file\n");
 			return 0;
 		}
-		char** table = hash_table();
+		//char** table = hash_table();
+		meta_h* table = hash_new_table();
 		printf("Words in Dictionary: 102305\n");
 		while(fgets(word, 128, dict)){
 			printf("Current Word: %d\r",word_count);
-			table = hash_insert(table, word, &collisions);
+			//table = hash_insert(table, word, &collisions);
 			word_count++;
 		}
 		printf("Current Word: 102305\n");
 		printf("Collisions: %d\n", collisions);
 		////////////////////////////
+		/*
 		printf("Find by Value...\n");
 		char* hstr = malloc(WORD_SIZE);
 		hstr = "hos";
@@ -77,10 +79,11 @@ int main(int argc, char* argv[]){
 			printf("Hash: %08lu\n", hstr_hash);
 			printf("Index: %08ld\n", index);
 		}
+		*/
 		////////////////////////////
 		if (fclose(dict) != 0)
 			printf("Failed to close file\n");
-		hash_free(table);
+		//hash_free(table);
 	}
 	return 0;
 }
