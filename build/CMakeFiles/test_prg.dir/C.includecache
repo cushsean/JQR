@@ -1,0 +1,36 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../inc/encode.h
+stdio.h
+-
+ctype.h
+-
+stdarg.h
+-
+string.h
+-
+stdint.h
+-
+inttypes.h
+-
+
+/home/sean/jqr/src/encode.c
+encode.h
+/home/sean/jqr/src/encode.h
+
+/home/sean/jqr/test_prg.c
+stdio.h
+-
+inttypes.h
+-
+math.h
+-
+encode.h
+/home/sean/jqr/encode.h
+

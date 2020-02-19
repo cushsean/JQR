@@ -1,3 +1,7 @@
+/*******************************************\
+|	Modified Beej's code to fit my needs.	|
+\*******************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,71 +17,105 @@
 int main(int argc, char* argv[]){
 
 	struct addrinfo hints;
-	struct addrinfo *res_tmp;
+	struct addrinfo *servinfo;
 	struct addrinfo *res;
 	int status;
 	char ipstr[INET_ADDRSTRLEN];
 	int sock_mine;
 
 	if(argc != 3){
-		fprintf(stderr, "usage: showip hostname\n");
-		return 1;
+		fprintf(stderr, "SYNOPSIS: client ip port\n");
+		return EXIT_FAILURE;
 	}
+	
+	const char* ip_dest = argv[1];
+	const char* port_dest = argv[2];
 
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_INET;
 	hints.ai_socktype = SOCK_STREAM;
 
-	if((status = getaddrinfo(argv[1], argv[2], &hints, &res_tmp)) != 0){
+	if((status = getaddrinfo(ip_dest, port_dest, &hints, &res)) != 0){
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(status));
+		return EXIT_FAILURE;
 	}
 
-	printf("IP address for %s:\n\n", argv[1]);
+	printf("IP address for %s:\n\n", ip_dest);
 
-	for(res = res_tmp; res != NULL; res = res->ai_next){
+	for(servinfo = res; servinfo != NULL; servinfo = servinfo->ai_next){
 		void* addr;
 		char* ipversion;
 
-		struct sockaddr_in *ipv4 = (struct sockaddr_in*)res->ai_addr;
+		struct sockaddr_in *ipv4 = (struct sockaddr_in*)servinfo->ai_addr;
 		addr = &(ipv4->sin_addr);
 		ipversion = "IPv4";
 
-		inet_ntop(res->ai_family, addr, ipstr, sizeof(ipstr));
+		inet_ntop(servinfo->ai_family, addr, ipstr, sizeof(ipstr));
 		printf("\t%s: %s\n\n", ipversion, ipstr);
 
-		sock_mine = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
-		connect(sock_mine, res->ai_addr, res->ai_addrlen);
+		if((sock_mine = socket(
+							servinfo->ai_family, 
+							servinfo->ai_socktype, 
+							servinfo->ai_protocol
+						)) == -1){
+			perror("client: socket");
+			continue;
+		}
 		
-		char buf[128];
-		int buf_len = sizeof(buf);
-		memset(buf, '\0', buf_len);
-		int bytes_recv = recv(sock_mine, buf, buf_len, 0);
-		printf("SERVER: %d bytes recv\n", bytes_recv);
-		printf("%.*s\n", bytes_recv, buf);
+		if(connect(sock_mine, servinfo->ai_addr, servinfo->ai_addrlen) == -1){
+			perror("client: connect");
+			continue;
+		}
 		
-		//sleep(2);
-		
-		char* msg =
-			"I have a UDP joke,\n\
-you might get it and you might not,\n\
-I don't really care.";
-		int msg_len = strlen(msg);
-		int bytes_sent = sendto(
-							sock_mine, 
-							buf, 
-							buf_len, 
-							0, 
-							res->ai_addr, 
-							res->ai_addrlen
-						);
-		if(bytes_sent < msg_len)
-			printf("NOTE: Only %d bytes of %d were sent.", bytes_sent, msg_len);
-		
-		close(sock_mine);
+		break;
+	}
+	
+	freeaddrinfo(res);
+	
+	if(servinfo == NULL){
+		fprintf(stderr, "client: failed to connect\n");
+		return EXIT_FAILURE;
+	}
+	
+	inet_ntop(
+		servinfo->ai_family,
+		(struct sockaddr*)servinfo->ai_addr,
+		ipstr,
+		sizeof ipstr
+	);
+	freeaddrinfo(servinfo);
+	
+	socklen_t i;
+	int type;
+	
+	if(getsockopt(sock_mine, SOL_SOCKET, SO_TYPE, &type, &i) == -1)
+		perror("getsockopt");
+	printf("client: the sock is of type %s\n", 
+		type ? "DATAGRAM" : "STREAM");
+	printf("client: connecting to %s\n", ipstr);
+	
+	//char buf[128];
+	//int buf_len = sizeof(buf);
+	//memset(buf, '\0', buf_len);
+	/*
+	*	NOTE:
+	*	Instead of above, could also set the byte after the 
+	*	received message to '\0'. This byte would be:
+	*	buf[bytes_recv]
+	*/
+	int buf;
+	int buf_len = sizeof(int);
+	int bytes_recv = recv(sock_mine, &buf, buf_len, 0);
+	if(bytes_recv == -1)
+		perror("recv");
+	else{
+		printf("client: %d bytes recv\n", bytes_recv);
+		printf("be_buf: %d\n", buf);
+		buf = be32toh(buf);
+		printf("h_buf: %d\n", buf);
 	}
 
-	freeaddrinfo(res_tmp);
-
+	close(sock_mine);
 
 	return EXIT_SUCCESS;
 } 

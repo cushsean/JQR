@@ -1,0 +1,1 @@
+/usr/bin/cc -g   CMakeFiles/test_prg.dir/test_prg.c.o CMakeFiles/test_prg.dir/src/encode.c.o  -o bin/test_prg 
