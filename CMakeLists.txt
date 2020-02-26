@@ -4,6 +4,10 @@ include_directories(inc)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin)
 set(CMAKE_BUILD_TYPE Debug)
 
+set(TEST_PRG
+	src/encode.c
+)
+
 set(QUE
 	src/list.c
 	src/que.c
@@ -20,10 +24,22 @@ set(HASH
 	src/list.c
 	src/util.c
 )
+
+set(SERIAL
+	src/encode.c
+	src/util.c
+)
 	
+add_executable(test_prg "test_prg.c" ${TEST_PRG})
 add_executable(02 "3-3/02.c")
 add_executable(03 "3-3/03.c")
 add_executable(04 "3-3/04.c")
 add_executable(05 "3-3/05.c" ${QUE})
 add_executable(07 "3-3/07.c" ${TREE})
 add_executable(hash "3-1/13.c" ${HASH})
+add_executable(server "3-1/12_server.c")
+add_executable(client "3-1/12_client.c")
+add_executable(talker "3-1/12_talker.c")
+add_executable(listener "3-1/12_listener.c")
+add_executable(serial_send "3-1/12_serial_send.c" ${SERIAL})
+add_executable(serial_recv "3-1/12_serial_recv.c" ${SERIAL})
