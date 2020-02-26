@@ -1,1 +1,0 @@
-/usr/bin/cc -g   CMakeFiles/07.dir/3-3/07.c.o CMakeFiles/07.dir/src/list.c.o CMakeFiles/07.dir/src/tree.c.o CMakeFiles/07.dir/src/util.c.o  -o bin/07 

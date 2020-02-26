@@ -8,43 +8,49 @@
 #include <stdint.h>
 #include <inttypes.h>
 
+#include "util.h"
+
+#define BUF_SIZE (1024)
+
 /***************************************************\
-|	Taken from Beej's Guide to Network Programing	|
+|	FOllowing Beej's Guide to Network Programing	|
 |	and modified to fit my needs.					|
 \***************************************************/
 
-#define pack754_16(f) (pack754((f), 16, 5))
-#define pack754_32(f) (pack754((f), 32, 8))
-#define pack754_64(f) (pack754((f), 64, 11))
-#define unpack754_16(i) (unpack754((i), 16, 5))
-#define unpack754_32(i) (unpack754((i), 32, 8))
-#define unpack754_64(i) (unpack754((i), 64, 11))
+union float32_t{    // float
+    float frac;
+    uint32_t whole;
+};
 
-uint64_t pack754(long double f, unsigned bits, unsigned expbits);
-long double upack754(uint64_t i, unsigned bits, unsigned expbits);
+union float64_t{    // double
+    double frac;
+    uint64_t whole;
+};
 
-void packi16(unsigned char *buf, unsigned int i);
-void packi32(unsigned char *buf, unsigned long int i);
-void packi64(unsigned char *buf, unsigned long long int i);
-int unpacki16(unsigned char *buf);
-unsigned int unpacku16(unsigned char *buf);
-long int unpacki32(unsigned char *buf);
-unsigned long int unpacku32(unsigned char *buf);
-long long int unpacki64(unsigned char *buf);
-unsigned long long int unpacku64(unsigned char *buf);
+void packi16(unsigned char *buf, uint16_t i);
+void packi32(unsigned char *buf, uint32_t i);
+void packi64(unsigned char *buf, uint64_t i);
+int16_t unpacki16(unsigned char *buf);
+uint16_t unpacku16(unsigned char *buf);
+int32_t unpacki32(unsigned char *buf);
+uint32_t unpacku32(unsigned char *buf);
+int64_t unpacki64(unsigned char *buf);
+uint64_t unpacku64(unsigned char *buf);
 
 /*
 ** pack() -- store data dictated by the format string in the buffer
 **
-**   bits |signed   unsigned   float   string
-**   -----+----------------------------------
+**   bits |signed   unsigned   float   string   binary
+**   -----+-------------------------------------------
 **      8 |   c        C         
-**     16 |   h        H         f
-**     32 |   l        L         d
-**     64 |   q        Q         g
-**      - |                               s
+**     16 |   h        H         
+**     32 |   l        L         f
+**     64 |   q        Q         d
+**      - |                               s 	  b
 **
-**  (16-bit unsigned length is automatically prepended to strings)
+**  NOTE:   32-bit unsigned length is automatically prepended to strings
+**          and binaries in order to pack their len,
+**          up to 4.29 GB, into the buffer. 
 */ 
 
 unsigned int pack(unsigned char *buf, char *format, ...);
@@ -52,17 +58,18 @@ unsigned int pack(unsigned char *buf, char *format, ...);
 /*
 ** unpack() -- unpack data dictated by the format string into the buffer
 **
-**   bits |signed   unsigned   float   string
-**   -----+----------------------------------
+**   bits |signed   unsigned   float   string   binary
+**   -----+-------------------------------------------
 **      8 |   c        C         
-**     16 |   h        H         f
-**     32 |   l        L         d
-**     64 |   q        Q         g
-**      - |                               s
+**     16 |   h        H         
+**     32 |   l        L         f
+**     64 |   q        Q         d
+**      - |                               s 	  b
 **
-**  (string is extracted based on its stored length, but 's' can be
-**  prepended with a max length)
+**  NOTE: strings and binaries are extracted based on their stored length,
+**  but 's' and 'b' can be prepended with a max length
 */
 void unpack(unsigned char *buf, char *format, ...);
+void check_buf(unsigned int size);
 
 #endif /* ENCODE_H_CUSHMAN */

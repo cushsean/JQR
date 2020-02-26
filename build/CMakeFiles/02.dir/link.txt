@@ -1,1 +1,0 @@
-/usr/bin/cc -g   CMakeFiles/02.dir/3-3/02.c.o  -o bin/02 

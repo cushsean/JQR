@@ -34,6 +34,7 @@ typedef struct cereal{
 	float		fl;
 	double		db;
 	char		str[128];
+	char		bin[128];
 }cereal_t;
 
 int main(int argc, char* argv[]){
@@ -141,87 +142,100 @@ int main(int argc, char* argv[]){
 		);
 		printf("\nserver: connection from %s\n", ipstr);
 		
-		unsigned char buf[1024];
-		/*char *auth = "It's me.";
-		int auth_len = strlen(auth);
+		unsigned char buf[BUF_SIZE];
+		//buf = malloc(128);
+		//buf = realloc(buf, 1028);
+				
+		//Initialize struct and assign values
+		cereal_t packet;
+		packet.ch = 'a';
+		packet.s_16 = rand()%65535-32767;
+		packet.u_16 = rand()%65535;
+		packet.s_32 = rand()%4294967295-2147483647;
+		packet.u_32 = rand()%4294967295;
+		packet.s_64 = rand()-9223372036854775807;
+		packet.u_64 = rand();
+		packet.fl = M_PI;
+		packet.db = M_PI;
+		strncpy(packet.str, "This is a test.\nThis is only a test.\0", 37);
+		uint32_t bin_len = 45;
+		memcpy(packet.bin, "\0This is binary data.\0 With a Null Terminator.", bin_len);
+		//Serialize
 		
-		int bytes_recv = recv(sock_curr, buf, auth_len-1, 0);
-		if(bytes_recv == -1)
-			perror("recv");
-		else if((!strncmp(buf, auth, auth_len-1)) == TRUE){
-		*/
-				
-			//Initialize struct and assign values
-			cereal_t packet;
-			packet.ch = 'a';
-			packet.s_16 = rand()%65535-32767;
-			packet.u_16 = rand()%65535;
-			packet.s_32 = rand()%4294967295-2147483647;
-			packet.u_32 = rand()%4294967295;
-			packet.s_64 = rand()-9223372036854775807;
-			packet.u_64 = rand();
-			packet.fl = M_PI;
-			packet.db = M_PI;
-			strncpy(packet.str, "This is a test.\nThis is only a test.\0", 37);
-			//char* s = "This is a test.";
-			
-			//Serialize
-			
-			//printf("sizeof double: %lu\n", sizeof(double));
-			unsigned int packetsize = pack(buf, "chHlLqQs",
-					(int8_t)packet.ch,
-					packet.s_16,
-					packet.u_16,
-					packet.s_32,
-					packet.u_32,
-					packet.s_64,
-					packet.u_64,
-					//packet.fl,
-					//packet.db,
-					packet.str
-				);
-			if(packetsize == -1){
-				perror("pack");
-				exit(EXIT_FAILURE);
-			}
-			printf("packet is %u bytes\n", packetsize);
-			buf[packetsize] = '\0';
-
-			//Send it
-			int bytes_sent = send(sock_curr, buf, packetsize+1, 0);
-			if(bytes_sent == -1)
+		uint32_t packetsize = pack(buf, "chHlLqQfdsb",
+				(int8_t)packet.ch,
+				packet.s_16,
+				packet.u_16,
+				packet.s_32,
+				packet.u_32,
+				packet.s_64,
+				packet.u_64,
+				packet.fl,
+				packet.db,
+				packet.str,
+				packet.bin,
+				bin_len
+			);
+		if(packetsize == -1){
+			perror("pack");
+			exit(EXIT_FAILURE);
+		}
+		printf("packet is %u bytes\n", packetsize);
+		buf[packetsize++] = '\0';
+		
+		//Send it
+		int bytes = 0;
+		
+		//preamble
+		char preamble[17];	//preamble 6 BELLs, uint32 packetsize, 6 BELLs, NULL Terminator
+		memset(preamble, '\a', 16); //loads preamble with the BELL
+		preamble[16] = '\0'; //Adds null at the end
+		char msg_len[4];
+		packi32(msg_len, packetsize-1); //package packetsize into msg_len
+		//packi32 not required if endianess is handeled otherwise
+		memcpy(preamble+6, msg_len, 4); //insert packetsize
+		if((bytes = send(sock_curr, preamble, 16, 0)) == -1)
+			perror("preamble");
+		bytes = 0;	//reset bytes
+		
+		//recv ACK;
+		char ack[6];
+		if((bytes = recv(sock_curr, ack, 6, 0)) == -1)
+			perror("ACK");
+		bytes = 0;	//reset bytes
+		if(strncmp(ack, "ACK", 3)){
+			fprintf(stderr, "ACK not received. Terminating transmission.\n");
+			exit(1);
+		}
+		
+		//main packet
+		packetsize /= 2; 			//testing partial r/w
+		while(bytes < packetsize){
+			bytes += send(sock_curr, buf+bytes, packetsize-bytes, 0);
+			if(bytes == -1){
 				perror("send");
-			else if(bytes_sent < packetsize+1)
-				printf("NOTE: Only %d bytes of %d were sent.", bytes_sent+1, packetsize);
-			else{
-				printf("Sent:\n\n");
-				printf("ch=%c\n", packet.ch);
-				printf("s_16=%d\n", packet.s_16);
-				printf("u_16=%d\n", packet.u_16);
-				printf("s_32=%d\n", packet.s_32);
-				printf("u_32=%d\n", packet.u_32);
-				printf("s_64=%ld\n", packet.s_64);
-				printf("u_64=%ld\n", packet.u_64);
-				//printf("fl=%.7f\n", packet.fl);
-				//printf("db=%.20lf\n", packet.db);
-				printf("str=%s\n", packet.str);
+				break;
 			}
-		/*}
-		else{
-			char* msg = "INVALID ENTRY";
-			int msg_len = strlen(msg);
-			//if(!send_msg(msg, msg_len))
-			//	perror("send_msg");
-			//printf("------------------\n");
-			
-			strncpy(buf, msg, msg_len); 
-			int bytes_sent = send(sock_curr, msg, msg_len, 0);
-			if(bytes_sent < msg_len)
-				printf("NOTE: Only %d bytes of %d were sent.\n", bytes_sent, msg_len);
-			else
-				printf("%s\n", msg);
-				
-		}*/
+			fprintf(stderr, "NOTE: %d total bytes were sent out of %d.\n", bytes, packetsize);
+			if(bytes == 65) 		//testing partial r/w
+				packetsize *= 2;	//testing partial r/w
+		}
+		bytes = 0;	//reset bytes
+		printf("Sent:\n\n");
+		printf("ch=%c\n", packet.ch);
+		printf("s_16=%d\n", packet.s_16);
+		printf("u_16=%d\n", packet.u_16);
+		printf("s_32=%d\n", packet.s_32);
+		printf("u_32=%d\n", packet.u_32);
+		printf("s_64=%ld\n", packet.s_64);
+		printf("u_64=%ld\n", packet.u_64);
+		printf("fl=%.7f\n", packet.fl);
+		printf("db=%.20lf\n", packet.db);
+		printf("str=%s\n", packet.str);
+		printf("bin=");
+		print_bin(packet.bin, 40);
+		
+		
 		close(sock_curr);
 	}	
 

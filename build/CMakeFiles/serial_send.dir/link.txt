@@ -1,1 +1,0 @@
-/usr/bin/cc -g   CMakeFiles/serial_send.dir/3-1/12_serial_send.c.o CMakeFiles/serial_send.dir/src/encode.c.o  -o bin/serial_send 

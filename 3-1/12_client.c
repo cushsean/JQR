@@ -94,25 +94,26 @@ int main(int argc, char* argv[]){
 		type ? "DATAGRAM" : "STREAM");
 	printf("client: connecting to %s\n", ipstr);
 	
-	//char buf[128];
-	//int buf_len = sizeof(buf);
-	//memset(buf, '\0', buf_len);
+	char buf[128];
+	//int buf_len = strlen(buf);
+	memset(buf, '\0', 128);
 	/*
 	*	NOTE:
 	*	Instead of above, could also set the byte after the 
 	*	received message to '\0'. This byte would be:
 	*	buf[bytes_recv]
 	*/
-	int buf;
-	int buf_len = sizeof(int);
-	int bytes_recv = recv(sock_mine, &buf, buf_len, 0);
+	//int buf;
+	//int buf_len = 128;
+	int bytes_recv = recv(sock_mine, &buf, 128, 0);
 	if(bytes_recv == -1)
 		perror("recv");
 	else{
 		printf("client: %d bytes recv\n", bytes_recv);
-		printf("be_buf: %d\n", buf);
-		buf = be32toh(buf);
-		printf("h_buf: %d\n", buf);
+		//printf("be_buf: %d\n", buf);
+		//buf = be32toh(buf);
+		//printf("h_buf: %d\n", buf);
+		printf("%s\n", buf);
 	}
 
 	close(sock_mine);

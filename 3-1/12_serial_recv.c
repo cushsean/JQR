@@ -27,6 +27,7 @@ typedef struct cereal{
 	float		fl;
 	double		db;
 	char		str[128];
+	char		bin[128];
 }cereal_t;
 
 int main(int argc, char* argv[]){
@@ -119,44 +120,81 @@ int main(int argc, char* argv[]){
 	*	NOTE:
 	*	Instead of above, could also set the byte after the 
 	*	received message to '\0'. This byte would be:
-	*	buf[bytes_recv]
+	*	buf[bytes]
 	*/
-	int bytes_recv = recv(sock_mine, buf, buf_len-1, 0);
-	if(bytes_recv == -1)
-		perror("recv");
-	else{
-		printf("client: %d bytes recv\n", bytes_recv);
+	int bytes = 0;
+	uint32_t packetsize = 0;
+
+	//receive preamble containing packetsize;
+	char preamble[17]; //preamble 6 BELLs, uint32 packetsize, 6 BELLs, NULL Terminator
+	if((bytes = recv(sock_mine, preamble, (sizeof preamble)-1, 0)) == -1)
+		perror("preamble");
+	preamble[16] = '\0';
+	char bells[6] = "\a\a\a\a\a\a";
+	char reply[6] = "ERROR";
+	char ack[4]   = "ACK";
+	reply[5] = '\0';
+	if(bytes == 16){
+		if(!strncmp(preamble, bells, 6)){			//Begins with 6 bells
+			if(!strncmp(preamble+10, bells, 6)){	//Ends with 6 bells
+				packetsize = unpacki32(preamble+6);	//Extract packetsize;
+				strncpy(reply, ack, 3);				//Set reply to 'ACK'
+				reply[3] = '\0';					//Include null terminator
+			}
+		}
 	}
-	//char* err_msg = "INVALID ENTRY";
-	//printf("%s\n%s\n%ld\n", buf, err_msg, strlen(err_msg));
-	//if(strncmp(buf, err_msg, 13)){
-		cereal_t packet;
-		
-		unpack(buf, "chHlLqQ16s",
-				&packet.ch,
-				&packet.s_16,
-				&packet.u_16,
-				&packet.s_32,
-				&packet.u_32,
-				&packet.s_64,
-				&packet.u_64,
-				//&packet.fl,
-				//&packet.db,
-				packet.str
-			);
-		
-		printf("Received:\n\n");
-		printf("ch=%c\n", packet.ch);
-		printf("s_16=%d\n", packet.s_16);
-		printf("u_16=%d\n", packet.u_16);
-		printf("s_32=%d\n", packet.s_32);
-		printf("u_32=%d\n", packet.u_32);
-		printf("s_64=%ld\n", packet.s_64);
-		printf("u_64=%ld\n", packet.u_64);
-		//printf("fl=%.7f\n", packet.fl);
-		//printf("db=%.20lf\n", packet.db);
-		printf("str=%s\n", packet.str);
-	//}
+	bytes = 0;
+
+	//reply to preamble
+	if((bytes = send(sock_mine, reply, 6, 0)) == -1)
+		perror("reply");
+	if(strncmp(reply, ack, 3)){
+		fprintf(stderr, "ACK not sent. Terminating connection.\n");
+		exit(1);
+	}
+	bytes = 0;	//reset bytes
+	while(bytes < packetsize){
+		bytes += recv(sock_mine, buf+bytes, packetsize-bytes, 0);
+		if(bytes == 0){
+			perror("recv");
+			break;
+		}
+		else{
+			printf("client: %d bytes recv\n", bytes);
+		}
+	}
+	bytes = 0;	//reset bytes
+
+	cereal_t packet;
+	
+	unpack(buf, "chHlLqQfd16sb",
+			&packet.ch,
+			&packet.s_16,
+			&packet.u_16,
+			&packet.s_32,
+			&packet.u_32,
+			&packet.s_64,
+			&packet.u_64,
+			&packet.fl,
+			&packet.db,
+			packet.str,
+			packet.bin
+		);
+	
+	printf("Received:\n\n");
+	printf("ch=%c\n", packet.ch);
+	printf("s_16=%d\n", packet.s_16);
+	printf("u_16=%d\n", packet.u_16);
+	printf("s_32=%d\n", packet.s_32);
+	printf("u_32=%d\n", packet.u_32);
+	printf("s_64=%ld\n", packet.s_64);
+	printf("u_64=%ld\n", packet.u_64);
+	printf("fl=%.7f\n", packet.fl);
+	printf("db=%.20lf\n", packet.db);
+	printf("str=%s\n", packet.str);
+	printf("bin=");
+	print_bin(packet.bin, 40);
+
 	close(sock_mine);
 
 	return EXIT_SUCCESS;

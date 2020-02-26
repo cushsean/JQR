@@ -125,20 +125,20 @@ int main(int argc, char* argv[]){
 		if(!fork()){
 			//Children only zone
 			close(sock_mine);
-			//char* msg = "This is a test.\nThis is only a test.";
-			int msg_len = sizeof(int);
-			int msg = 1;
+			char* msg = "This is a test.\nThis is only a test.";
+			int msg_len = strlen(msg);
+			//int msg = 1;
 			//printf("host: %x\n", msg);
 			//printf("htole32: %d\n", htole32(msg));
 			//printf("htobe32: %d\n", htobe32(msg));
-			printf("h_msg: %d\n", msg);
-			msg = htobe32((uint32_t)msg);
-			printf("be_msg: %d\n", msg);
-			int bytes_sent = send(sock_curr, &msg, msg_len, 0);
+			//printf("h_msg: %d\n", msg);
+			//msg = htobe32((uint32_t)msg);
+			//printf("be_msg: %d\n", msg);
+			int bytes_sent = send(sock_curr, msg, msg_len, 0);
 			if(bytes_sent == -1)
 				perror("send");
-			else if(bytes_sent < msg_len)
-				printf("NOTE: Only %d bytes of %d were sent.", bytes_sent, msg_len);
+			else
+				printf("%d bytes of %d were sent.", bytes_sent, msg_len);
 			
 			exit(EXIT_SUCCESS); //Return to your parents
 		}

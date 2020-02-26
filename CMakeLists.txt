@@ -27,6 +27,7 @@ set(HASH
 
 set(SERIAL
 	src/encode.c
+	src/util.c
 )
 	
 add_executable(test_prg "test_prg.c" ${TEST_PRG})
