@@ -68,6 +68,7 @@ print("2^8*(4+28)/1024-8 = " + str(ans))
 
 
 def factorial(x):
+    #3.2.7.d
     if x > 1:
         #recursion - 3.2.5.c
         x = x*factorial(x-1)
@@ -95,6 +96,7 @@ def func():
         except:
             print("STRING")
     try:
+        #3.2.7.c
         if x <= 0:
             raise ValueError
     except ValueError:
@@ -126,12 +128,17 @@ print("The factorial " + str(x) + "! is " + str(ans))
     e. Scope:
         The block of code that a varable is visable/usable.
 
-****    f. Return values (reture type and reference):
+    f. Return values (reture type and reference):
+        In python, you return objects. Objects are Python's abstraction for data. Every object has an
+        identity, type, and value. (PRM 3.1)
 
     g. Import files
         Modules/libraries that contain methods/classes/functions
     
-****    h. Dictionaries:
+    h. Dictionaries:
+        Otherwise known as "associative arrays", dictionaries are indexed by keys rather than numbers.
+        Keys can be any immutable type, including strings and numbers. Tuples can be keys if they contain
+        only strings, numbers, or tuples. 
 
     i. Lists:
         Similar to c arrays, lists are mutable (changable) data of any type that (generally) 
@@ -154,4 +161,51 @@ print("The factorial " + str(x) + "! is " + str(ans))
 
     o. Immutable:
         Unchangable data. ex) Tuples
+"""
+
+"""
+3.2.9 - Describe the terms and fundamentals associated with OOP using Python:
+
+    a. Class:
+
+
+    b. Object:
+
+
+    c. Difference between an object when discussing a class:
+
+
+    d. Advantages to OOP:
+
+
+    e. Inheritance:
+
+
+    f. The keyword "Super":
+
+
+    g. Initialization function of a constructor:
+
+
+    h. The keyword "self":
+
+
+    i. The getter and setter functions:
+
+
+    j. Attributes of a class:
+
+
+    k. Factory design pattern:
+
+
+    l. Sinleton desing pattern:
+
+
+    m. Adapter design pattern:
+
+
+    n. Bridge design pattern:
+
+
 """
