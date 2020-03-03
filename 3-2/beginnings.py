@@ -67,7 +67,7 @@ print("2^8*(4+28)/1024-8 = " + str(ans))
 """
 
 
-def factorial(x):
+def factorial_rec(x):
     #3.2.7.d
     if x > 1:
         #recursion - 3.2.5.c
@@ -75,6 +75,14 @@ def factorial(x):
         return x
     else:
         return 1
+    
+def factorial_loop(x):
+    #3.2.7.b
+    tmp = 1
+    while x>0:
+        tmp *= x
+        x -= 1
+    return tmp
 
 def func():
     print("This function calculates the factorial of any whole positive number")
@@ -102,13 +110,21 @@ def func():
     except ValueError:
         print("ERROR: Expected positive value but recieved value less than or equal to 0")
 
-    ans = factorial(x)
+    ans = factorial_rec(x)
 
     #return muliple values - 3.2.5.a
     return (ans, x)
 
 ans, x = func()
 print("The factorial " + str(x) + "! is " + str(ans))
+
+#3.2.7.e
+if x==0:
+    print("This is a special factorial where 0! is equal to 1")
+elif x==1:
+    print("This factorial is simple, 1! is equal to 1")
+else:
+    print("This is a normal factorial, " + str(x) + "is multiplied by every positive number decrimenting by 1")
 
 """
 3.2.1 - Descript the purpose and use of:
