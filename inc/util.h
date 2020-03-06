@@ -8,7 +8,7 @@
 int cmp_int(void*, void*);
 int cmp_ulong(void*, void*);
 int cmp_str(void*, void*);
-void swap_int(void*, void*);
+void swap(void**, void**);
 void print_bin(char*, size_t);
 
 #endif /* UTIL_H_CUSHMAN */

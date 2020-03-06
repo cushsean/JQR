@@ -34,12 +34,10 @@ int cmp_str(void *var1, void *var2){
 	return strcmp((char*)var1, (char*)var2);
 }
 
-void swap_int(void *num1, void* num2){
-	if(cmp_int(num1, num2)){
-		int tmp = *(int*)num1;
-		*(int*)num1 = *(int*)num2;
-		*(int*)num2 = tmp;
-	}
+void swap(void **a, void **b){
+	void *tmp = *a;
+	*a = *b;
+	*b = tmp;
 	return;
 }
 

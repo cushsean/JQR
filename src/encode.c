@@ -293,6 +293,8 @@ void unpack(unsigned char *buf, char *format, ...)
     char *b;
     uint32_t len, maxlen=0, count;
 
+    unsigned int size = 0;
+
     va_start(ap, format);
 
     for(; *format != '\0'; format++) {

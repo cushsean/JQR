@@ -29,6 +29,11 @@ set(SERIAL
 	src/encode.c
 	src/util.c
 )
+
+set(SORT
+	src/util.c
+	src/sort.c
+)
 	
 add_executable(test_prg "test_prg.c" ${TEST_PRG})
 add_executable(02 "3-3/02.c")
@@ -43,3 +48,4 @@ add_executable(talker "3-1/12_talker.c")
 add_executable(listener "3-1/12_listener.c")
 add_executable(serial_send "3-1/12_serial_send.c" ${SERIAL})
 add_executable(serial_recv "3-1/12_serial_recv.c" ${SERIAL})
+add_executable(sort "3-1/14.c" ${SORT})
