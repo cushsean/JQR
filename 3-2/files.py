@@ -1,5 +1,6 @@
 import os 
 import sys
+import re
 
 """
 3.2.4 - File operations
@@ -51,7 +52,7 @@ except IOError:
     print("ERROR: Failed to create file")
 
 #d
-fd.write("This is a new file.\n")
+fd.write("A line of text.\nThis is a new file.\nThis is the end.\n")
 fd.close()
 
 try:
@@ -62,24 +63,47 @@ print(fd.read())
 fd.close()
 
 try:
-    fd = open("new_file.txt", "r+")
+    fd = open("new_file.txt", "r")
 except IOError:
     print("Failed to open file")
 
+pos = 0
 for line in fd:
     for word in line.split():
+        #print(word)
         if word == "new":
-            break;
+            fd.seek(0,2)
+            break
+        else:
+            pos += len(word)+1
+print()
+print("Position at \'new\': " + str(pos))
+print("Position at end of line: " + str(fd.tell()))
+print()
 
-pos = fd.tell()
-print(pos)
+fd.close()
+fd = open("new_file.txt", "w")
+fd.seek(pos)
+fd.write(line.replace("new", "old"))
+fd.close()
 
+fd = open("new_file.txt", "r")
+fd.seek(pos)
+print(fd.readline())
+print(fd.read())
+print()
 
+for result in str(os.stat("new_file.txt")).split():
+    if result.__contains__('size'):
+        size = re.search('\d+', result)
+        size = size.group(0)
+        break
 
 #g,k
 try:
     print("file.txt     :   " + str(os.stat("file.txt")))
     print("new_file.txt :   " + str(os.stat("new_file.txt")))
+    print("size of new_file.txt is " + str(size) + " bytes.")
     print()
 except:
     print("ERROR: Failed to get file information")

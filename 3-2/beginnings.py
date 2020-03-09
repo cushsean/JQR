@@ -1,3 +1,5 @@
+import re
+
 """
 3.2.2
 Explicit and implicit declaration of data types
@@ -71,7 +73,7 @@ def factorial_rec(x):
     #3.2.7.d
     if x > 1:
         #recursion - 3.2.5.c
-        x = x*factorial(x-1)
+        x = x*factorial_rec(x-1)
         return x
     else:
         return 1
@@ -94,6 +96,9 @@ def func():
         print("User input expected")
         
     #data validation - 3.2.6
+    check = re.search('\D*', x)
+    if check != None:
+        print("Input conatins \'" + check.group(0) + "\' therefore is not an INT.")
     try:
         x = int(x)
     except ValueError:
@@ -101,8 +106,10 @@ def func():
         try:
             x = float(x)
             print("FLOAT")
+            exit()
         except:
             print("STRING")
+            exit()
     try:
         #3.2.7.c
         if x <= 0:
@@ -124,7 +131,7 @@ if x==0:
 elif x==1:
     print("This factorial is simple, 1! is equal to 1")
 else:
-    print("This is a normal factorial, " + str(x) + "is multiplied by every positive number decrimenting by 1")
+    print("This is a normal factorial, " + str(x) + " is multiplied by every positive number decrimenting by 1")
 
 """
 3.2.1 - Descript the purpose and use of:
