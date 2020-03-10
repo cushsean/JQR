@@ -76,7 +76,7 @@ int main()
         send(fptr);
         //printf("%d\n", ftell(fptr));
         fseek(fptr, 0, SEEK_END);
-        printf("The files size is %d\n", ftell(fptr));
+        printf("The files size is %ld\n", ftell(fptr));
         fclose(fptr);
     }
 

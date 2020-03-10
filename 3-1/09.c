@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include <string.h>
 
 
 int main()
@@ -12,7 +13,7 @@ int main()
 
     fgets(arr, 100, stdin);
 
-    printf("length: %d\n%s\n", strlen(arr), arr);
+    printf("length: %ld\n%s\n", strlen(arr), arr);
 
     for(int i=0; i<strlen(arr); i++){
         //printf("%c", arr[i]);
