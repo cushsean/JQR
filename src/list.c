@@ -1,123 +1,80 @@
 #include "list.h"
+#include "util.h"
 
-node_t* mkNode(void* value){
+node_t* mkNode(int l_type){
 	node_t* fn_node = (node_t*)malloc(sizeof(node_t));
-	fn_node->data = value;
+	fn_node->data = NULL;
+	fn_node->type = l_type;
 	fn_node->next = NULL;
 	fn_node->prev = NULL;
 	return fn_node;
 }
 
-node_t* mkList(int num, int circle){
+node_t* mkList(int num, int type){
 	node_t* head = NULL;
 	node_t* tail = NULL;
 	for (int i=0; i<num; i++){
-		void* ptr = &i;
-		head = insert_at_head(head, tail, mkNode(ptr));
-		if(tail == NULL && circle)
+		if(head == NULL){
+			head = mkNode(type);
+		}
+		else
+			head = insert_at_head(head, tail, mkNode(type));
+		if(tail == NULL && type == CIRCULARLY)
 			tail = head;
 	}
 	
-	ptList(head);
 	return head;
 }
 
-void ptList(node_t *head){
-	node_t* tmp = head;
+void ptList(node_t *head, void (*print_ptr)(void*)){
+	node_t* curr = head;
 	printf("Printing List...\n");
-	do{
-		printf("\t%d\n", *((int*)tmp->data));
-		tmp = tmp->next;
-	}while(tmp != head && tmp != NULL);
+	if(curr != NULL){
+		printf("\t");
+		do{
+			(*print_ptr)(curr->data);
+			// printf("%d", *((int*)curr->data));
+			printf(" -> ");
+			curr = curr->next;
+		}while(curr != NULL && curr != head);
+	}
 	printf("\n");
 	return;	
 }
 
-node_t* find_node(node_t *head, void* value){
-	node_t* tmp = head;
-	if (tmp != NULL)
+node_t* find_node(node_t *head, void *value, int (*cmp_ptr)(void*, void*)){
+	node_t* curr = head;
+	if (curr != NULL)
 		do{
-			if(tmp->data == value)
-				return tmp;
-			tmp = tmp->next;
-		}while(tmp != head && tmp != NULL);
-	printf("ERROR: FOUND NULL; NO ACTION.\n");
+			if((*cmp_ptr)(curr->data, value) == 0)
+				return curr;
+			curr = curr->next;
+		}while(curr != NULL && curr != head);
 	return NULL;	
 }
 
-node_t* sort_node(node_t *head){
-	node_t *curr = head;
-	node_t *last = get_tail(head);
-	node_t *NX = NULL;
-	int swapped;
-		
-	//reassign curr to head
-	curr = head;
-	
-	//sort
-	do{
-		swapped = 0;
-		while(curr->next != last){
-			NX = curr->next;
-			if(curr->data > NX->data){
-				if(curr->prev != NULL)
-					curr->prev->next = NX;
-				NX->prev = curr->prev;
-				if(NX->next != NULL)
-					NX->next->prev = curr;
-				curr->next = NX->next;
-				NX->next = curr;
-				curr->prev = NX;
-				if(head == curr)
-					head = curr->prev;
-				swapped = 1;
-			}
-			else
-				curr = curr->next;
-		}
-		last = curr;
-		curr = head;
-	}while(swapped);
-	return head;	
-}
 
-node_t* rmNode(node_t *head, void* value, int all){
-	//Removes node with data equal to value
-	//Non-zero all will remove all nodes with value
-	node_t* tail = get_tail(head);
-	if(tail == head){
-		rm_all_nodes(head);
-		return NULL;
-	}
-	node_t* rm_node = find_node(head, value);
-	if(rm_node != NULL){
-		do{
-			if(rm_node == head){
-				head = rm_node->next;
-				if(tail->next != NULL){
-					tail->next = head;
-					head->prev = tail;
-				}
-				else
-					head->prev = NULL;
-			}
-			else
-				rm_node->prev->next = rm_node->next;
-			if(rm_node->next != NULL)
-				rm_node->next->prev = rm_node->prev;
-			if(rm_node == tail)
-				break;
-			free(rm_node);
-		}while(rm_node != tail && all);
+void insert_node(node_t *list, void *after, void *value){
+	node_t *insert_after = find_node(list, after, cmp_int);
+	if(insert_after != NULL){
+		node_t* new_node = mkNode(insert_after->type);
+		new_node->data = value;
+		new_node->next = insert_after->next;
+		if(insert_after->next != NULL)
+			insert_after->next->prev = new_node;
+		insert_after->next = new_node;
+		new_node->prev = insert_after;
 	}
 	else
-		printf("ERROR: Value not found, no node removed.\n");
-	return head;
+		printf("ERROR: Failed to locate valid node\n");
+	return;
 }
 
-node_t* insert_at_head(node_t* head, node_t* tail, node_t* insert){
+
+node_t* insert_at_head(node_t *head, node_t *tail, node_t *insert){
 	insert->next = head;
-	insert->prev = tail;
+	if(head->type != SINGLY)
+		insert->prev = tail;
 	if(head != NULL)
 		head->prev = insert;
 	if(tail != NULL)
@@ -125,40 +82,89 @@ node_t* insert_at_head(node_t* head, node_t* tail, node_t* insert){
 	return insert;
 }
 
-void insert_node(node_t *list, void* after, void* value){
-	node_t* insert_after = find_node(list, after);
-	if(insert_after != NULL){
-		node_t* new_node = mkNode(value);
-		new_node->next = insert_after->next;
-		if(insert_after->next != NULL)
-			insert_after->next->prev = new_node;
-		insert_after->next = new_node;
-		new_node->prev = insert_after;
+
+node_t* rmNode(node_t *head, void *value, int all){
+	//Removes node with data equal to value
+	//Non-zero all will remove all nodes with value
+	if(head == NULL){
+		printf("ERROR: Passed Pointer is NULL, NO ACTION\n");
+		return NULL;
 	}
-	return;
+	
+	node_t* tail = get_tail(head);
+	if(tail == head){
+		rm_all_nodes(head);
+		return NULL;
+	}
+	
+	do{
+		node_t* rm_node = find_node(head, value, cmp_int);
+		if(rm_node == NULL)
+			break;
+		if(rm_node == head){
+			head = rm_node->next;
+			if(tail->next != NULL){
+				tail->next = head;
+				head->prev = tail;
+			}
+			else
+				head->prev = NULL;
+		}
+		else
+			rm_node->prev->next = rm_node->next;
+		if(rm_node->next != NULL)
+			if(rm_node->next->prev != NULL)
+				rm_node->next->prev = rm_node->prev;
+		if(rm_node == tail)
+			all = 0;
+		free_node(rm_node);
+	}while(all);
+		
+	return head;
 }
 
-void rm_all_nodes(node_t *head){
-	node_t* tail = get_tail(head);
-	if(head == NULL)
-		printf("ERROR: Passed Pointer is NULL, NO ACTION\n");
 
-	do{
+void rm_all_nodes(node_t *head){
+	if(head == NULL){
+		printf("ERROR: Passed Pointer is NULL, NO ACTION\n");
+		return;
+	}
+
+	//node_t* tail = get_tail(head);
+	int size = countList(head);
+	// do{
+	for(; size > 0; size--){
 		node_t* tmp = head->next;
-		free(head);
+		free_node(head);
 		head = tmp;
-	}while(head != NULL && head != tail);
+	}
+	// }while(head != NULL && head != tail);
 	printf("ALL NODES REMOVED. LIST IS DESTROYED!\n");
-		
 	return;
 }
 
 node_t* get_tail(node_t* head){
 	node_t* curr = head;
-	if(curr->next == NULL)
-		goto TERM;
-	do{
+	if (curr != NULL)
+		while(curr->next != NULL && curr->next != head)
+			curr = curr->next;
+		return curr;
+	printf("ERROR: Passed Pointer is NULL, NO ACTION\n");
+}
+
+int countList(node_t *head){
+	int size = 1;
+	node_t* curr = head;
+	if (curr != NULL)
+	for(; curr->next != NULL && curr->next != head; ++size)
 		curr = curr->next;
-	}while(curr->next != NULL && curr->next != head);
-	TERM: return curr;
+	return size;
+}
+
+void free_node(node_t *head){
+	free(head->data);
+	head->data = NULL;
+	free(head);
+	head = NULL;
+	return;
 }

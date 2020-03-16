@@ -5,7 +5,7 @@
 #include "util.h"
 #include "sort.h"
 
-#define size_arr (4)
+#define size_arr (200)
 
 int main(){
 
@@ -19,7 +19,7 @@ int main(){
 		list[i] = arr[i];
 	}
 
-	sort_bubble(arr, size_arr, cmp_int);
+	sort_bubble_array(arr, size_arr, sizeof(arr[0]), cmp_int);
 
 	for(int i=0; i<size_arr; i++){
 		printf("%d\t%d\n",list[i],arr[i]);
