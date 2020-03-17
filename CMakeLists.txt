@@ -29,17 +29,45 @@ set(SERIAL
 	src/encode.c
 	src/util.c
 )
+
+set(SORT
+	src/util.c
+	src/sort.c
+	src/list.c
+)
+
+set(CIRCLE
+	src/list.c
+	src/sort.c
+	src/util.c
+)
+
 	
-add_executable(test_prg "test_prg.c" ${TEST_PRG})
-add_executable(02 "3-3/02.c")
-add_executable(03 "3-3/03.c")
-add_executable(04 "3-3/04.c")
-add_executable(05 "3-3/05.c" ${QUE})
-add_executable(07 "3-3/07.c" ${TREE})
-add_executable(hash "3-1/13.c" ${HASH})
+#3-1 Executables
+add_executable(04 "3-1/04.c")
+add_executable(05 "3-1/05.c")
+add_executable(06 "3-1/06.c")
+add_executable(07 "3-1/07.c")
+add_executable(08 "3-1/08.c")
+add_executable(09 "3-1/09.c")
+add_executable(10 "3-1/10.c")
+add_executable(11 "3-1/11.c")
 add_executable(server "3-1/12_server.c")
 add_executable(client "3-1/12_client.c")
 add_executable(talker "3-1/12_talker.c")
 add_executable(listener "3-1/12_listener.c")
 add_executable(serial_send "3-1/12_serial_send.c" ${SERIAL})
 add_executable(serial_recv "3-1/12_serial_recv.c" ${SERIAL})
+#add_executable(hash "3-1/13.c" ${HASH})
+add_executable(sort "3-1/14.c" ${SORT})
+add_executable(15 "3-1/15.c")
+#add_executable(dijkstra "3-1/16.c")
+add_executable(21 "3-1/21.c")
+
+#3-3 Executables
+add_executable(single "3-3/02.c")
+add_executable(double "3-3/03.c")
+add_executable(circle "3-3/04.c" ${CIRCLE})
+#add_executable(que "3-3/05.c" ${QUE})
+#add_executable(tree "3-3/07.c" ${TREE})
+

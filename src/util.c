@@ -3,6 +3,7 @@
 int cmp_int(void *var1, void *var2){
 	int num1 = *((int*)var1);
 	int num2 = *((int*)var2);
+	// printf("cmp %d with %d\n", num1, num2);
 	if(num1 == num2)
 		return 0;
 	else if(num1 > num2)
@@ -34,13 +35,12 @@ int cmp_str(void *var1, void *var2){
 	return strcmp((char*)var1, (char*)var2);
 }
 
-void swap_int(void *num1, void* num2){
-	if(cmp_int(num1, num2)){
-		int tmp = *(int*)num1;
-		*(int*)num1 = *(int*)num2;
-		*(int*)num2 = tmp;
-	}
-	return;
+void swap(void *a, void *b, size_t size){
+    void *temp = malloc(size);
+    memcpy(temp, a   , size);
+    memcpy(a   , b   , size);
+    memcpy(b   , temp, size);
+    free(temp);
 }
 
 void print_bin(char* buf, size_t len){
@@ -49,4 +49,38 @@ void print_bin(char* buf, size_t len){
 	}
 	printf("\n");
 	return;
+}
+
+void print_int(void *num){
+	printf("%d", *((int*)num));
+	return;
+}
+
+node_t* swap_node(node_t *head, node_t *curr, node_t *NX){
+
+	if(curr->prev != NULL)
+		curr->prev->next = NX;
+	NX->prev = curr->prev;
+	if(NX->next != NULL && NX->type != SINGLY)
+		NX->next->prev = curr;
+	curr->next = NX->next;
+	NX->next = curr;
+	if(curr->type != SINGLY)
+		curr->prev = NX;
+	if(head == curr)
+		head = NX;
+		
+	return head;
+}
+
+node_t* swap_node_singly(node_t *head, node_t *curr, node_t *NX, node_t *PR){
+
+	if(PR != NULL)
+		PR->next = NX;
+	curr->next = NX->next;
+	NX->next = curr;
+	if(head == curr)
+		head = NX;
+		
+	return head;
 }

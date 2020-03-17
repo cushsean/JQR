@@ -1,3 +1,5 @@
+import re
+
 """
 3.2.2
 Explicit and implicit declaration of data types
@@ -67,13 +69,22 @@ print("2^8*(4+28)/1024-8 = " + str(ans))
 """
 
 
-def factorial(x):
+def factorial_rec(x):
+    #3.2.7.d
     if x > 1:
         #recursion - 3.2.5.c
-        x = x*factorial(x-1)
+        x = x*factorial_rec(x-1)
         return x
     else:
         return 1
+    
+def factorial_loop(x):
+    #3.2.7.b
+    tmp = 1
+    while x>0:
+        tmp *= x
+        x -= 1
+    return tmp
 
 def func():
     print("This function calculates the factorial of any whole positive number")
@@ -85,6 +96,9 @@ def func():
         print("User input expected")
         
     #data validation - 3.2.6
+    check = re.search('\D*', x)
+    if check != None:
+        print("Input conatins \'" + check.group(0) + "\' therefore is not an INT.")
     try:
         x = int(x)
     except ValueError:
@@ -92,21 +106,32 @@ def func():
         try:
             x = float(x)
             print("FLOAT")
+            exit()
         except:
             print("STRING")
+            exit()
     try:
+        #3.2.7.c
         if x <= 0:
             raise ValueError
     except ValueError:
         print("ERROR: Expected positive value but recieved value less than or equal to 0")
 
-    ans = factorial(x)
+    ans = factorial_rec(x)
 
     #return muliple values - 3.2.5.a
     return (ans, x)
 
 ans, x = func()
 print("The factorial " + str(x) + "! is " + str(ans))
+
+#3.2.7.e
+if x==0:
+    print("This is a special factorial where 0! is equal to 1")
+elif x==1:
+    print("This factorial is simple, 1! is equal to 1")
+else:
+    print("This is a normal factorial, " + str(x) + " is multiplied by every positive number decrimenting by 1")
 
 """
 3.2.1 - Descript the purpose and use of:
@@ -126,12 +151,17 @@ print("The factorial " + str(x) + "! is " + str(ans))
     e. Scope:
         The block of code that a varable is visable/usable.
 
-****    f. Return values (reture type and reference):
+    f. Return values (reture type and reference):
+        In python, you return objects. Objects are Python's abstraction for data. Every object has an
+        identity, type, and value. (PRM 3.1)
 
     g. Import files
         Modules/libraries that contain methods/classes/functions
     
-****    h. Dictionaries:
+    h. Dictionaries:
+        Otherwise known as "associative arrays", dictionaries are indexed by keys rather than numbers.
+        Keys can be any immutable type, including strings and numbers. Tuples can be keys if they contain
+        only strings, numbers, or tuples. 
 
     i. Lists:
         Similar to c arrays, lists are mutable (changable) data of any type that (generally) 
@@ -154,4 +184,51 @@ print("The factorial " + str(x) + "! is " + str(ans))
 
     o. Immutable:
         Unchangable data. ex) Tuples
+"""
+
+"""
+3.2.9 - Describe the terms and fundamentals associated with OOP using Python:
+
+    a. Class:
+
+
+    b. Object:
+
+
+    c. Difference between an object when discussing a class:
+
+
+    d. Advantages to OOP:
+
+
+    e. Inheritance:
+
+
+    f. The keyword "Super":
+
+
+    g. Initialization function of a constructor:
+
+
+    h. The keyword "self":
+
+
+    i. The getter and setter functions:
+
+
+    j. Attributes of a class:
+
+
+    k. Factory design pattern:
+
+
+    l. Sinleton desing pattern:
+
+
+    m. Adapter design pattern:
+
+
+    n. Bridge design pattern:
+
+
 """
