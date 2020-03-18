@@ -11,6 +11,7 @@ set(TEST_PRG
 set(QUE
 	src/list.c
 	src/que.c
+	src/util.c
 )
 
 set(TREE
@@ -36,7 +37,7 @@ set(SORT
 	src/list.c
 )
 
-set(CIRCLE
+set(linkedList
 	src/list.c
 	src/sort.c
 	src/util.c
@@ -65,9 +66,7 @@ add_executable(15 "3-1/15.c")
 add_executable(21 "3-1/21.c")
 
 #3-3 Executables
-add_executable(single "3-3/02.c")
-add_executable(double "3-3/03.c")
-add_executable(circle "3-3/04.c" ${CIRCLE})
-#add_executable(que "3-3/05.c" ${QUE})
-#add_executable(tree "3-3/07.c" ${TREE})
+add_executable(linkedList "3-3/linkedList.c" ${linkedList})
+add_executable(que "3-3/queTest.c" ${QUE})
+#add_executable(tree "3-3/treeTest.c" ${TREE})
 
