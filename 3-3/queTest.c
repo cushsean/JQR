@@ -8,7 +8,7 @@
 #include "que.h"
 #include "util.h"
 
-#define QUE_SIZE (10)
+#define QUE_SIZE (20)
 
 node_t* fillQue(node_t* front){
 	srand(time(NULL));
@@ -36,18 +36,33 @@ int main(){
 	ptList(front, print_int);
 	printf("size: %d\n", que_get_size(front));
 	num = 6;
-	int ptr = &num;
-	// Need to fix this function
+	int *ptr = &num;
+	int n = que_get_size(front);
+	node_t *tmp = front;
 	front = que_find_by_val(front, ptr, cmp_int);
-	printf("The element with value %d is: %d\n", num, *((int*)front->data));
+	int m = n - que_get_size(front) + 1;
+	printf("The element with value %d is ", num);
+	if(m > n){
+		printf("not found in the que.\n");
+		printf("Que is empty.\n");
+		return 0;
+	}
+	printf("%d in line\n", m);
 	ptList(front, print_int);
-	printf("%d\n", que_get_size(front));
-	// num = 7;
-	// ptr = &num;
-	// front = rm_que_item(front, ptr);
-	// ptList(front);
-	// rmQue(front);
-	// //ptList(front);
-	
+	printf("size: %d\n", que_get_size(front));
+	num = 7;
+	ptr = &num;
+	printf("Removing node with value %d...\n", num);
+	front = rm_que_item(front, ptr, cmp_int);
+	if(front == NULL){
+		printf("Que is empty.\n");
+		return 0;
+	}
+	ptList(front, print_int);
+	printf("size: %d\n", que_get_size(front));
+	printf("Remove entire Que.\n");
+	front = rmQue(front);
+	printf("size: %d\n", que_get_size(front));
+
 	return 0;	
 }

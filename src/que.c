@@ -25,53 +25,65 @@ node_t* que_find_by_elem(node_t *first, int num){
 node_t* que_find_by_val(node_t *first, void *value, 
 	int (*cmp_ptr)(void*, void*)){
 	if(first != NULL){
-		do{
-			if((*cmp_ptr)(first->data, value))
+		while(first != NULL){
+			if((*cmp_ptr)(first->data, value) == 0)
 				return first;
 			first = dQue(first);
-		}while(first->next != first && first->next != NULL);
+		}
 	}
 	printf("Value not found.\n");
 	return NULL;
 }
 
-node_t* rm_que_item(node_t *first, void *value){
-	while(first->data != value){
+node_t* rm_que_item(node_t *first, void *value, int (*cmp_ptr)(void*,void*)){
+	while((*cmp_ptr)(first->data, value) != 0){
 		first = dQue(first);
+		if(first == NULL)
+			return NULL;
 	}
 	first = dQue(first);
 	return first;
 }
 
-void rmQue(node_t *first){
-	while(first->next != first && first->next != NULL){
-		first = rm_que_item(first, first->data);
+node_t* rmQue(node_t *first){
+	while(first != NULL){
+		first = dQue(first);
 	}
 	printf("Que has been destroyed\n");
-	return;
+	return NULL;
 }
 
 int que_get_size(node_t* head){
-	node_t* curr = head;
 	int size = 0;
+	if(head == NULL)
+		return size;
+	node_t* curr = head;
+
 	do{
 		size++;
-		if(curr!=NULL)
+		if(curr!=NULL){
 			curr = curr->next;
+		}
 	}while(curr != NULL && curr != head);
 	
 	return size;
 }
 
 node_t* dQue(node_t* head){
+	int safe = 0;
 	node_t* tmp = head->next;
 	node_t* end = head->prev;
+	if(head->next != head)
+		safe = 1;
 	free(head->data);
 	head->data = NULL;
 	free(head);
 	head = NULL;
-	end->next = tmp;
-	tmp->prev = end;
-		
-	return tmp;
+	if(safe){
+		end->next = tmp;
+		tmp->prev = end;
+		return tmp;
+	}
+
+	return NULL;
 }
