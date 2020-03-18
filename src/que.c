@@ -22,10 +22,11 @@ node_t* que_find_by_elem(node_t *first, int num){
 	return first;
 }
 
-node_t* que_find_by_val(node_t *first, void *value){
+node_t* que_find_by_val(node_t *first, void *value, 
+	int (*cmp_ptr)(void*, void*)){
 	if(first != NULL){
 		do{
-			if(first->data == value)
+			if((*cmp_ptr)(first->data, value))
 				return first;
 			first = dQue(first);
 		}while(first->next != first && first->next != NULL);

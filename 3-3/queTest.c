@@ -36,9 +36,9 @@ int main(){
 	ptList(front, print_int);
 	printf("size: %d\n", que_get_size(front));
 	num = 6;
-	ptr = &num;
+	int ptr = &num;
 	// Need to fix this function
-	front = que_find_by_val(front, ptr);
+	front = que_find_by_val(front, ptr, cmp_int);
 	printf("The element with value %d is: %d\n", num, *((int*)front->data));
 	ptList(front, print_int);
 	printf("%d\n", que_get_size(front));
