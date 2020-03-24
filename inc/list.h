@@ -9,7 +9,7 @@
 #define SINGLY (2)
 
 typedef struct node{
-	void* data;
+	void *data;
 	int type;
 	struct node *next;
 	struct node *prev;
@@ -23,7 +23,8 @@ node_t* mkList(int, int);
 void ptList(node_t*, void (*print_ptr)(void*));
 node_t* find_node(node_t*, void*, int (*cmp_ptr)(void*, void*));
 node_t* sort_node(node_t*);
-node_t* rmNode(node_t*, void*, int);
+node_t* rmNode(node_t *head, node_t *rm_node);
+node_t* rmNode_by_value(node_t*, void*, int (*cmp_ptr)(void*, void*), int);
 node_t* insert_at_head(node_t*, node_t*, node_t*);
 void insert_node(node_t*, void*, void*);
 void rm_all_nodes(node_t*);

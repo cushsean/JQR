@@ -43,6 +43,20 @@ set(linkedList
 	src/util.c
 )
 
+set(STACK
+	src/util.c
+	src/list.c
+	src/sort.c
+	src/stack.c
+)
+
+set(GRAPH
+	src/graph.c
+	src/que.c
+	src/stack.c
+	src/list.c
+	src/util.c
+)
 	
 #3-1 Executables
 add_executable(04 "3-1/04.c")
@@ -68,5 +82,7 @@ add_executable(21 "3-1/21.c")
 #3-3 Executables
 add_executable(linkedList "3-3/linkedList.c" ${linkedList})
 add_executable(que "3-3/queTest.c" ${QUE})
+add_executable(stack "3-3/stackTest.c" ${STACK})
 #add_executable(tree "3-3/treeTest.c" ${TREE})
+add_executable(graph "3-3/graphTest.c" ${GRAPH})
 

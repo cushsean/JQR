@@ -24,8 +24,6 @@ node_t* fillQue(node_t* front){
 
 
 int main(){
-	// int num = 0;
-	// void* ptr = &num;
 	node_t* front = mkQue(QUE_SIZE);
 	front = fillQue(front);
 	ptList(front, print_int);

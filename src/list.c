@@ -32,8 +32,10 @@ void ptList(node_t *head, void (*print_ptr)(void*)){
 	if(curr != NULL){
 		printf("\t");
 		do{
-			(*print_ptr)(curr->data);
-			// printf("%d", *((int*)curr->data));
+			if(curr->data != NULL)
+				(*print_ptr)(curr->data);
+			else
+				printf("NULL");
 			printf(" -> ");
 			curr = curr->next;
 		}while(curr != NULL && curr != head);
@@ -83,9 +85,7 @@ node_t* insert_at_head(node_t *head, node_t *tail, node_t *insert){
 }
 
 
-node_t* rmNode(node_t *head, void *value, int all){
-	//Removes node with data equal to value
-	//Non-zero all will remove all nodes with value
+node_t* rmNode(node_t *head, node_t *rm_node){
 	if(head == NULL){
 		printf("ERROR: Passed Pointer is NULL, NO ACTION\n");
 		return NULL;
@@ -96,30 +96,41 @@ node_t* rmNode(node_t *head, void *value, int all){
 		rm_all_nodes(head);
 		return NULL;
 	}
-	
-	do{
-		node_t* rm_node = find_node(head, value, cmp_int);
-		if(rm_node == NULL)
-			break;
-		if(rm_node == head){
-			head = rm_node->next;
-			if(tail->next != NULL){
-				tail->next = head;
-				head->prev = tail;
-			}
-			else
-				head->prev = NULL;
+	if(rm_node == NULL)
+			return head;
+	if(rm_node == head){
+		head = rm_node->next;
+		if(tail->next != NULL){
+			tail->next = head;
+			head->prev = tail;
 		}
 		else
-			rm_node->prev->next = rm_node->next;
-		if(rm_node->next != NULL)
-			if(rm_node->next->prev != NULL)
-				rm_node->next->prev = rm_node->prev;
-		if(rm_node == tail)
-			all = 0;
-		free_node(rm_node);
-	}while(all);
-		
+			head->prev = NULL;
+	}
+	else
+		rm_node->prev->next = rm_node->next;
+	if(rm_node->next != NULL)
+		if(rm_node->next->prev != NULL)
+			rm_node->next->prev = rm_node->prev;
+	free_node(rm_node);
+	rm_node == NULL;
+	return head;
+}
+
+
+node_t* rmNode_by_value(node_t *head, 
+							void *value, 
+							int (*cmp_ptr)(void*, void*), 
+							int all){
+	//Removes node with data equal to value
+	//Non-zero all will remove all nodes with value
+	if(all)
+		for(node_t *rm_node = find_node(head, value, (*cmp_ptr));
+				rm_node != NULL;
+				rm_node = find_node(head, value, (*cmp_ptr)))
+			head = rmNode(head, rm_node);
+	else
+		rmNode(head, find_node(head, value, (*cmp_ptr)));
 	return head;
 }
 

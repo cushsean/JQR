@@ -10,7 +10,7 @@
 
 #define LIST_SIZE (20)
 
-node_t* fill_list(node_t *head, int n){
+static node_t* fill_list(node_t *head, int n){
 	srand(time(NULL));
 	node_t* curr = head;
 	for(int i = 0; i < n; i++){
@@ -24,7 +24,7 @@ node_t* fill_list(node_t *head, int n){
 
 int main(){
 	node_t* list;
-	list = mkList(LIST_SIZE, DOUBLY);
+	list = mkList(LIST_SIZE, SINGLY);
 	list = fill_list(list, LIST_SIZE);
 	ptList(list, print_int);
 	int num = 3;
@@ -38,9 +38,9 @@ int main(){
 		printf("\n");
 	}
 	num = 5;
-	list = rmNode(list, &num, 0);
+	list = rmNode(list, find_node(list, &num, cmp_int));
 	ptList(list, print_int);
-	list = rmNode(list, &num, 1);
+	list = rmNode_by_value(list, &num, cmp_int, 1);
 	ptList(list, print_int);
 	int *value = malloc(sizeof(int));
 	num = 3;
