@@ -28,7 +28,6 @@ node_t* pop(node_t *top){
     free(top->data);
     top->data = NULL;
     free(top);
-    top = NULL;
     return tmp;
 }
 
@@ -41,7 +40,8 @@ int get_stack_size(node_t *top){
 
 void rmStack(node_t *top){
     int size = get_stack_size(top);
-    for(int i = 0; i<size; i++)
+    for(int i=0; i<size; i++)
         top = pop(top);
+        top = NULL;
     return;
 }

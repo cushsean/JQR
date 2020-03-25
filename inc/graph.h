@@ -66,11 +66,23 @@ void ptGraph(graph_t *graph, void (*print_ptr)(void*));
 /**
  * Finds a node in the graph with the value specifed by the user.
  */
-graphNode_t findGraphNode(graph_t *graph, 
-                            int method, 
-                            int start,
-                            void *value, 
-                            int (*cmp_ptr)(void*,void*));
+void findGraphNode(graph_t *graph, graphNode_t*, int method, int start, 
+    void *value, int (*cmp_ptr)(void*,void*));
+
+
+/**
+ * Finds the edge between a parent and child nodes if one exists. Returns a list 
+ * of the parent and child adjNodes. NULL is returned if edge is not found.
+ */
+adjNode_t* findEdge_by_parentChild(graph_t *graph, graphNode_t parent, 
+    graphNode_t child);
+
+
+/**
+ * Finds an edge with the specified weight if one exists. Returns a list of the
+ * parent and child adjNodes. Null is returned if edge is not found.
+ */
+adjNode_t* findEdge_by_weight(graph_t *graph, int weight);                                                 
 
 
 /**

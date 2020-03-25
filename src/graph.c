@@ -1,5 +1,53 @@
 #include "graph.h"
 
+
+// static funtion declearation
+/**
+ * Local function to create a new adjNode
+ */
+static adjNode_t* newAdjNode(int name, 
+                                int weight, 
+                                graphNode_t child, 
+                                graphNode_t parent );
+
+
+/**
+ * Local function that returns the adjNode with Parent and Child 
+ * names as specified
+ */
+static adjNode_t* findAdjNode(graph_t *graph, int nameParent, int nameChild);
+
+
+/**
+ * Local function that prints the list of visited nodes. Used for debugging.
+ */                                                     
+static void ptVisited(uint8_t *list, int size);
+
+
+/**
+ * Local function to identify and return the graphNode_t represented by the 
+ * value at the top of the stack.
+ */
+static graphNode_t nodeFromStack(node_t *stack, graph_t *graph);
+
+
+/**
+ * Local function for coping all informaion from one adjNode to another. 
+ */
+static void adjNodecpy(adjNode_t *dest, adjNode_t *src){
+    if(src != NULL){
+        dest->parent = src->parent;
+        dest->child = src->child;
+        dest->weight = src->weight;
+        dest->next = src->next;
+    }
+    return;
+}
+
+
+//LOCAL FUNCTIONS
+
+
 static adjNode_t* newAdjNode(int name, 
                                 int weight, 
                                 graphNode_t child, 
@@ -11,6 +59,33 @@ static adjNode_t* newAdjNode(int name,
     new_node->child = child;
     return new_node;
 }
+
+
+static adjNode_t* findAdjNode(graph_t *graph, int nameParent, int nameChild){
+    adjNode_t *curr = graph->adjArr[nameParent].list;
+    while(curr != NULL){
+        if(curr->child.name == nameChild)
+            break;
+        curr = curr->next;
+    }
+    return curr;
+}
+
+
+static void ptVisited(uint8_t *list, int size){
+    printf("Visited Nodes...\n\t");
+    for(int i=0; i<size; i++){
+        printf("%d(%d) -> ", i, list[i]);
+    }
+    printf("\n");
+    return;
+}
+
+
+static graphNode_t nodeFromStack(node_t *stack, graph_t *graph){
+    return graph->nodeArr[*(int*)(stack->data)];
+}
+
 
 graph_t* newGraph(int num){
     graph_t* graph = malloc(sizeof(graph_t));
@@ -31,6 +106,10 @@ graph_t* newGraph(int num){
     }
     return graph;
 }
+
+
+//CREATION
+
 
 void addEdge(graph_t *graph, int src, int dest, int weight){ 
     // Add an edge from src to dest. A new node is 
@@ -58,6 +137,9 @@ void addEdge(graph_t *graph, int src, int dest, int weight){
 }
 
 
+//DISPLAY
+
+
 void ptGraph(graph_t *graph, void (*print_ptr)(void*)){
     for(int i=0; i<graph->size; i++){
         adjNode_t *curr_adj = graph->adjArr[i].list;
@@ -83,54 +165,44 @@ void ptGraph(graph_t *graph, void (*print_ptr)(void*)){
 }
 
 
-static void ptVisited(uint8_t *list, int size){
-    printf("Visited Nodes...\n\t");
-    for(int i=0; i<size; i++){
-        printf("%d(%d) -> ", i, list[i]);
-    }
-    printf("\n");
-    return;
-}
+//LOCATE
 
 
-/**
- * Local function to identify and return the graphNode_t represented by the 
- * value at the top of the stack.
- */
-static graphNode_t nodeFromStack(node_t *stack, graph_t *graph){
-    return graph->nodeArr[*(int*)(stack->data)];
-}
-
-
-graphNode_t findGraphNode(graph_t *graph, 
+void findGraphNode(graph_t *graph,
+                            graphNode_t *target,
                             int method, 
                             int start,
                             void *value, 
                             int (*cmp_ptr)(void*,void*)){
     
+    printf("\nfindGraphNode...\n");
+
     // Define function variables
     graphNode_t next_node = graph->nodeArr[start];
-    // adjNode_t *curr_adj = graph->adjArr[0].list;
     uint8_t *visited = malloc(graph->size);
-    graphNode_t target;
-    target.name = -1;
-    target.data = NULL;
+    for(int i=0; i<graph->size; i++)
+        visited[i] = 0;
+    (*target).name = -1;
+    (*target).data = NULL;
 
 
-    // ptVisited(visited, graph->size);
+    ptVisited(visited, graph->size);
 
 
     // Inital check
     if((*cmp_ptr)(next_node.data, value) == 0)
         // Target found
-        target = next_node;
+        *target = next_node;
 
     // DEPTH METHOD
     else if(method == DEPTH){
 
         // Define stack
-        node_t *stack = malloc(sizeof(node_t));
-        stack = NULL;
+        // node_t *stack = malloc(sizeof(node_t));
+        node_t *stack = mkStack(1);
+
+        // pop the initial value from the stack.
+        stack = pop(stack);
 
 
         for(int i=0; i<graph->size; i++){
@@ -146,11 +218,13 @@ graphNode_t findGraphNode(graph_t *graph,
             stack = push(stack, nameHolder);
             visited[curr_node.name] = 1;
 
+            ptList(stack, print_int);
+            ptVisited(visited, graph->size);
+
 
             while(visited[next_node.name]){
                 for(; curr_adj != NULL; curr_adj = curr_adj->next){
                     // Loop through all adj Nodes to curr
-                    // printf("check edge to node: %d\n", curr_adj->child.name);
                     if(!visited[curr_adj->child.name])
                         if(curr_adj->weight < min_weight){
                             // update next_node
@@ -162,21 +236,18 @@ graphNode_t findGraphNode(graph_t *graph,
 
                 if(curr_node.name == next_node.name){
                     // No unvisited nodes found
+                    printf("No unvisited nodes found\n");
+                    ptList(stack, print_int);
                     stack = pop(stack);
-                    if(!get_stack_size(stack))
-                        // The below goto is not needed but after researching
-                        // the best way to breaking out of both the while and 
-                        // for loop this became the clear "optimized" solution.
-                        // I could check the size fo the stack at the of the 
-                        // for loop but I wanted to only check it when I popped 
-                        // since it will be a choke point. I also could use a 
-                        // variable to track the size of the stack but this 
-                        // would use unnessary memory. Its not clear what the 
-                        // Big-O values for any of these solutions are since it 
-                        // depends on the size of the graph and where the target
-                        // node is located within it.
-                        goto TERM;
+                    ptList(stack, print_int);
+                    if(!get_stack_size(stack)){
+                        //Leaving both while and for loop
+                        i = graph->size;
+                        break;
+                    }
                     curr_node = nodeFromStack(stack, graph);
+                    // stack = pop(stack);
+                    // ptList(stack, print_int);
                     next_node = curr_node;
                     curr_adj = graph->adjArr[curr_node.name].list;
                 }
@@ -184,15 +255,24 @@ graphNode_t findGraphNode(graph_t *graph,
 
 
             // next_node identified
-            printf("next_node is %d with weight of %d\n\n", 
-                next_node.name, min_weight);
+            // printf("next_node is %d with weight of %d\n\n", 
+                // next_node.name, min_weight);
 
             
             if((*cmp_ptr)(next_node.data, value) == 0){
                 // Target node found
-                target = next_node;
+                *target = next_node;
                 break;
             }
+        }
+        // Clean up function stack
+        rmStack(stack);
+        stack = NULL;
+        if(get_stack_size(stack) != 0){
+            // printf("\n**********************************\n");
+            printf("ERROR: Stack did not free properly, ");
+            printf("%d items remaining in stack\n", get_stack_size(stack));
+            // printf("**********************************\n\n");
         }
     }
 
@@ -200,30 +280,123 @@ graphNode_t findGraphNode(graph_t *graph,
     else{
         printf("Placeholder for BREADTH Method.\n");
         printf("Continuing using DEPTH Method.\n");
-        target = findGraphNode(graph, DEPTH, start, value, cmp_ptr);
+        findGraphNode(graph, target, DEPTH, start, value, cmp_ptr);
 
     }
-    TERM:
-    if(target.name != -1){
-        printf("Target found: node %d contains value ", target.name);
-        print_int(target.data);
-        printf("\n");
+    // CLEANUP
+    free(visited);
+    visited = NULL;
+
+
+    // CLOSEOUT
+    if((*target).name != -1){
+        // printf("Target found: node %d contains value ", target.name);
+        // print_int(target.data);
+        // printf("\n");
     }
     else
-        printf("Target not found\n");
+        // printf("Target not found\n");
+    return;
+}
+
+
+adjNode_t* findEdge_by_parentChild(graph_t *graph, 
+                                    graphNode_t parent, 
+                                    graphNode_t child){
+    // Debugging statements
+    // printf("\nfindEdge_by_parentChild...\n");
+    // printf("Parent Node %d value ", parent.name);
+    // print_int(parent.data);
+    // printf("\n");
+    // printf("Child Node %d value ", child.name);
+    // print_int(child.data);
+    // printf("\n");
+    
+
+    // Define target node
+    adjNode_t *target;
+    target->parent.name = -1;
+    target->parent.data = NULL;
+    target->child.name = -1;
+    target->child.data = NULL;
+    target->weight = -1;
+    target->next = NULL;
+
+
+    // Define current node to parent node
+    adjNode_t *curr = graph->adjArr[parent.name].list;
+    
+    
+    // While true, either find the adjNode pointing to the desired child and
+    // copy its contents into the target node, or determine there is not an 
+    // adjNode pointing to the desired child and return NULL.
+    while(1){
+        if(curr == NULL)
+            return NULL;
+        else if(curr->child.name == child.name){
+            adjNodecpy(target, curr);
+            break;
+        }
+        curr = curr->next;
+    }
+
+
+    // Redefine current node to child node
+    curr = graph->adjArr[child.name].list;
+
+
+    // Similar to previous while on line 333, however, child and parent nodes 
+    // have swapped and adjNode, if found, will be copied to target->next.
+    // target->next->next will be set to NULL before breaking.
+    while(1){
+        if(curr == NULL)
+            return NULL;
+        else if(curr->child.name == parent.name){
+            adjNodecpy(target->next, curr);
+            target->next->next = NULL;
+            break;
+        }
+        curr = curr->next;
+    }
+
+
+    // Varify the edge is intact before return
+    if(target != NULL && target->next != NULL)
+        return target;
+    else
+        return NULL;
+}
+
+
+adjNode_t* findEdge_by_weight(graph_t *graph, int weight){
+    printf("\nfindEdge_by_weight...\n");
+    adjNode_t *target = NULL;
+    adjNode_t *curr = NULL;
+    for(int i=0; i<graph->size; i++){
+        adjNode_t *curr = graph->adjArr[i].list;
+        while(curr != NULL){
+            if(curr->weight == weight){
+                memcpy(target, curr, sizeof(adjNode_t));
+                target->next = NULL;
+                break;
+            }
+        }
+    }
+    if(target != NULL){
+        curr = graph->adjArr[target->child.name].list;
+        while(curr != NULL){
+            if(curr->weight = weight){
+                memcpy(target->next, curr, sizeof(adjNode_t));
+                target->next->next = NULL;
+                break;
+            }
+        }
+    }
     return target;
 }
 
 
-static adjNode_t* findAdjNode(graph_t *graph, int nameParent, int nameChild){
-    adjNode_t *curr = graph->adjArr[nameParent].list;
-    while(curr != NULL){
-        if(curr->child.name == nameChild)
-            break;
-        curr = curr->next;
-    }
-    return curr;
-}
+//CLEAN UP
 
 
 void freeEdge(graph_t **graph, adjNode_t *parent, adjNode_t *child){
