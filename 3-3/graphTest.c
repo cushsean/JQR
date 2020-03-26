@@ -35,7 +35,7 @@ int main(void){
 
     addEdge(graph, 0, 2, 1);
     addEdge(graph, 0, 4, 4);
-    addEdge(graph, 1, 4, 1);
+    addEdge(graph, 1, 4, 2);
     addEdge(graph, 2, 3, 3);
     addEdge(graph, 2, 4, 2);
 
@@ -89,27 +89,6 @@ int main(void){
     int num2 = 3;
     int *ptr2 = &num2;
 
-    // Find edge by parent-child relation
-    printf("Find edge by parent-child relationship. Parent %d. Child %d\n",
-        num, num2);
-    graphNode_t target2;
-    target2.name = -1;
-    target2.data = NULL;
-    findGraphNode(graph, &target, DEPTH, 0, ptr, cmp_int);
-    findGraphNode(graph, &target2, DEPTH, 0, ptr2, cmp_int);
-    ptGraph(graph, print_int);
-    if(target.name == -1 || target2.name == -1){
-        printf("One or more target nodes were not found.");
-        printf("Attempt to find edge terminated.\n");
-    }
-    else{
-        edge = findEdge_by_parentChild(graph, target, target2);
-        if(edge == NULL)
-            printf("There is not an edge between the specified nodes.\n");
-        else
-            printf("An edge with weight %d was found between nodes %d and %d.\n",
-                edge->weight, edge->parent.name, edge->child.name);
-    }
 
     // Find edge by weight
     printf("\n\nFind edge by weight of %d\n", num);
@@ -119,8 +98,55 @@ int main(void){
     else
         printf("An edge with weight %d was found between nodes %d and %d.\n",
             edge->weight, edge->parent.name, edge->child.name);
+    printf("\n\n");
+
+    // Find edge by parent-child relation
+    printf("Find edge by parent-child relationship.");
+    graphNode_t target2;
+    target2.name = -1;
+    target2.data = NULL;
+    findGraphNode(graph, &target, DEPTH, 0, ptr, cmp_int);
+    printf(" Parent %d", target.name);
+    findGraphNode(graph, &target2, DEPTH, 0, ptr2, cmp_int);
+    printf(" Child %d\n", target2.name);
+    // ptGraph(graph, print_int);
+    if(target.name == -1 || target2.name == -1){
+        printf("One or more target nodes were not found.");
+        printf("Attempt to find edge terminated.\n");
+    }
+    else{
+        edge = findEdge_by_parentChild(graph, target, target2);
+        if(edge == NULL){
+            printf("There is not an edge between the specified nodes.\n");
+            printf("\nAdding edge between nodes %d and %d\n",
+                target.name, target2.name);
+            addEdge(graph, target.name, target2.name, 4);
+            ptGraph(graph, print_int);
+
+            edge = findEdge_by_parentChild(graph, target, target2);
+            if(edge == NULL)
+                printf("There is not an edge between the specified nodes.\n");
+            else
+                printf("An edge with weight %d was found between nodes %d and %d.\n",
+                    edge->weight, edge->parent.name, edge->child.name);
+        }
+        else
+            printf("An edge with weight %d was found between nodes %d and %d.\n",
+                edge->weight, edge->parent.name, edge->child.name);
+    }
+    printf("\n\n");
+
+    
    
     // Clean Up and Exit
+
+
+    // Remove a single edge from the graph
+    // printf("Remove an edge from graph...\n");
+    // freeEdge(&graph, edge, edge->next);
+    // ptGraph(graph, print_int);
+
+
     printf("\n\nCLEAN UP...\n\n");
     freeGraph(graph);
 

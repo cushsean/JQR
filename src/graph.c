@@ -39,7 +39,6 @@ static void adjNodecpy(adjNode_t *dest, adjNode_t *src){
         dest->parent = src->parent;
         dest->child = src->child;
         dest->weight = src->weight;
-        dest->next = src->next;
     }
     return;
 }
@@ -186,7 +185,7 @@ void findGraphNode(graph_t *graph,
     (*target).data = NULL;
 
 
-    ptVisited(visited, graph->size);
+    // ptVisited(visited, graph->size);
 
 
     // Inital check
@@ -218,8 +217,8 @@ void findGraphNode(graph_t *graph,
             stack = push(stack, nameHolder);
             visited[curr_node.name] = 1;
 
-            ptList(stack, print_int);
-            ptVisited(visited, graph->size);
+            // ptList(stack, print_int);
+            // ptVisited(visited, graph->size);
 
 
             while(visited[next_node.name]){
@@ -303,16 +302,6 @@ void findGraphNode(graph_t *graph,
 adjNode_t* findEdge_by_parentChild(graph_t *graph, 
                                     graphNode_t parent, 
                                     graphNode_t child){
-    // Debugging statements
-    // printf("\nfindEdge_by_parentChild...\n");
-    // printf("Parent Node %d value ", parent.name);
-    // print_int(parent.data);
-    // printf("\n");
-    // printf("Child Node %d value ", child.name);
-    // print_int(child.data);
-    // printf("\n");
-    
-
     // Define target node
     adjNode_t *target;
     target->parent.name = -1;
@@ -320,7 +309,12 @@ adjNode_t* findEdge_by_parentChild(graph_t *graph,
     target->child.name = -1;
     target->child.data = NULL;
     target->weight = -1;
-    target->next = NULL;
+    target->next->parent.name = -1;
+    target->next->parent.data = NULL;
+    target->next->child.name = -1;
+    target->next->child.data = NULL;
+    target->next->weight = -1;
+    target->next->next = NULL;
 
 
     // Define current node to parent node
@@ -347,13 +341,11 @@ adjNode_t* findEdge_by_parentChild(graph_t *graph,
 
     // Similar to previous while on line 333, however, child and parent nodes 
     // have swapped and adjNode, if found, will be copied to target->next.
-    // target->next->next will be set to NULL before breaking.
     while(1){
         if(curr == NULL)
             return NULL;
         else if(curr->child.name == parent.name){
             adjNodecpy(target->next, curr);
-            target->next->next = NULL;
             break;
         }
         curr = curr->next;
@@ -361,38 +353,64 @@ adjNode_t* findEdge_by_parentChild(graph_t *graph,
 
 
     // Varify the edge is intact before return
-    if(target != NULL && target->next != NULL)
-        return target;
-    else
+    if(target == NULL)
         return NULL;
+    else if(target->child.name == target->next->parent.name)
+        if(target->parent.name == target->next->child.name)
+            return target;
+    return NULL;
 }
 
 
 adjNode_t* findEdge_by_weight(graph_t *graph, int weight){
     printf("\nfindEdge_by_weight...\n");
-    adjNode_t *target = NULL;
-    adjNode_t *curr = NULL;
+    adjNode_t *target;
+    target->parent.name = -1;
+    target->parent.data = NULL;
+    target->child.name = -1;
+    target->child.data = NULL;
+    target->weight = -1;
+    target->next->parent.name = -1;
+    target->next->parent.data = NULL;
+    target->next->child.name = -1;
+    target->next->child.data = NULL;
+    target->next->weight = -1;
+    target->next->next = NULL;
+    
+
+    adjNode_t *curr;
     for(int i=0; i<graph->size; i++){
-        adjNode_t *curr = graph->adjArr[i].list;
+        curr = graph->adjArr[i].list;
         while(curr != NULL){
             if(curr->weight == weight){
-                memcpy(target, curr, sizeof(adjNode_t));
-                target->next = NULL;
+                adjNodecpy(target, curr);
+                i = graph->size;
                 break;
             }
+            curr = curr->next;
         }
     }
-    if(target != NULL){
+    if(target->parent.name != -1){
         curr = graph->adjArr[target->child.name].list;
         while(curr != NULL){
-            if(curr->weight = weight){
-                memcpy(target->next, curr, sizeof(adjNode_t));
-                target->next->next = NULL;
-                break;
+            if(curr->child.name == target->parent.name){
+                if(curr->weight = weight){
+                    adjNodecpy(target->next, curr);
+                    break;
+                }
             }
+            curr = curr->next;
         }
     }
-    return target;
+
+    // Varify the edge is intact before return
+    if(target == NULL)
+        return NULL;
+    else if(target->child.name == target->next->parent.name)
+        if(target->parent.name == target->next->child.name)
+            if(target->weight == weight)
+                return target;
+    return NULL;
 }
 
 
@@ -462,11 +480,11 @@ void freeGraphNode(graph_t *graph, int name){
     }
     // 2
     // printf("Attempting to free node.data...\n");
-    free(node.data);
-    node.data = NULL;
+    free(&graph->nodeArr[name].data);
+    // &(graph->nodeArr[name].data) = NULL;
     // printf("node.data has been freed.\n");
     // 3
-    node.name = -1;
+    graph->nodeArr[name].name = -1;
     return;
 }
 
