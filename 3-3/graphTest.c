@@ -50,10 +50,18 @@ int main(void){
     }
     printf("\nPRINT INITAL GRAPH...\n");
     ptGraph(graph, print_int);
+
+
+    // FIND NODE WITHIN GRAPH
     int num = 2;
     int *ptr = &num;
     printf("\nFIND NODE WITH VALUE %d...\n\n", num);
-    graphNode_t target = findGraphNode(graph, DEPTH, 0, ptr, cmp_int);
+    graphNode_t *target = findGraphNode(graph, DEPTH, 0, ptr, cmp_int);
+    if(target == NULL)
+        printf("Value %d not found\n", num);
+    else
+        printf("Value %d found in node %d\n", num, target->name);
+    printf("\n");
 
     printf("\n\nCLEAN UP...\n\n");
     freeGraph(graph);

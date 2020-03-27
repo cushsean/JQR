@@ -66,7 +66,7 @@ void ptGraph(graph_t *graph, void (*print_ptr)(void*));
 /**
  * Finds a node in the graph with the value specifed by the user.
  */
-graphNode_t findGraphNode(graph_t *graph, 
+graphNode_t* findGraphNode(graph_t *graph, 
                             int method, 
                             int start,
                             void *value, 

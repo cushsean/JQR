@@ -102,7 +102,7 @@ static graphNode_t nodeFromStack(node_t *stack, graph_t *graph){
 }
 
 
-graphNode_t findGraphNode(graph_t *graph, 
+graphNode_t* findGraphNode(graph_t *graph, 
                             int method, 
                             int start,
                             void *value, 
@@ -110,11 +110,8 @@ graphNode_t findGraphNode(graph_t *graph,
     
     // Define function variables
     graphNode_t next_node = graph->nodeArr[start];
-    // adjNode_t *curr_adj = graph->adjArr[0].list;
     uint8_t *visited = malloc(graph->size);
-    graphNode_t target;
-    target.name = -1;
-    target.data = NULL;
+    graphNode_t *target = NULL;
 
 
     // ptVisited(visited, graph->size);
@@ -123,14 +120,14 @@ graphNode_t findGraphNode(graph_t *graph,
     // Inital check
     if((*cmp_ptr)(next_node.data, value) == 0)
         // Target found
-        target = next_node;
+        target = &next_node;
 
     // DEPTH METHOD
     else if(method == DEPTH){
 
         // Define stack
-        node_t *stack = malloc(sizeof(node_t));
-        stack = NULL;
+        node_t *stack = mkStack(1);
+        stack = pop(stack);
 
 
         for(int i=0; i<graph->size; i++){
@@ -150,7 +147,6 @@ graphNode_t findGraphNode(graph_t *graph,
             while(visited[next_node.name]){
                 for(; curr_adj != NULL; curr_adj = curr_adj->next){
                     // Loop through all adj Nodes to curr
-                    // printf("check edge to node: %d\n", curr_adj->child.name);
                     if(!visited[curr_adj->child.name])
                         if(curr_adj->weight < min_weight){
                             // update next_node
@@ -163,37 +159,24 @@ graphNode_t findGraphNode(graph_t *graph,
                 if(curr_node.name == next_node.name){
                     // No unvisited nodes found
                     stack = pop(stack);
-                    if(!get_stack_size(stack))
-                        // The below goto is not needed but after researching
-                        // the best way to breaking out of both the while and 
-                        // for loop this became the clear "optimized" solution.
-                        // I could check the size fo the stack at the of the 
-                        // for loop but I wanted to only check it when I popped 
-                        // since it will be a choke point. I also could use a 
-                        // variable to track the size of the stack but this 
-                        // would use unnessary memory. Its not clear what the 
-                        // Big-O values for any of these solutions are since it 
-                        // depends on the size of the graph and where the target
-                        // node is located within it.
-                        goto TERM;
+                    if(!get_stack_size(stack)){
+                        i = graph->size;
+                        break;
+                    }
                     curr_node = nodeFromStack(stack, graph);
                     next_node = curr_node;
                     curr_adj = graph->adjArr[curr_node.name].list;
                 }
             }
 
-
-            // next_node identified
-            printf("next_node is %d with weight of %d\n\n", 
-                next_node.name, min_weight);
-
             
             if((*cmp_ptr)(next_node.data, value) == 0){
                 // Target node found
-                target = next_node;
+                target = &next_node;
                 break;
             }
         }
+        rmStack(stack);
     }
 
     // BREATH METHOD
@@ -203,14 +186,12 @@ graphNode_t findGraphNode(graph_t *graph,
         target = findGraphNode(graph, DEPTH, start, value, cmp_ptr);
 
     }
-    TERM:
-    if(target.name != -1){
-        printf("Target found: node %d contains value ", target.name);
-        print_int(target.data);
-        printf("\n");
-    }
-    else
-        printf("Target not found\n");
+    
+
+    // CLEANUP
+    free(visited);
+    visited = NULL;
+    
     return target;
 }
 
