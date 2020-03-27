@@ -1,5 +1,9 @@
 #include "graph.h"
 
+
+/**
+ * Local function: Creates a new adjNode
+ */
 static adjNode_t* newAdjNode(int name, 
                                 int weight, 
                                 graphNode_t child, 
@@ -83,6 +87,9 @@ void ptGraph(graph_t *graph, void (*print_ptr)(void*)){
 }
 
 
+/**
+ * Local Function: Prints the array of visited nodes.
+ */
 static void ptVisited(uint8_t *list, int size){
     printf("Visited Nodes...\n\t");
     for(int i=0; i<size; i++){
@@ -94,7 +101,7 @@ static void ptVisited(uint8_t *list, int size){
 
 
 /**
- * Local function to identify and return the graphNode_t represented by the 
+ * Local function: Identifies and returns the graphNode_t represented by the 
  * value at the top of the stack.
  */
 static graphNode_t nodeFromStack(node_t *stack, graph_t *graph){
@@ -196,6 +203,9 @@ graphNode_t* findGraphNode(graph_t *graph,
 }
 
 
+/**
+ * Local Function: Finds an adjNode based on the name of it's parent and child.
+ */
 static adjNode_t* findAdjNode(graph_t *graph, int nameParent, int nameChild){
     adjNode_t *curr = graph->adjArr[nameParent].list;
     while(curr != NULL){
@@ -204,6 +214,99 @@ static adjNode_t* findAdjNode(graph_t *graph, int nameParent, int nameChild){
         curr = curr->next;
     }
     return curr;
+}
+
+
+void findEdge_by_parentChild(graph_t *graph, adjNode_t **edge,
+    graphNode_t parent, graphNode_t child){
+    
+
+    // Clear the incoming edge
+    edge[0] = edge [1] = NULL;
+
+    
+    // Define local varibales
+    adjNode_t *curr = graph->adjArr[parent.name].list;
+
+
+    // Could combine the next two while loops... but not right now.
+
+    // While true, either find the adjNode pointing to the desired child and
+    // copy its contents into the edge list, or determine there is not an 
+    // adjNode pointing to the desired child and break.
+    while(1){
+        if(curr == NULL)
+            break;
+        else if(curr->child.name == child.name){
+            edge[0] = curr;
+            break;
+        }
+        curr = curr->next;
+    }
+
+    if(edge[0] != NULL){
+        // Redefine curr
+        curr = graph->adjArr[child.name].list;
+
+
+        // Similar to previous while, however, child and parent nodes have 
+        // swapped and adjNode, if found, will be copied to edge[1].
+        while(1){
+            if(curr == NULL)
+                break;
+            else if(curr->child.name == parent.name){
+                edge[1] = curr;
+                break;
+            }
+            curr = curr->next;
+        }
+    }
+
+    return;
+}
+
+
+void findEdge_by_weight(graph_t *graph, adjNode_t **edge, int weight){
+    
+    // Clear the incoming edge
+    edge[0] = edge[1] = NULL;
+
+
+    // Declare local variables
+    adjNode_t *curr;
+
+
+    // Loop through all adjLists until an adjNode with the specifed weight
+    // is found.
+    for(int i=0; i<graph->size; i++){
+        curr = graph->adjArr[i].list;
+        while(curr != NULL){
+            if(curr->weight == weight){
+                edge[0] = curr;
+                i = graph->size;
+                break;
+            }
+            curr = curr->next;
+        }
+    }
+
+
+    // If edge[0] != NULL, loop through the child's adjNode's until either NULL
+    // or one is found with the parents names. Check that the weight is correct
+    // before setting it to edge[1].
+    if(edge[0] != NULL){
+        curr = graph->adjArr[edge[0]->child.name].list;
+        while(curr != NULL){
+            if(curr->child.name == edge[0]->parent.name)
+                if(curr->weight == weight){
+                    edge[1] = curr;
+                    break;
+                }
+            curr = curr->next;
+        }
+    }
+
+    return;
 }
 
 

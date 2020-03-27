@@ -61,8 +61,35 @@ int main(void){
         printf("Value %d not found\n", num);
     else
         printf("Value %d found in node %d\n", num, target->name);
-    printf("\n");
+    printf("\n\n");
 
+
+    // FIND EDGE BY PARENT-CHILD RELATION
+    printf("FIND EDGE BY PARENT-CHILD RELATION...\n");
+    adjNode_t *edge[2] = {NULL,NULL};
+    findEdge_by_parentChild(graph, edge, graph->nodeArr[0], graph->nodeArr[1]);
+    if(edge[0] == NULL)
+        printf("No edge found between nodes %d and %d\n", 0, 1);
+    else if(edge[1] == NULL)
+        printf("Error occured while getting edge\n");
+    else
+        printf("Edge between nodes %d and %d has a weight of %d\n",
+            0, 1, edge[0]->weight);
+    printf("\n\n");
+
+    // FIND EDGE BY WEIGHT
+    printf("FIND EDGE BY WEIGHT...\n");
+    findEdge_by_weight(graph, edge, 2);
+    if(edge[0] == NULL)
+        printf("No edge found with weight of %d\n", 2);
+    else if(edge[1] == NULL)
+        printf("Error occured while getting edge\n");
+    else
+        printf("Edge with weight of %d was found connecting nodes %d and %d\n",
+            2, edge[0]->parent.name, edge[1]->parent.name);
+    printf("\n\n");
+
+    // CLEAN UP
     printf("\n\nCLEAN UP...\n\n");
     freeGraph(graph);
 

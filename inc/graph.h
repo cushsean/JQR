@@ -74,7 +74,23 @@ graphNode_t* findGraphNode(graph_t *graph,
 
 
 /**
- * Frees the adjNodes that create an Edge in the graph.
+ * Finds an edge in the graph should one exist between two specified nodes
+ */
+void findEdge_by_parentChild(graph_t *graph, adjNode_t **edge,
+    graphNode_t parent, graphNode_t child);
+
+
+/**
+ * Finds an edge in the graph should one exist that contains the weight 
+ * specified.
+ */
+void findEdge_by_weight(graph_t *graph, adjNode_t **edge, int weight);                  
+
+
+/**
+ * Frees the adjNodes that create an Edge in the graph. Returns an array of the 
+ * two adjNodes that comprise the edge. Parent function assumes ownership of
+ * this list.
  */
 void freeEdge(graph_t **graph, adjNode_t *parent, adjNode_t *child);
 
