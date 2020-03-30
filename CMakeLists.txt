@@ -52,9 +52,14 @@ set(STACK
 
 set(GRAPH
 	src/graph.c
-	src/que.c
-	src/stack.c
-	src/list.c
+	${STACK}
+	${QUE}
+	src/util.c
+)
+
+set(DIJKSTRA
+	${linkedList}
+	${GRAPH}
 	src/util.c
 )
 	
@@ -76,7 +81,7 @@ add_executable(serial_recv "3-1/12_serial_recv.c" ${SERIAL})
 #add_executable(hash "3-1/13.c" ${HASH})
 add_executable(sort "3-1/14.c" ${SORT})
 add_executable(15 "3-1/15.c")
-#add_executable(dijkstra "3-1/16.c")
+add_executable(dijkstra "3-1/dijkstra.c" ${DIJKSTRA})
 add_executable(21 "3-1/21.c")
 
 #3-3 Executables

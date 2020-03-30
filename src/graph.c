@@ -319,8 +319,8 @@ void freeEdge(graph_t **graph, adjNode_t *parent, adjNode_t *child){
      *  1) adjNode of the parent
      *  2) adjNode of the child
      */
-    printf("Freeing edge between %d and %d...\n", 
-        parent->parent.name, child->parent.name);
+    // printf("Freeing edge between %d and %d...\n", 
+    //     parent->parent.name, child->parent.name);
     adjNode_t *rm_node = parent;
     for(int i=0; i<2; i++){
         
@@ -398,22 +398,22 @@ void freeGraph(graph_t *graph){
         if(graph->nodeArr[i].name != -1)
             freeGraphNode(graph, i);
     }
-    fprintf(stderr, "All nodes have been freed\n");
+    // fprintf(stderr, "All nodes have been freed\n");
 
     //2
     free(graph->nodeArr);
     graph->nodeArr = NULL;
-    fprintf(stderr, "Array of Nodes have been freed\n");
+    // fprintf(stderr, "Array of Nodes have been freed\n");
     
     //3
     free(graph->adjArr);
     graph->adjArr = NULL;
-    fprintf(stderr, "Array of adjNodes have been freed\n");
+    // fprintf(stderr, "Array of adjNodes have been freed\n");
 
     //4
     free(graph);
     graph = NULL;
-    fprintf(stderr, "Graph has been destroyed\n");
+    // fprintf(stderr, "Graph has been destroyed\n");
 
     return;
 }

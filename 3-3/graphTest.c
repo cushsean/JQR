@@ -7,7 +7,7 @@
 #include "stack.h"
 #include "util.h"
 
-#define SIZE_GRAPH (5)
+#define SIZE_GRAPH (10)
 
 static graph_t* fillGraph(graph_t *graph){
     srand(time(NULL));
