@@ -7,6 +7,8 @@
 #include "que.h"
 #include "stack.h"
 #include "graph.h"
+#include "util.h"
+#include "sort.h"
 
 #define GRAPH_SIZE (7)
 #define MAX_WEIGHT (20)
@@ -29,47 +31,77 @@ typedef struct dijk{
 }dijk_t;
 
 
-static dijk_t* getNextNode(graph_t *graph, dijk_t *meta, dijk_t *curr_node);
-static void ptDijk(dijk_t meta);
-
-
 /**
- * Finds the next unvisited node with the smallest weight.
+ * Local Function: Updates the meta data of any unvisited adjacent 
+ * nodes and updates the curr_node to the unvisited adjacent node 
+ * with the smallest weight.
  */
-static dijk_t* getNextNode(graph_t *graph, dijk_t *meta, dijk_t *curr_node){
-	
-	dijk_t *next = NULL;
-	adjNode_t *curr_adj = graph->adjArr[curr_node->name].list;
-
-
-	while(curr_adj != NULL){
-		ptDijk(meta[curr_adj->child.name]);
-		while(meta[curr_adj->child.name].visited)
-			curr_adj = curr_adj->next;
-		if(curr_adj == NULL)
-			break;
-		if(next != NULL){
-			printf("next weight %d\n", next->weight);
-			printf("curr_adj weight %d\n", curr_adj->weight);
-		}
-		if(next == NULL)
-			next = &meta[curr_adj->child.name];
-		else if(next->weight > curr_adj->weight)
-			next = &meta[curr_adj->child.name];
-		curr_adj = curr_adj->next;
-	}
-	
-	printf("\n");
-	if(next == NULL)
-		return NULL;
-	else
-		return next;
-}
+static void updateMeta(graph_t *graph, dijk_t *meta, dijk_t *curr_node);
 
 
 /**
  * Local Function: Prints the contents of the dijk structure.
  */
+static void ptDijk(dijk_t meta);
+
+
+/**
+ * Compare the weight of two nodes.
+ */
+int cmp_weight(void*, void*);
+
+
+/**
+ * Local Function: Updates the meta data of any unvisited adjacent 
+ * nodes and updates the curr_node to the unvisited adjacent node 
+ * with the smallest weight.
+ */
+static void updateMeta(graph_t *graph, dijk_t *meta, dijk_t *curr_node){
+	
+	// Hold next meta to update
+	dijk_t *next = NULL;
+
+	// Hold next curr_node and set weight to infinity
+	dijk_t *tmp_next = curr_node;
+	tmp_next->weight = GRAPH_SIZE + MAX_WEIGHT + 1;
+
+	// Get list of adjacent nodes and loop until NULL
+	adjNode_t *curr_adj = graph->adjArr[curr_node->name].list;
+	while(curr_adj != NULL){
+
+		// Skip visited nodes
+		while(meta[curr_adj->child.name].visited)
+			curr_adj = curr_adj->next;
+		if(curr_adj == NULL)
+			break;
+
+		// Set next
+		next = &meta[curr_adj->child.name];
+
+		// Update next if needed
+		if(next->weight > curr_node->weight + curr_adj->weight){
+			next->weight = curr_node->weight + curr_adj->weight;
+			next->lastNode = curr_node;
+		}
+
+		// Update tmp_next
+		if(next->weight < tmp_next->weight)
+			tmp_next = next;
+
+		// Update curr_adj
+		curr_adj = curr_adj->next;
+	}
+	
+	// Set curr_node to visited and update
+	curr_node->visited = 1;
+	// curr_node = tmp_next;
+
+	// CLOSE OUT
+	return;
+}
+
+
+
 static void ptDijk(dijk_t meta){
 	printf("meta name: %d\n", meta.name);
 	printf("meta visited: %d\n", meta.visited);
@@ -80,6 +112,17 @@ static void ptDijk(dijk_t meta){
 		printf("%d \n", meta.lastNode->name);
 	printf("meta weight: %d\n\n", meta.weight);
 	return;
+}
+
+
+int cmp_weight(void *var1, void *var2){
+	int *num1 = &(*(dijk_t*)var1).weight;
+	int *num2 = &(*(dijk_t*)var2).weight;
+	return cmp_int(num1, num2);
+}
+
+void ptDijk_ptr(void *var){
+	return ptDijk(*(dijk_t*)var);
 }
 
 
@@ -120,8 +163,8 @@ int main(void){
 
 
 	// Define list of all nodes
-	node_t *path = mkList(GRAPH_SIZE, DOUBLY);
-	node_t *curr = path;
+	node_t *pQue = mkList(GRAPH_SIZE, DOUBLY);
+	node_t *curr = pQue;
 	dijk_t *meta = malloc(sizeof(dijk_t) * GRAPH_SIZE);
 	for(int i=0; curr != NULL && i<GRAPH_SIZE; curr = curr->next, i++){
 		meta[i].name = i;
@@ -133,28 +176,34 @@ int main(void){
 
 
 	// Define start and end nodes
-	dijk_t *start = &meta[0];
-	dijk_t *end = &meta[5];
-	// ptDijk(*start);
-	// ptDijk(*end);
+	int start = 0;
+	int end = 5;
 
+	meta[start].weight = 0;
+	meta[start].lastNode = &meta[start];
+	
+	ptList(pQue, ptDijk_ptr); printf("NULL\n\n");
+	pQue = sort_bubble_list(pQue, cmp_weight);
+	ptList(pQue, ptDijk_ptr); printf("NULL\n\n");
+	
 
-	dijk_t *curr_meta = start; 
-	dijk_t *next_meta = getNextNode(graph, meta, curr_meta);
-	printf("next node: %d\n", next_meta->name);
-	
-	
+	dijk_t *curr_meta = (dijk_t*)pQue->data; 
+	updateMeta(graph, meta, curr_meta);
+	ptDijk(meta[0]);
+	ptDijk(meta[1]);
+	ptDijk(meta[2]);
+	ptDijk(meta[4]);
 
 
 
 	// Clean up
 	// Free list
-	while(path != NULL){
+	while(pQue != NULL){
 		node_t *tmp;
-		tmp = path->next;
-		free(path);
-		path = NULL;
-		path = tmp;
+		tmp = pQue->next;
+		free(pQue);
+		pQue = NULL;
+		pQue = tmp;
 	}
 
 	// Free meta
