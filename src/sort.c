@@ -16,7 +16,7 @@ void sort_bubble_array(void *arr, size_t nmemb, size_t e_size,
 
 node_t* sort_bubble_list(void *head, int (*cmp_ptr)(void*, void*)){
 	
-	printf("SORTING...\n");
+	// printf("SORTING...\n");
 
 	node_t *curr = head;
 	int size = countList(head);
