@@ -24,4 +24,10 @@ node_t* swap_node(node_t *head, node_t *a, node_t *b);
 node_t* swap_node_singly(node_t *head, node_t *curr, node_t *NX, node_t *PR);
 
 
+/**
+ * Hashing scheme that returns an unsigned long.
+ */
+unsigned long hash(char *input, size_t size);
+
+
 #endif /* UTIL_H_CUSHMAN */

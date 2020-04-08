@@ -77,12 +77,4 @@ int freeSet(hash_table *table, hash_set *set);
  */
 void freeTable(hash_table **table);
 
-//Old functions below
-// unsigned long hash(char*);
-// char** hash_table();
-// char** hash_insert(char**, void*, int*);
-// void hash_free(char**);
-// long hash_find_byValue(char**, void*);
-// long hash_find_byNumber(char**, unsigned long);
-// char** hash_rmItem(char**, void*);
 #endif /* HASH_H_CUSHMAN */

@@ -4,6 +4,7 @@
 
 #include "hash.h"
 #include "list.h"
+#include "util.h"
 
 
 /**
@@ -16,12 +17,6 @@ void print_set(hash_set set);
  * Prints the set with a determined level for tabing.
  */
 void print_set_util(hash_set set, int level);
-
-
-/**
- * Hashing scheme that returns an unsigned long.
- */
-unsigned long hash(char *input, size_t size);
 
 
 /**
@@ -64,25 +59,6 @@ void print_set_util(hash_set set, int level){
 		}
 	}
 	return;
-}
-
-unsigned long hash(char *input, size_t size){
-	
-	unsigned long key = 0;
-	int c;
-
-	while(c = *input++)
-		key = c + (key << 6) + (key << 16) - key;
-	
-
-	// Double hash
-	char buf[21];
-	sprintf(buf, "%020lu", key);
-	buf[20] = '\0';
-	for(int i=0; i<20; i++)
-		key = buf[i] + (key << 6) + (key << 16) - key;
-
-	return key;
 }
 
 void fill_hashTable(hash_table *table, int num){

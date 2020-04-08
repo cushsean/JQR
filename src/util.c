@@ -87,3 +87,22 @@ node_t* swap_node_singly(node_t *head, node_t *curr, node_t *NX, node_t *PR){
 		
 	return head;
 }
+
+unsigned long hash(char *input, size_t size){
+	
+	unsigned long key = 0;
+	int c;
+
+	while(c = *input++)
+		key = c + (key << 6) + (key << 16) - key;
+	
+
+	// Double hash
+	char buf[21];
+	sprintf(buf, "%020lu", key);
+	buf[20] = '\0';
+	for(int i=0; i<20; i++)
+		key = buf[i] + (key << 6) + (key << 16) - key;
+
+	return key;
+}
