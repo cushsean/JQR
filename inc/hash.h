@@ -7,37 +7,61 @@
 
 #include "list.h"
 #include "util.h"
+#include "sort.h"
 
 #define MATCH 0
 #define LIMITER 99999999
 #define WORD_SIZE 128
 
-typedef struct hash_node{
-	char* key;
-	void* data;
-	char* valid_node;
-}node_h;
+typedef struct hashSet{
+	void *key;
+	void *data;
+	struct hashSet *next;
+	struct hashSet *top;
+}hash_set;
 
-typedef struct hash_table_meta{
-	node_h** set;
+typedef struct hashTable{
+	struct hashSet *set;
 	size_t size;
-	size_t num_elem;
-	//unsigned long (*hash)(void);
-	//void* (*key_cpy)(void*);
-	//int (*key_cmp)(void*, void*);
-}meta_h;
+	size_t nElem;
+	unsigned long (*hash)(char*, size_t);
+	int (*cmp_key)(void*, void*);
+	void (*print_set)(hash_set);
+}hash_table;
 
-meta_h* hash_new_table(void);
-int hash_insert_node(meta_h* table, char* key);
-void* hash_get_node(meta_h* table, char* key);
-int hash_rm_node(meta_h* table, char* key);
+
+/**
+ * Allocates memory and set inital values for hashTable struct.
+ * Sets inital size of table to 16.
+ */
+hash_table* newHashTable(unsigned long (*hash)(char*, size_t), 
+	int (*cmp_key)(void*, void*), void (*ptr_set)(hash_set));
+
+
+/**
+ * Inserts new set into hash table.
+ */
+void insertHashSet(hash_table *table, void *data, size_t size);
+
+
+/**
+ * Increase the size of the table by 2^n+1
+ */
+void growTable(hash_table *table);
+
+
+/**
+ * Frees the hash tabel and sets array. Takes the address of the table in order
+ * to set the table to NULL.
+ */
+void freeTable(hash_table **table);
 
 //Old functions below
-unsigned long hash(char*);
-char** hash_table();
-char** hash_insert(char**, void*, int*);
-void hash_free(char**);
-long hash_find_byValue(char**, void*);
-long hash_find_byNumber(char**, unsigned long);
-char** hash_rmItem(char**, void*);
+// unsigned long hash(char*);
+// char** hash_table();
+// char** hash_insert(char**, void*, int*);
+// void hash_free(char**);
+// long hash_find_byValue(char**, void*);
+// long hash_find_byNumber(char**, unsigned long);
+// char** hash_rmItem(char**, void*);
 #endif /* HASH_H_CUSHMAN */

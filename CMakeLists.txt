@@ -20,12 +20,6 @@ set(TREE
 	src/util.c
 )
 
-set(HASH
-	src/hash.c
-	src/list.c
-	src/util.c
-)
-
 set(SERIAL
 	src/encode.c
 	src/util.c
@@ -61,6 +55,13 @@ set(DIJKSTRA
 	${linkedList}
 	${GRAPH}
 	src/util.c
+	src/sort.c
+)
+
+set(HASH
+	${linkedList}
+	src/hash.c
+	src/util.c
 )
 	
 #3-1 Executables
@@ -78,7 +79,7 @@ add_executable(talker "3-1/12_talker.c")
 add_executable(listener "3-1/12_listener.c")
 add_executable(serial_send "3-1/12_serial_send.c" ${SERIAL})
 add_executable(serial_recv "3-1/12_serial_recv.c" ${SERIAL})
-#add_executable(hash "3-1/13.c" ${HASH})
+#add_executable(13 "3-1/13.c" ${HASH})
 add_executable(sort "3-1/14.c" ${SORT})
 add_executable(15 "3-1/15.c")
 add_executable(dijkstra "3-1/dijkstra.c" ${DIJKSTRA})
@@ -90,4 +91,5 @@ add_executable(que "3-3/queTest.c" ${QUE})
 add_executable(stack "3-3/stackTest.c" ${STACK})
 #add_executable(tree "3-3/treeTest.c" ${TREE})
 add_executable(graph "3-3/graphTest.c" ${GRAPH})
+add_executable(hash "3-3/hashTable.c" ${HASH})
 

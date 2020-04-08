@@ -50,7 +50,6 @@ void print_bin(char* buf, size_t len){
 	printf("\n");
 	return;
 }
-
 void print_int(void *num){
 	printf("%d", *((int*)num));
 	return;
