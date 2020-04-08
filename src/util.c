@@ -1,6 +1,10 @@
 #include "util.h"
 
 int cmp_int(void *var1, void *var2){
+	if(var1 == NULL || var2 == NULL){
+		fprintf(stderr, "ERROR: Compare Failed\n");
+		return 0;
+	}
 	int num1 = *((int*)var1);
 	int num2 = *((int*)var2);
 	// printf("cmp %d with %d\n", num1, num2);
@@ -10,13 +14,13 @@ int cmp_int(void *var1, void *var2){
 		return 1;
 	else if(num1 < num2)
 		return -1;
-	else{
-		fprintf(stderr, "ERROR: Compare Failed\n");
-		return 0;
-	}
 }
 
 int cmp_ulong(void *var1, void *var2){
+	if(var1 == NULL || var2 == NULL){
+		fprintf(stderr, "ERROR: Compare Failed\n");
+		return 0;
+	}
 	unsigned long num1 = *((unsigned long*)var1);
 	unsigned long num2 = *((unsigned long*)var2);
 	if(num1 == num2)
@@ -25,13 +29,13 @@ int cmp_ulong(void *var1, void *var2){
 		return 1;
 	else if(num1 < num2)
 		return -1;
-	else{
-		fprintf(stderr, "ERROR: Compare Failed\n");
-		return 0;
-	}
 }
 
 int cmp_str(void *var1, void *var2){
+	if(var1 == NULL || var2 == NULL){
+		fprintf(stderr, "ERROR: Compare Failed\n");
+		return 0;
+	}
 	return strcmp((char*)var1, (char*)var2);
 }
 

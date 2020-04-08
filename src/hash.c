@@ -55,61 +55,134 @@ hash_table* newHashTable(unsigned long (*hash)(char*, size_t),
 							void (*print_set)(hash_set)){
 	hash_table *table = malloc(sizeof(hash_table));
 	table->size = 16;
-	table->set = malloc(sizeof(hash_set) * table->size);
+	table->set = calloc(table->size, sizeof(hash_set));
 	table->nElem = 0;
 	table->hash = hash;
 	table->cmp_key = cmp_key;
 	table->print_set = print_set;
-	for(int i=0; i<table->size; i++){
-		table->set[i].key = NULL;
-		table->set[i].data = NULL;
-		table->set[i].next = NULL;
-	}
 	return table;
 }
 
 
-void insertHashSet(hash_table *table, void *data, size_t size){
-	if(table->nElem >= table->size*.75)
-		growTable(table);
-	unsigned long *key = malloc(sizeof(unsigned long));
-	*key = table->hash(data, size);
-	// printf("key: %lu\n", *key);
-	size_t index = *key % table->size;
-	// hash_set *tmp = NULL;
-	if(table->set[index].key != NULL){
-		hash_set *tmp = malloc(sizeof(hash_set));
-		tmp->key = table->set[index].key;
-		tmp->data = table->set[index].data;
-		tmp->next = table->set[index].next;
-		table->set[index].next = tmp;
-		// printf("table:\n");
-		// table->print_set(table->set[index]);
-		// printf("tmp:\n");
-		// table->print_set(*tmp);
-	}
-	table->set[index].key = key;
-	table->set[index].data = data;
-	table->nElem++;
-	// printf("New Set at index %ld:\n", index);
-	// table->print_set(table->set[index]);
-	// if(tmp != NULL){
-	// 	table->set[index].next = tmp;
-		// printf("Next Set at index %ld:\n", index);
-		// table->print_set(*(table->set[index].next));
-	// }
+static void shiftSet(hash_table *table, size_t index){
+	hash_set *tmp = malloc(sizeof(hash_set));
+	tmp->key = table->set[index].key;
+	tmp->data = table->set[index].data;
+	tmp->size = table->set[index].size;
+	tmp->next = table->set[index].next;
+	table->set[index].next = tmp;
+
 	return;
 }
 
 
+void insertHashSet(hash_table *table, void *user_data, size_t size){
+	if(table->nElem >= table->size*.75)
+		growTable(table);
+	void *data = malloc(size);
+	memcpy(data, user_data, size);
+	size_t *key = malloc(sizeof(size_t));
+	*key = table->hash(data, size);
+	size_t index = *key % table->size;
+	if(table->set[index].key != NULL)
+		shiftSet(table, index);
+	table->set[index].key = key;
+	table->set[index].data = data;
+	table->set[index].size = size;
+	table->nElem++;
+	return;
+}
+
 void growTable(hash_table *table){
-	printf("The table needs to grow.\n");
+	// printf("The table needs to grow.\n");
+	table->size *= 2;
+	hash_set *old = table->set;
+	table->set = calloc(table->size, sizeof(hash_set));
+	for(int i=0; i<table->size/2; i++){
+		hash_set *tmp = old+i;
+		do{
+			if(tmp->key != NULL){
+				size_t index = *(size_t*)tmp->key % table->size;
+				if(table->set[index].key != NULL)
+					shiftSet(table, index);
+				table->set[index].key = tmp->key;
+				table->set[index].data = tmp->data;
+				table->set[index].size = tmp->size;
+			}
+			tmp = tmp->next;
+		}while(tmp != NULL);
+		tmp = old[i].next;
+		while(tmp != NULL){
+			hash_set *tmp_next = tmp->next;
+			free(tmp);
+			tmp = tmp_next;
+		}
+
+	}
+	free(old);
+	old = NULL;
+
+	return;
+}
+
+hash_set* find_nth_hashItem(hash_table *table, int n){
+	if(table->nElem < n){
+		fprintf(stderr, "Table contains less than %d elements\n", n);
+		return NULL;
+	}
+	hash_set *target = NULL;
+	for(int i=0; n>0 && i<table->size; i++){
+		target = table->set+i;
+		while(target != NULL){
+			if(target->key != NULL)
+				if(--n == 0)
+					break;
+			target = target->next;
+		}
+	}
+	return target;
+}
+
+hash_set* find_hashItem(hash_table *table, void *item, size_t size){
+	size_t key = table->hash(item, size);
+	hash_set *target = table->set + key % table->size;
+	while(target != NULL){
+		if(table->cmp_key(target->key, &key))
+			target = target->next;
+		else
+			break;
+	}
+	return target;
+
+}
+
+
+
+int freeSet(hash_table *table, hash_set *set){
+	if(set->key == NULL)
+		return 0;
+
+	table->nElem -= 1;
+	free(set->key);
+	free(set->data);
+	if(set->next == NULL){
+		set->key = NULL;
+		set->data = NULL;
+		return 0;
+	}
+	else{
+		set->key = set->next->key;
+		set->data = set->next->data;
+		hash_set *tmp = set->next->next;
+		free(set->next);
+		set->next = tmp;
+		return 1;
+	}
 }
 
 void freeTable(hash_table **table){
 	for(int i=0; i<(*table)->size; i++)
-		if((*table)->set[i].key != NULL)
-			free((*table)->set[i].key);
+		while(freeSet((*table), (*table)->set+i));
 	free((*table)->set);
 	(*table)->set = NULL;
 	free(*table);

@@ -16,8 +16,8 @@
 typedef struct hashSet{
 	void *key;
 	void *data;
+	size_t size;
 	struct hashSet *next;
-	struct hashSet *top;
 }hash_set;
 
 typedef struct hashTable{
@@ -45,9 +45,30 @@ void insertHashSet(hash_table *table, void *data, size_t size);
 
 
 /**
- * Increase the size of the table by 2^n+1
+ * Increase the size of the table by 2^n+1.
  */
 void growTable(hash_table *table);
+
+
+/**
+ * Find the nth item in the hash table.
+ */
+hash_set* find_nth_hashItem(hash_table *table, int n);
+
+
+/**
+ * Find an item in the hash table.
+ */
+hash_set* find_hashItem(hash_table *table, void *item, size_t size);
+
+
+/**
+ * Frees a hash_set.
+ * Returns:
+ * 	0 - If the hash set is empty after freeing. (i.e. set.next == NULL)
+ * 	1 - If the hash set was filled with the next set. (i.e. set.next != NULL)
+ */
+int freeSet(hash_table *table, hash_set *set);
 
 
 /**
