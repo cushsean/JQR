@@ -1,156 +1,99 @@
 #include "tree.h"
 
-/*
-tree_t* mkTree(int num){
-	tree_t* root;
-	mkLeaf(root, num--);
-	while(num > 0){
-		mkLeaf(root, num--);
-	}
-	return root;
-}
-*/
 
-tree_b* mkTree_bst(int num){
-	srand(time(NULL));
-	tree_b* root = NULL;
-	for(int i = 0; i < num; i++){
-		int rnum = rand()%20;
-		void* ptr = &rnum;
-		insert_leaf_bst(&root, ptr);
-	}
-	return root;
+/**
+ * Local Function for printing the contents of a BST.
+ */
+static void print_bst(leaf_t *root, size_t num, void (*printLeaf)(void*));
+
+
+tree_t* createTree(int type, int (*cmp_leaf)(void*, void*), 
+					void (*printLeaf)(void*)){
+	tree_t *tree = malloc(sizeof(tree_t));
+	tree->root = NULL;
+	tree->size = 0;
+	tree->depth = 0;
+	tree->type = type;
+	tree->cmp_leaf = cmp_leaf;
+	tree->printLeaf = printLeaf;
+	return tree;
 }
 
-tree_b* mkLeaf_bst(void* value){
-	tree_b* leaf = (tree_b*)malloc(sizeof(tree_b));
-	leaf->left = NULL;
-	leaf->right = NULL;
-	leaf->data = value;
-	return leaf;
-}
 
-void insert_leaf_bst(tree_b** root, void* value){
-	if(*root == NULL){
-		*root = mkLeaf_bst(value);
+void addLeaf(tree_t *tree, void *data, size_t size){
+	if(tree->type == BST){
+		leaf_t *curr = tree->root;
+		size_t depth = 0;
+		while(curr != NULL){
+			if(tree->cmp_leaf(data, curr->data) > 0){
+				if(curr->right == NULL){
+					curr->right = malloc(sizeof(leaf_t));
+					curr = curr->right;
+					break;
+				}
+				curr = curr->right;
+			}
+			else if(tree->cmp_leaf(data, curr->data) < 0){
+				if(curr->left == NULL){
+					curr->left = malloc(sizeof(leaf_t));
+					curr = curr->left;
+					break;
+				}
+				curr = curr->left;
+			}
+			else{
+				curr->count++;
+				return;
+			}
+			depth++;
+		}
+		if(curr == NULL)
+			curr = malloc(sizeof(leaf_t));
+		curr->child = calloc(2, sizeof(leaf_t*));
+		curr->left = curr->child[0];
+		curr->right = curr->child[1];
+		curr->children = curr->count = 0;
+		curr->data = malloc(size);
+		memcpy(curr->data, data, size);
+
+		tree->size++;
+		if(depth > tree->depth)
+			tree->depth = depth;
+		if(tree->root == NULL)
+			tree->root = curr;
 		return;
 	}
-	int cmp = cmp_int(value, (*root)->data);
-	switch(cmp){
-		case 1:
-			//value > root->data
-			return insert_leaf_bst(&(*root)->right, value);
-			break;
-		case -1:
-			//value < root->data
-			return insert_leaf_bst(&(*root)->left, value);
+}
+
+
+void ptTree(tree_t *tree){
+	switch(tree->type){
+		case BST:
+			print_bst(tree->root, 0, tree->printLeaf);
 			break;
 		default:
-			//value == root->data
-			printf("No leaf created.\n");
+			printf("Currently no print method for this type of tree.\n");
 			break;
 	}
+	printf("\n\n");
 	return;
 }
 
-tree_b* find_leaf_bst(tree_b* root, void* value){
-	tree_b* leaf = root;
-	if(leaf == NULL){
-		printf("Leaf not found, returned NULL\n");
-		return leaf;
-	}
-	int cmp = cmp_int(value, leaf->data);
-	if(cmp == 1)
-		return find_leaf_bst(leaf->right, value);
-	else if(cmp == -1)
-		return find_leaf_bst(leaf->left, value);
-	else{
-		return leaf;
-	}
-}
 
-void rmLeaf_bst(tree_b* root, void* value){
-	//case 1: has no children
-	//case 2: has 1 child
-	//case 3: has 2 children
-	
-	//get parent && set root to node to be removed
-	tree_b* parent = NULL; 
-	tree_b* swap = NULL;
-	while(root->data != value){
-		parent = root;
-		if(value < root->data)
-			root = root->left;
-		else
-			root = root->right;
-		if(root == NULL){
-			/**************************************
-				SegFault when value is not in tree
-			***************************************/
-			printf("Value not found. No leaf removed.\n");
-			return;
-		}
-	}
-
-	if((root->left != NULL) != (root->right != NULL)){
-		//1 Child
-		if(root->left != NULL)
-			swap = root->left;
-		else if(root->right != NULL)
-			swap = root->right;
-	}
-	else if(root->left != NULL && root->right != NULL){
-		//2 Children
-		swap = find_min_bst(root);
-	}
-	//Any Children
-	if(parent != NULL){
-		if(parent->data > root->data)
-			parent->left = swap;
-		else
-			parent->right = swap;
-	}
-	else{
-
-	}
-	free(root);
-	
-	return;
-}
-
-//Utils
-void ptTree_bst_int(tree_b* root){
-	printf("\nPrinting Tree...");
-	ptTree_bst_util_int(root, 0);
-	return;
-}
-
-void ptTree_bst_util_int(tree_b* root, int num){	
+static void print_bst(leaf_t *root, size_t num, void (*printLeaf)(void*)){	
 	if(root == NULL)
 		return;
 	
-	num += 1;
+	num++;
 	
-	ptTree_bst_util_int(root->right, num);
+	print_bst(root->right, num, printLeaf);
 	
 	printf("\n");
 	for(int i=0; i<num; i++)
 		printf("\t");
-	printf("%d\n", *((int*)root->data));
+	(*printLeaf)(root->data);
 	
-	ptTree_bst_util_int(root->left, num);
+	print_bst(root->left, num, printLeaf);
 	
 	return;
-}
-
-tree_b* find_min_bst(tree_b* root){
-	if(root->left == NULL)
-		return root;
-	return find_min_bst(root->left);
-}
-
-tree_b* find_max_bst(tree_b* root){
-	if(root->right == NULL)
-		return root;
-	return find_max_bst(root->right);
 }

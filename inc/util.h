@@ -30,4 +30,10 @@ node_t* swap_node_singly(node_t *head, node_t *curr, node_t *NX, node_t *PR);
 unsigned long hash(char *input, size_t size);
 
 
+/**
+ * Prints the contents of a leaf.
+ */
+void print_str(void* data);
+
+
 #endif /* UTIL_H_CUSHMAN */

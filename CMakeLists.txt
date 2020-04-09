@@ -89,7 +89,7 @@ add_executable(21 "3-1/21.c")
 add_executable(linkedList "3-3/linkedList.c" ${linkedList})
 add_executable(que "3-3/queTest.c" ${QUE})
 add_executable(stack "3-3/stackTest.c" ${STACK})
-#add_executable(tree "3-3/treeTest.c" ${TREE})
+add_executable(tree "3-3/treeTest.c" ${TREE})
 add_executable(graph "3-3/graphTest.c" ${GRAPH})
 add_executable(hash "3-3/hashTable.c" ${HASH})
 

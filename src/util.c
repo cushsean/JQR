@@ -76,6 +76,7 @@ node_t* swap_node(node_t *head, node_t *curr, node_t *NX){
 	return head;
 }
 
+
 node_t* swap_node_singly(node_t *head, node_t *curr, node_t *NX, node_t *PR){
 
 	if(PR != NULL)
@@ -105,4 +106,10 @@ unsigned long hash(char *input, size_t size){
 		key = buf[i] + (key << 6) + (key << 16) - key;
 
 	return key;
+}
+
+
+void print_str(void *data){
+	printf("\"%s\"", (char*)data);
+	return;
 }

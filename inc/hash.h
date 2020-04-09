@@ -10,7 +10,6 @@
 #include "sort.h"
 
 #define MATCH 0
-#define LIMITER 99999999
 #define WORD_SIZE 128
 
 typedef struct hashSet{
