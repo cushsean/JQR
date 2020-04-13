@@ -7,14 +7,20 @@
 static void print_bst(leaf_t *root, size_t num, void (*printLeaf)(void*));
 
 
-tree_t* createTree(int type, int (*cmp_leaf)(void*, void*), 
+/**
+ * Local function for comparing two leafs.
+ */
+static int cmp_leaf(tree_t *tree, leaf_t *leaf1, leaf_t *leaf2);
+
+
+tree_t* createTree(int type, int (*cmp_data)(void*, void*), 
 					void (*printLeaf)(void*)){
 	tree_t *tree = malloc(sizeof(tree_t));
 	tree->root = NULL;
 	tree->size = 0;
 	tree->depth = 0;
 	tree->type = type;
-	tree->cmp_leaf = cmp_leaf;
+	tree->cmp_data = cmp_data;
 	tree->printLeaf = printLeaf;
 	return tree;
 }
@@ -23,20 +29,31 @@ tree_t* createTree(int type, int (*cmp_leaf)(void*, void*),
 void addLeaf(tree_t *tree, void *data, size_t size){
 	if(tree->type == BST){
 		leaf_t *curr = tree->root;
-		size_t depth = 0;
+		leaf_t *parent = NULL;
+		size_t depth = 0;q
 		while(curr != NULL){
-			if(tree->cmp_leaf(data, curr->data) > 0){
+			if(tree->cmp_data(data, curr->data) > 0){
 				if(curr->right == NULL){
-					curr->right = malloc(sizeof(leaf_t));
-					curr = curr->right;
+					parent = curr;
+					parent->right = malloc(sizeof(leaf_t));
+					parent->child->next->data = parent->right;
+					parent->children++;
+					curr = parent->right;
+					curr->parent = parent;
+					depth++;
 					break;
 				}
 				curr = curr->right;
 			}
-			else if(tree->cmp_leaf(data, curr->data) < 0){
+			else if(tree->cmp_data(data, curr->data) < 0){
 				if(curr->left == NULL){
-					curr->left = malloc(sizeof(leaf_t));
-					curr = curr->left;
+					parent = curr;
+					parent->left = malloc(sizeof(leaf_t));
+					parent->child->data = parent->left;
+					parent->children++;
+					curr = parent->left;
+					curr->parent = parent;
+					depth++;
 					break;
 				}
 				curr = curr->left;
@@ -49,9 +66,7 @@ void addLeaf(tree_t *tree, void *data, size_t size){
 		}
 		if(curr == NULL)
 			curr = malloc(sizeof(leaf_t));
-		curr->child = calloc(2, sizeof(leaf_t*));
-		curr->left = curr->child[0];
-		curr->right = curr->child[1];
+		curr->child = mkList(2, DOUBLY);
 		curr->children = curr->count = 0;
 		curr->data = malloc(size);
 		memcpy(curr->data, data, size);
@@ -80,7 +95,8 @@ void ptTree(tree_t *tree){
 }
 
 
-static void print_bst(leaf_t *root, size_t num, void (*printLeaf)(void*)){	
+static void print_bst(leaf_t *root, size_t num, void (*printLeaf)(void*)){
+	// Navigates the tree in "REVERSE-INORDER"
 	if(root == NULL)
 		return;
 	
@@ -88,12 +104,73 @@ static void print_bst(leaf_t *root, size_t num, void (*printLeaf)(void*)){
 	
 	print_bst(root->right, num, printLeaf);
 	
-	printf("\n");
+	printf("\n\n");
 	for(int i=0; i<num; i++)
 		printf("\t");
 	(*printLeaf)(root->data);
+	if(root->count > 0)
+		printf("(%ld)", root->count);
 	
 	print_bst(root->left, num, printLeaf);
 	
 	return;
+}
+
+
+static int cmp_leaf(tree_t *tree, leaf_t *leaf1, leaf_t *leaf2){
+	if(leaf1 == NULL || leaf2 == NULL)
+		return 1;
+	return tree->cmp_data(leaf1->data, leaf2->data);
+}
+
+
+void rmLeaf(tree_t *tree, leaf_t **leaf){
+	leaf_t *parent = (*leaf)->parent;
+	node_t *child = parent->child->next;
+	*leaf = NULL;
+	while(1==1);
+	// if(leaf->count > 0){
+	// 	leaf->count--;
+	// 	return;
+	// }
+	// if(leaf != tree->root){
+	// 	leaf_t *parent = leaf->parent;
+	// 	printf("parent: %s\n", (char*)parent->data);
+	// 	printf("leaf: %s\n", (char*)leaf->data);
+	// 	node_t *curr_child = parent->child;
+	// 	for(; curr_child != NULL; curr_child = curr_child->next){	
+	// 		if(cmp_leaf(tree, curr_child->data, leaf) == 0)
+	// 			break;
+	// 	}
+	// 	if(tree->type == BST){
+	// 		if(tree->cmp_data(leaf->data, parent->data))
+	// 			parent->right = NULL;
+	// 		else
+	// 			parent->left = NULL;
+	// 		// free(curr_child->data);
+	// 		curr_child->data = NULL;
+	// 	}
+	// 	else{
+	// 		rmNode(parent->child, curr_child);
+	// 	}
+	// }
+	// free(leaf->data);
+	// leaf->data = NULL;
+
+	// // No children only
+	// rm_all_nodes(leaf->child);
+	
+	// free(leaf);
+	// leaf = NULL;
+
+	
+	return;
+}
+
+
+void rmTree(tree_t **tree){
+	while((*tree)->root != NULL)
+		// rmLeaf(*tree, (*tree)->root);
+	free(*tree);
+	tree = NULL;
 }

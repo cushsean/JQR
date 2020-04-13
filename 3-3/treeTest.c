@@ -11,14 +11,26 @@ int main(){
 	tree_t *tree = createTree(BST, cmp_str, print_str);
 	addLeaf(tree, "SEAN", strlen("SEAN"));
 	addLeaf(tree, "WILLIAM", strlen("WILLIAM"));
-	addLeaf(tree, "HAPPY BIRTHDAY BABE!!!!", strlen("HAPPY BIRTHDAY BABE!!!!"));
-	
+	// addLeaf(tree, "Brad", strlen("Brad"));
+	// addLeaf(tree, "Ben", strlen("Ben"));
+	// addLeaf(tree, "Chelsea", strlen("Chelsea"));
+	// addLeaf(tree, "Julie", strlen("Julie"));
+	// addLeaf(tree, "Zac", strlen("Zac"));
+	// addLeaf(tree, "Wilma", strlen("Wilma"));
+	// addLeaf(tree, "Ben", strlen("Ben"));
+
 
 	printf("size  : %d\ndepth : %d\n\n", tree->size, tree->depth);
+	printf("Printing Tree...\n");
 	ptTree(tree);
 
-	printf("root  : %s\n", (char*)tree->root->data);
-	printf("right : %s\n", (char*)tree->root->right->data);
-	printf("left : %s\n", (char*)tree->root->left);
+	// printf("Remove \"Wilma\"...\n");
+	// rmLeaf(tree, tree->root->right->right->left);
+	printf("Remove \"WILLIAM\"...\n");
+	rmLeaf(tree, &tree->root->right);
+	printf("Printing Tree...\n");
+	ptTree(tree);
+
+	rmTree(&tree);
 	return 0;
 }

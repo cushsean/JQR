@@ -150,7 +150,7 @@ void rm_all_nodes(node_t *head){
 		head = tmp;
 	}
 	// }while(head != NULL && head != tail);
-	printf("ALL NODES REMOVED. LIST IS DESTROYED!\n");
+	// printf("ALL NODES REMOVED. LIST IS DESTROYED!\n");
 	return;
 }
 

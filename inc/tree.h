@@ -13,8 +13,9 @@
 
 typedef struct leaf{
 	void *data;
-	struct leaf **child;
+	node_t *child;
 	size_t children;
+	struct leaf *parent;
 	struct leaf *left;
 	struct leaf *right;
 	size_t count;
@@ -25,7 +26,7 @@ typedef struct tree{
 	int size;
 	int depth;
 	int type;
-	int (*cmp_leaf)(void*, void*);
+	int (*cmp_data)(void*, void*);
 	void (*printLeaf)(void*);
 }tree_t;
 
@@ -52,8 +53,15 @@ void addLeaf(tree_t *tree, void *data, size_t size);
 void ptTree(tree_t *tree);
 
 
-// void ptTree(tree_t*);
-// void ptTree_bst_int(tree_b*);
-// void ptTree_bst_util_int(tree_b*, int);
+/**
+ * Removes a leaf from the tree and frees all reltive addresses.
+ */
+void rmLeaf(tree_t *tree, leaf_t **leaf);
+
+
+/**
+ * Removes the entire tree and frees all memory.
+ */
+void rmTree(tree_t **tree);
 
 #endif /* TREE_H_CUSHMAN */
