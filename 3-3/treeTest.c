@@ -9,8 +9,8 @@
 
 int main(){
 	tree_t *tree = createTree(BST, cmp_str, print_str);
-	addLeaf(tree, "SEAN", strlen("SEAN"));
-	addLeaf(tree, "WILLIAM", strlen("WILLIAM"));
+	addLeaf2(tree, "SEAN", strlen("SEAN"));
+	addLeaf2(tree, "WILLIAM", strlen("WILLIAM"));
 	// addLeaf(tree, "Brad", strlen("Brad"));
 	// addLeaf(tree, "Ben", strlen("Ben"));
 	// addLeaf(tree, "Chelsea", strlen("Chelsea"));
@@ -26,11 +26,11 @@ int main(){
 
 	// printf("Remove \"Wilma\"...\n");
 	// rmLeaf(tree, tree->root->right->right->left);
-	printf("Remove \"WILLIAM\"...\n");
-	rmLeaf(tree, &tree->root->right);
-	printf("Printing Tree...\n");
-	ptTree(tree);
+	// printf("Remove \"WILLIAM\"...\n");
+	// rmLeaf(tree, &tree->root->right);
+	// printf("Printing Tree...\n");
+	// ptTree(tree);
 
-	rmTree(&tree);
+	// rmTree(&tree);
 	return 0;
 }

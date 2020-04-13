@@ -30,7 +30,7 @@ void addLeaf(tree_t *tree, void *data, size_t size){
 	if(tree->type == BST){
 		leaf_t *curr = tree->root;
 		leaf_t *parent = NULL;
-		size_t depth = 0;q
+		size_t depth = 0;
 		while(curr != NULL){
 			if(tree->cmp_data(data, curr->data) > 0){
 				if(curr->right == NULL){
@@ -81,6 +81,50 @@ void addLeaf(tree_t *tree, void *data, size_t size){
 }
 
 
+void addLeaf2(tree_t *tree, void *data, size_t size){
+	if(tree->type == BST){
+		leaf_t *curr = tree->root;
+		leaf_t *parent = NULL;
+		size_t depth = 0;
+		while(curr != NULL){
+			int cmp_int = tree->cmp_data(data, curr->data);
+			parent = curr;
+			if(cmp_int > 0)
+				curr = curr->right;
+			else if(cmp_int < 0)
+				curr = curr->left;
+			else{
+				curr->count++;
+				break;
+			}
+			depth++;
+		}
+		if(curr == NULL){
+			if(curr == tree->root)
+				curr = malloc(sizeof(leaf_t));
+			else
+				parent->children++;
+			curr->child = mkList(2, DOUBLY);
+			curr->child->data = calloc(1, sizeof(leaf_t));
+			curr->child->next->data = calloc(1, sizeof(leaf_t));
+			curr->left = curr->child->data;
+			curr->right = curr->child->next->data;
+			curr->children = curr->count = 0;
+			curr->parent = parent;
+			curr->data = malloc(size);
+			memcpy(curr->data, data, size);
+			
+			tree->size++;
+			if(depth > tree->depth)
+				tree->depth = depth;
+			if(tree->root == NULL)
+				tree->root = curr;
+		}
+	}
+	return;
+}
+
+
 void ptTree(tree_t *tree){
 	switch(tree->type){
 		case BST:
@@ -128,7 +172,7 @@ void rmLeaf(tree_t *tree, leaf_t **leaf){
 	leaf_t *parent = (*leaf)->parent;
 	node_t *child = parent->child->next;
 	*leaf = NULL;
-	while(1==1);
+	// while(1==1);
 	// if(leaf->count > 0){
 	// 	leaf->count--;
 	// 	return;

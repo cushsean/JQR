@@ -94,8 +94,8 @@ add_executable(graph "3-3/graphTest.c" ${GRAPH})
 add_executable(hash "3-3/hashTable.c" ${HASH})
 
 #test
-set(TEST
-
-)
-add_executable(test "test.c" ${TEST})
+#set(TEST
+#
+#)
+#add_executable(test "test.c" ${TEST})
 

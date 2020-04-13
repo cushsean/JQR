@@ -45,6 +45,7 @@ tree_t* createTree(int type, int (*cmp_leaf)(void*, void*),
  * Inserts a leaf on the tree containing "data".
  */
 void addLeaf(tree_t *tree, void *data, size_t size);
+void addLeaf2(tree_t *tree, void *data, size_t size);
 
 
 /**
