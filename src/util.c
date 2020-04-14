@@ -32,11 +32,19 @@ int cmp_ulong(void *var1, void *var2){
 }
 
 int cmp_str(void *var1, void *var2){
-	if(var1 == NULL || var2 == NULL){
-		fprintf(stderr, "ERROR: Compare Failed\n");
-		return 0;
+	// if(var1 == NULL || var2 == NULL){
+	// 	fprintf(stderr, "ERROR: Compare Failed\n");
+	// 	return 0;
+	// }
+	if(var1 == NULL){
+		if(var2 == NULL)
+			return 0;
+		return -1;
 	}
-	return strcmp((char*)var1, (char*)var2);
+	else if(var2 == NULL)
+		return 1;
+	else
+		return strcmp((char*)var1, (char*)var2);
 }
 
 void swap(void *a, void *b, size_t size){

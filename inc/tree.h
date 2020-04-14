@@ -13,6 +13,7 @@
 
 typedef struct leaf{
 	void *data;
+	size_t data_size;
 	node_t *child;
 	size_t children;
 	struct leaf *parent;
@@ -27,7 +28,7 @@ typedef struct tree{
 	int depth;
 	int type;
 	int (*cmp_data)(void*, void*);
-	void (*printLeaf)(void*);
+	void (*printLeaf)(leaf_t*);
 }tree_t;
 
 
@@ -38,14 +39,14 @@ typedef struct tree{
  * "NORMAL" = Normal Tree
  */
 tree_t* createTree(int type, int (*cmp_leaf)(void*, void*), 
-					void (*printLeaf)(void*));
+					void (*printLeaf)(leaf_t*));
 
 
 /**
  * Inserts a leaf on the tree containing "data".
  */
 void addLeaf(tree_t *tree, void *data, size_t size);
-void addLeaf2(tree_t *tree, void *data, size_t size);
+// void addLeaf2(tree_t *tree, void *data, size_t size);
 
 
 /**
@@ -55,9 +56,24 @@ void ptTree(tree_t *tree);
 
 
 /**
- * Removes a leaf from the tree and frees all reltive addresses.
+ * Returns a leaf with the data given. Returns NULL if leaf cannot be found.
  */
-void rmLeaf(tree_t *tree, leaf_t **leaf);
+leaf_t* findLeaf(tree_t *tree, void *data);
+
+
+/**
+ * Returns the child of a leaf with the data give. Returns NULL if no child
+ * contains the data given.
+ */
+node_t* findChild(tree_t *tree, leaf_t *parent, void *data);
+
+
+/**
+ * Removes a leaf from the tree and frees all reltive addresses. If the leaf's 
+ * count is greater than 0, * the count will only be reduce by 1 and the leaf 
+ * will remain in the tree.
+ */
+void rmLeaf(tree_t *tree, leaf_t *leaf);
 
 
 /**
