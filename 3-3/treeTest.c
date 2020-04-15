@@ -76,10 +76,14 @@ int main(){
 	printf("Remove \"%s\"...\n", (char*)leaf->data);
 	rmLeaf(tree, leaf);
 
+	rmLeaf(tree, tree->root->right);
+
 	printf("Printing Tree...\n");
 	printf("size: %d\n", tree->size);
 	ptTree(tree);
 
+	printf("Destroy the tree...\n");
 	rmTree(&tree);
+	printf("DONE\n");
 	return 0;
 }

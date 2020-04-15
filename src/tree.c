@@ -157,6 +157,8 @@ leaf_t* findLeaf(tree_t *tree, void *data){
 
 node_t* findChild(tree_t *tree, leaf_t *parent, void *data){
 	node_t *curr = parent->child;
+	while(curr->data == NULL)
+		curr = curr->next;
 	while(tree->cmp_data(data, ((leaf_t*)curr->data)->data) != 0){
 		curr = curr->next;
 		if(curr == NULL){
@@ -185,39 +187,64 @@ static void rm_no_children(tree_t *tree, leaf_t *leaf, leaf_t *parent){
 		else
 			parent->right = NULL;
 	}
+	parent->children--;
+	
 	// Free the leaf's data
 	free(leaf->data);
 	leaf->data = NULL;
+
+	// // Free child node_t
+	// if(tree->type = BST){
+	// 	free(leaf->child->next);
+	// 	leaf->child->next = NULL;
+	// 	free(leaf->child);
+	// 	leaf->child = NULL;
+	// }
 	
 	// Free the leaf from the parent's child node
 	free(kid->data);
 	kid->data = NULL;
-	
-	if(tree->type != BST){
+
+	if(parent->children == 0){
+		// Free parent's other child nodes
+		if(kid->next != NULL){
+			free(kid->next);
+			kid->next = NULL;
+		}
+		else if(kid->prev != NULL){
+			free(kid->prev);
+			kid->prev = NULL;
+		}
+		// Free the kid node
+		free(kid);
+		kid = NULL;
+	}
+	else if(tree->type != BST){
+		// Unlink kid node
 		node_t *tmp = kid->prev;
-		if(kid == parent->child){
-			parent->child = kid->next;
-			parent->child->prev = tmp;
-		}
-		else{
-			tmp->next = kid->next;
+		if(kid->next != NULL)
 			kid->next->prev = tmp;
-		}
-		// Free the parent's child node
+		if(tmp == NULL)
+			parent->child = kid->next;
+		else
+			tmp->next = kid->next;
+		// Free the kid node
 		free(kid);
 		kid = NULL;
 	}
 	
+	
 	return;
 }
-
 static void rm_1_child(tree_t *tree, leaf_t *leaf, leaf_t *parent){
 	node_t *leafs_kid = leaf->child;
 
-	while(leafs_kid->data == NULL)
+	while(leafs_kid->data == NULL){
 		leafs_kid = leafs_kid->next;
+	}
 	if(parent == NULL){
 		tree->root = leafs_kid->data;
+		tree->root->parent = NULL;
 	}
 	else{
 		node_t *parents_kid = findChild(tree, parent, leaf->data);
@@ -229,6 +256,17 @@ static void rm_1_child(tree_t *tree, leaf_t *leaf, leaf_t *parent){
 				parent->right = leafs_kid->data;
 		}
 		((leaf_t*)leafs_kid->data)->parent = parent;
+	}
+
+
+	// Free leaf's other child nodes
+	if(leafs_kid->next != NULL){
+		free(leafs_kid->next);
+		leafs_kid->next = NULL;
+	}
+	else if(leafs_kid->prev != NULL){	
+		free(leafs_kid->prev);
+		leafs_kid->prev = NULL;
 	}
 
 	// Free the leaf's child node
@@ -250,6 +288,8 @@ static void rm_2_children_bst(tree_t *tree, leaf_t *leaf){
 	leaf_t *shift_leaf = leaf->right;
 	while(shift_leaf->left != NULL)
 		shift_leaf = shift_leaf->left;
+	memset(leaf->data, '\0', leaf->data_size);
+	leaf->data_size = shift_leaf->data_size;
 	memcpy(leaf->data, shift_leaf->data, shift_leaf->data_size);
 	leaf->count = shift_leaf->count;
 	rmLeaf(tree, shift_leaf);
@@ -282,7 +322,7 @@ void rmLeaf(tree_t *tree, leaf_t *leaf){
 
 
 void rmTree(tree_t **tree){
-	while((*tree)->root != NULL){
+	while((*tree)->size != 0){
 		rmLeaf(*tree, (*tree)->root);
 		ptTree(*tree);
 	}
