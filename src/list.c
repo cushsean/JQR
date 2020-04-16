@@ -2,11 +2,13 @@
 #include "util.h"
 
 node_t* mkNode(int l_type){
-	node_t* fn_node = (node_t*)malloc(sizeof(node_t));
-	fn_node->data = NULL;
+	// node_t* fn_node = (node_t*)malloc(sizeof(node_t));
+	// fn_node->data = NULL;
+	// fn_node->type = l_type;
+	// fn_node->next = NULL;
+	// fn_node->prev = NULL;
+	node_t *fn_node = calloc(1, sizeof(node_t));
 	fn_node->type = l_type;
-	fn_node->next = NULL;
-	fn_node->prev = NULL;
 	return fn_node;
 }
 
@@ -75,11 +77,11 @@ void insert_node(node_t *list, void *after, void *value){
 
 node_t* insert_at_head(node_t *head, node_t *tail, node_t *insert){
 	insert->next = head;
-	if(head->type != SINGLY)
+	if(insert->type == CIRCULARLY)
 		insert->prev = tail;
 	if(head != NULL)
 		head->prev = insert;
-	if(tail != NULL)
+	if(tail != NULL && tail->type == CIRCULARLY)
 		tail->next = insert;
 	return insert;
 }
@@ -159,8 +161,7 @@ node_t* get_tail(node_t* head){
 	if (curr != NULL)
 		while(curr->next != NULL && curr->next != head)
 			curr = curr->next;
-		return curr;
-	printf("ERROR: Passed Pointer is NULL, NO ACTION\n");
+	return curr;
 }
 
 int countList(node_t *head){

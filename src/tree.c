@@ -8,14 +8,50 @@ static void print_bst(leaf_t *root, size_t num, void (*printLeaf)(leaf_t*));
 
 
 /**
- * Local function for comparing two leafs.
+ * Local Function for printing the contents of a non-BST tree.
+ */
+static void print_tree(leaf_t *root, size_t num, void (*printLeaf)(leaf_t*));
+
+
+/**
+ * Local Function for finding a child in a non-BST tree. findLeaf acts as
+ * wrapper function.
+ */
+static leaf_t* findLeaf_nonBST(leaf_t *root, void *data, int (*cmp_leaf)(void*, void*));
+
+
+/**
+ * Local Function for comparing two leafs.
  */
 static int cmp_leaf(tree_t *tree, leaf_t *leaf1, leaf_t *leaf2);
 
 
+/**
+ * Local Function for removing a leaf with 2 children.
+ */
 static void rm_2_children_bst(tree_t *tree, leaf_t *leaf);
+
+
+/**
+ * Local Function for removing a leaf with 1 child.
+ */
 static void rm_1_child(tree_t *tree, leaf_t *leaf, leaf_t *parent);
+
+
+/**
+ * Local Function for removing a leaf with no children.
+ */
 static void rm_no_children(tree_t *tree, leaf_t *leaf, leaf_t *parent);
+
+
+/**
+ * Local Function for removing a leaf with 2 or more children from a non-BST.
+ * Child leaf is the child of the leaf that will take the place of its parent
+ * and adopt its siblings. If NULL is passed for "child" all children and their 
+ * subtree's will be removed as well.
+ */
+static void rm_multi_children(tree_t *tree, leaf_t *leaf, leaf_t *parente,
+								leaf_t *child);
 
 
 tree_t* createTree(int type, int (*cmp_data)(void*, void*), 
@@ -31,65 +67,107 @@ tree_t* createTree(int type, int (*cmp_data)(void*, void*),
 }
 
 
-void addLeaf(tree_t *tree, void *data, size_t size){
-	if(tree->type == BST){
-		leaf_t *curr = tree->root;
-		leaf_t *parent = NULL;
-		// size_t depth = 0;
-		int new_leaf = 0;
-		if(tree->root == NULL){
-			tree->root = calloc(1, sizeof(leaf_t));
-			curr = tree->root;
-			curr->parent = NULL;
-			curr->children = curr->count = 0;
-		}
-		else{
-			while(curr != NULL){
-				int cmp_int = tree->cmp_data(data, curr->data);
-				parent = curr;
-				if(cmp_int > 0){
-					curr = curr->right;
-					new_leaf = 1;
-				}
-				else if(cmp_int < 0){
-					curr = curr->left;
-					new_leaf = -1;
-				}
-				else{
-					curr->count++;
-					tree->size++;
-					new_leaf = 0;
-					if(curr == tree->root)
-						tree->root->parent = NULL;
-					return;
-				}
-				// depth++;
-			}
-			parent->children++;
-			if(parent->child == NULL)
-				parent->child = mkList(2, DOUBLY);
-			if(new_leaf == 1){
-				parent->right = calloc(1, sizeof(leaf_t));
-				parent->child->next->data = parent->right;
-				curr = parent->right;
-			}
-			else if(new_leaf == -1){
-				parent->left = calloc(1, sizeof(leaf_t));
-				parent->child->data = parent->left;
-				curr = parent->left;
-			}
-		}
-		if(new_leaf != 0)
-			curr->children = curr->count = 0;
-		curr->parent = parent;
-		curr->data = malloc(size);
-		memcpy(curr->data, data, size);
-		curr->data_size = size;
-		
-		tree->size++;
-		// if(depth > tree->depth)
-		// 	tree->depth = depth;
+void addLeaf_BST(tree_t *tree, void *data, size_t size){
+	leaf_t *curr = tree->root;
+	leaf_t *parent = NULL;
+	// size_t depth = 0;
+	int new_leaf = 0;
+	if(tree->root == NULL){
+		tree->root = calloc(1, sizeof(leaf_t));
+		curr = tree->root;
+		curr->parent = NULL;
+		curr->children = curr->count = 0;
 	}
+	else{
+		while(curr != NULL){
+			int cmp_int = tree->cmp_data(data, curr->data);
+			parent = curr;
+			if(cmp_int > 0){
+				curr = curr->right;
+				new_leaf = 1;
+			}
+			else if(cmp_int < 0){
+				curr = curr->left;
+				new_leaf = -1;
+			}
+			else{
+				curr->count++;
+				tree->size++;
+				new_leaf = 0;
+				if(curr == tree->root)
+					tree->root->parent = NULL;
+				return;
+			}
+			// depth++;
+		}
+		parent->children++;
+		if(parent->child == NULL)
+			parent->child = mkList(2, DOUBLY);
+		if(new_leaf == 1){
+			parent->right = calloc(1, sizeof(leaf_t));
+			parent->child->next->data = parent->right;
+			curr = parent->right;
+		}
+		else if(new_leaf == -1){
+			parent->left = calloc(1, sizeof(leaf_t));
+			parent->child->data = parent->left;
+			curr = parent->left;
+		}
+	}
+	if(new_leaf != 0)
+		curr->children = curr->count = 0;
+	curr->parent = parent;
+	curr->data = malloc(size);
+	memcpy(curr->data, data, size);
+	curr->data_size = size;
+	
+	tree->size++;
+	// if(depth > tree->depth)
+	// 	tree->depth = depth;
+
+	return;
+}
+
+void addLeaf(tree_t *tree, leaf_t *parent, void *data, size_t size){
+	
+	// // Debugging tool; Remove before release.
+	// printf("NOTE: Adding leaf ");
+	// print_str(data);
+	// printf(" with parent ");
+	// tree->printLeaf(parent);
+	// printf("\n");
+	// //////////////////////////////////////////
+
+	leaf_t *leaf = NULL;
+
+	if(tree->root == NULL){
+		tree->root = calloc(1, sizeof(leaf_t));
+		leaf = tree->root;
+	}
+	
+	else if(parent == NULL){
+		fprintf(stderr, "Parent leaf NULL, cannot add new leaf to tree.\n");
+		return;
+	}
+
+	else{
+		parent->child = insert_at_head(parent->child, 
+										get_tail(parent->child), 
+										mkNode(DOUBLY));
+		parent->child->data = calloc(1, sizeof(leaf_t));
+		leaf = parent->child->data;
+		// Must set parent before ending else statment since tree->root
+		// maintains NULL as parent.
+		leaf->parent = parent;
+		parent->children++;
+	}
+
+	// Used for both tree->root and other children
+	leaf->data = malloc(size);
+	memcpy(leaf->data, data, size);
+	leaf->data_size = size;
+	tree->size++;
+
 	return;
 }
 
@@ -100,10 +178,28 @@ void ptTree(tree_t *tree){
 			print_bst(tree->root, 0, tree->printLeaf);
 			break;
 		default:
-			printf("Currently no print method for this type of tree.\n");
+			print_tree(tree->root, 0, tree->printLeaf);
+			// printf("Currently no print method for this type of tree.\n");
 			break;
 	}
 	printf("\n\n");
+	return;
+}
+
+
+static void print_tree(leaf_t *root, size_t num, void (*printLeaf)(leaf_t*)){
+	// Navigates the tree in "PREORDER"
+	for(int i=0; i<=num; i++)
+		printf("\t");
+	(*printLeaf)(root);
+	printf("\n\n");
+	num++;
+	node_t *child = root->child;
+	while(child != NULL){
+		print_tree(child->data, num, printLeaf);
+		child = child->next;
+	}
+	
 	return;
 }
 
@@ -136,20 +232,35 @@ static int cmp_leaf(tree_t *tree, leaf_t *leaf1, leaf_t *leaf2){
 	return tree->cmp_data(leaf1->data, leaf2->data);
 }
 
+static leaf_t* findLeaf_nonBST(leaf_t *root, void *data, 
+								int (*cmp_leaf)(void*, void*)){
+	if((*cmp_leaf)(data, root->data) == 0)
+		return root;
+	node_t *child = root->child;
+	while(child != NULL){
+		leaf_t *leaf = findLeaf_nonBST(child->data, data, cmp_leaf);
+		if(leaf != NULL)
+			return leaf;
+		child = child->next;
+	}
+	return NULL;
+}
+
 leaf_t* findLeaf(tree_t *tree, void *data){
-	if(tree->root == NULL)
-		return NULL;
-	if(tree->type == BST){
-		leaf_t *curr = tree->root;
-		while(curr->data != NULL){
-			int cmp_int = tree->cmp_data(data, curr->data);
-			if(cmp_int > 0)
-				curr = curr->right;
-			else if(cmp_int < 0)
-				curr = curr->left;
-			else
-				return curr;
-		}
+	leaf_t *leaf = NULL;
+	if(tree->type != BST){
+		leaf = findLeaf_nonBST(tree->root, data, tree->cmp_data);
+		return leaf;
+	}
+	leaf = tree->root;
+	while(leaf != NULL){
+		int cmp_int = tree->cmp_data(data, leaf->data);
+		if(cmp_int > 0)
+			leaf = leaf->right;
+		else if(cmp_int < 0)
+			leaf = leaf->left;
+		else
+			return leaf;
 	}
 	return NULL;
 }
@@ -251,6 +362,7 @@ static void rm_1_child(tree_t *tree, leaf_t *leaf, leaf_t *parent){
 		parents_kid->data = leafs_kid->data;
 		if(tree->type == BST){
 			if(leaf == parent->left)
+	
 				parent->left = leafs_kid->data;
 			else
 				parent->right = leafs_kid->data;
@@ -299,7 +411,36 @@ static void rm_2_children_bst(tree_t *tree, leaf_t *leaf){
 	return;
 }
 
+static void rm_multi_children(tree_t *tree, leaf_t *leaf, 
+								leaf_t *parent, leaf_t *child){
+	if(child == NULL){
+		node_t *kid = leaf->child;
+		while(kid != NULL){
+			node_t *tmp = kid->next;
+			rmLeaf(tree, kid->data);
+			kid = tmp;
+		}
+		// rmLeaf will reduce tree size; need to counter for recursion.
+		tree->size++;
+		rmLeaf(tree, leaf);
+
+		return;
+	}
+
+
+	//////////////////////////////////////////////////////////
+	// NEED TO ADD FUCNTIONALITY FOR WHEN CHILD IS NOT NULL //
+	//////////////////////////////////////////////////////////
+
+	return;
+}
+
 void rmLeaf(tree_t *tree, leaf_t *leaf){
+	rmLeaf_Extended(tree, leaf, NULL);
+	return;
+}
+
+void rmLeaf_Extended(tree_t *tree, leaf_t *leaf, leaf_t *child){
 	if(leaf->count > 0){
 		leaf->count--;
 		tree->size--;
@@ -314,6 +455,8 @@ void rmLeaf(tree_t *tree, leaf_t *leaf){
 		rm_1_child(tree, leaf, parent);
 	else if(tree->type == BST)
 		rm_2_children_bst(tree, leaf);
+	else
+		rm_multi_children(tree, leaf, parent, child);
 
 	tree->size--;
 
@@ -324,7 +467,7 @@ void rmLeaf(tree_t *tree, leaf_t *leaf){
 void rmTree(tree_t **tree){
 	while((*tree)->size != 0){
 		rmLeaf(*tree, (*tree)->root);
-		ptTree(*tree);
+		// ptTree(*tree);
 	}
 	free(*tree);
 	tree = NULL;
