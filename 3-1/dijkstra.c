@@ -10,7 +10,7 @@
 #include "util.h"
 #include "sort.h"
 
-#define GRAPH_SIZE (12)
+#define GRAPH_SIZE (7)
 #define MAX_WEIGHT (10)
 
 

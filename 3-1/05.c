@@ -47,7 +47,7 @@ int main()
     printf("4. 4/b is 2.\n");
     printf("5. 4+2=6.\n");
     printf("6. b is incremented by 1; b is now 3.\n");
-    printf("--a+bmod()a*b/b++=%d; a=%d; b=%d", ans, a, b);
+    printf("--a+bmod()a*b/b++=%d; a=%d; b=%d\n", ans, a, b);
 
 
     return 0;
