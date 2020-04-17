@@ -428,9 +428,17 @@ static void rm_multi_children(tree_t *tree, leaf_t *leaf,
 	}
 
 
-	//////////////////////////////////////////////////////////
-	// NEED TO ADD FUCNTIONALITY FOR WHEN CHILD IS NOT NULL //
-	//////////////////////////////////////////////////////////
+	//////////////////////////////////////////////
+	// FUCNTIONALITY FOR WHEN CHILD IS NOT NULL //
+	//////////////////////////////////////////////
+
+	memset(leaf->data, '\0', leaf->data_size);
+	leaf->data_size = child->data_size;
+	memcpy(leaf->data, child->data, child->data_size);
+	leaf->count = child->count;
+	// rmLeaf will reduce tree size; need to counter for recursion.
+	tree->size++;
+	rmLeaf(tree, child);
 
 	return;
 }

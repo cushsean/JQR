@@ -145,6 +145,13 @@ int main(){
 	printf("\nPrinting Tree...\n\n");
 	ptTree(tree);
 
+	printf("Remove \"Mom & Dad\"...\n");
+	rmLeaf_Extended(tree, findLeaf(tree, "Mom & Dad"), 
+						findLeaf(tree, "Chelsea & Cody"));
+
+	printf("\nPrinting Tree...\n\n");
+	ptTree(tree);
+
 	printf("Destroy the tree...\n");
 	rmTree(&tree);
 	printf("DONE\n\n");
