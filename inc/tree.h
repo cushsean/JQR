@@ -20,6 +20,8 @@ typedef struct leaf{
 	struct leaf *left;
 	struct leaf *right;
 	size_t count;
+	int bf;
+	int height;
 }leaf_t;
 
 typedef struct tree{
@@ -71,6 +73,12 @@ leaf_t* findLeaf(tree_t *tree, void *data);
  * contains the data given.
  */
 node_t* findChild(tree_t *tree, leaf_t *parent, void *data);
+
+
+/**
+ * Balances a BST. Passing a non-BST will result in an error.
+ */
+void balanceTree(tree_t *tree, leaf_t *newLeaf);
 
 
 /**

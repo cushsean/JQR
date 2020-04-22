@@ -17,13 +17,52 @@ static void print_tree(leaf_t *root, size_t num, void (*printLeaf)(leaf_t*));
  * Local Function for finding a child in a non-BST tree. findLeaf acts as
  * wrapper function.
  */
-static leaf_t* findLeaf_nonBST(leaf_t *root, void *data, int (*cmp_leaf)(void*, void*));
+static leaf_t* findLeaf_nonBST(leaf_t *root, void *data, 
+								int (*cmp_leaf)(void*, void*));
 
 
 /**
  * Local Function for comparing two leafs.
  */
 static int cmp_leaf(tree_t *tree, leaf_t *leaf1, leaf_t *leaf2);
+
+
+/**
+ * Local Function to perform a LR rotation.
+ */
+static void rotation_LR(tree_t *tree, leaf_t *root);
+
+
+/**
+ * Local Function to perform a LL rotation.
+ */
+static void rotation_LL(tree_t *tree, leaf_t *root);
+
+
+/**
+ * Local Function to perform a RL rotation.
+ */
+static void rotation_RL(tree_t *tree, leaf_t *root);
+
+
+/**
+ * Local Function to perform a RR rotation.
+ */
+static void rotation_RR(tree_t *tree, leaf_t *root);
+
+
+/**
+ * Local Function used prior to rotation in AVL trees to update height and BF 
+ * from the newly inserted leaf to root only.
+ */
+static void updateBF(tree_t *tree, leaf_t *leaf);
+
+
+/**
+ * Local Function used after rotation in AVL trees to update height and BF 
+ * from root through the entire tree.
+ */
+static int updateHeight(tree_t *tree, leaf_t *root);
 
 
 /**
@@ -120,6 +159,9 @@ void addLeaf_BST(tree_t *tree, void *data, size_t size){
 	curr->data = malloc(size);
 	memcpy(curr->data, data, size);
 	curr->data_size = size;
+	curr->bf = 0;
+	curr->height = 1;
+	balanceTree(tree, curr);
 	
 	tree->size++;
 	// if(depth > tree->depth)
@@ -280,8 +322,257 @@ node_t* findChild(tree_t *tree, leaf_t *parent, void *data){
 	return curr;
 }
 
+static void rotation_LR(tree_t *tree, leaf_t *root){
+	ptTree(tree);
+	printf("\tLR\n");
+	leaf_t *A = root;
+	leaf_t *B = root->left;
+	leaf_t *C = B->right;
+	leaf_t *Cr = C->right;
+	leaf_t *Cl = C->left;
+	leaf_t *parent = root->parent;
+
+	// Update parent of sub-tree
+	if(root->parent != NULL){
+		if(parent->left == A)
+			parent->left = parent->child->data = C;
+		else
+			parent->right = parent->child->next->data = C;
+	}
+	else
+		tree->root = C;
+
+	// Update children
+	if(C->child == NULL)
+		C->child = mkList(2, DOUBLY);
+	C->right = C->child->next->data = A;
+	A->left = A->child->data = Cr;
+	C->left = C->child->data = B;
+	B->right = B->child->next->data = Cl;
+
+	// Update parents
+	if(Cl != NULL)
+		Cl->parent = B;
+	if(Cr != NULL)
+		Cr->parent = A;
+	A->parent = C;
+	B->parent = C;
+	C->parent = parent;
+
+	ptTree(tree);
+	return;
+}
+
+static void rotation_LL(tree_t *tree, leaf_t *root){
+	ptTree(tree);
+	printf("\tLL\n");
+	leaf_t *A = root;
+	leaf_t *B = root->left;
+	leaf_t *Br = B->right;
+	leaf_t *parent = root->parent;
+
+	// Update parent of sub-tree
+	if(root->parent != NULL){
+		if(parent->left == A)
+			parent->left = parent->child->data = B;
+		else
+			parent->right = parent->child->next->data = B;
+	}
+	else
+		tree->root = B;
+
+	// Update children
+	B->right = B->child->next->data = A;
+	A->left = A->child->data = Br;
+
+	// Update parents
+	B->parent = parent;
+	A->parent = B;
+	if(Br != NULL)
+		Br->parent = A;
+	
+	ptTree(tree);
+	return;
+}
+
+static void rotation_RL(tree_t *tree, leaf_t *root){
+	ptTree(tree);
+	printf("\tRL\n");
+	leaf_t *A = root;
+	leaf_t *B = A->right;
+	leaf_t *C = B->left;
+	leaf_t *Cl = C->left;
+	leaf_t *Cr = C->right;
+	leaf_t *parent = root->parent;
+
+	// Update parent of sub-tree
+	if(root->parent != NULL){
+		if(parent->left == A)
+			parent->left = parent->child->data = C;
+		else
+			parent->right = parent->child->next->data = C;
+	}
+	else
+		tree->root = C;
+
+	// Update children
+	if(C->child == NULL)
+		C->child = mkList(2, DOUBLY);
+	C->left = C->child->data = A;
+	C->right = C->child->next->data = B;
+	A->right = A->child->next->data = Cl;
+	B->left = B->child->data = Cr;
+
+	// Update parents
+	C->parent = parent;
+	A->parent = C;
+	B->parent = C;
+	if(Cl != NULL)
+		Cl->parent = A;
+	if(Cr != NULL)
+		Cr->parent = B;
+
+	ptTree(tree);
+	return;
+}
+
+static void rotation_RR(tree_t *tree, leaf_t *root){
+	ptTree(tree);
+	printf("\tRR\n");
+	leaf_t *A = root;
+	leaf_t *B = root->right;
+	leaf_t *Bl = B->left;
+	leaf_t *parent = root->parent;
+
+	// Update parent of sub-tree
+	if(root->parent != NULL){
+		if(parent->left == A)
+			parent->left = parent->child->data = B;
+		else
+			parent->right = parent->child->next->data = B;
+	}
+	else
+		tree->root = B;
+
+	// Update children
+	B->left = B->child->data = A;
+	A->right =  A->child->next->data = Bl;
+
+	// Update parents
+	B->parent = parent;
+	A->parent = B;
+	if(Bl != NULL)
+		Bl->parent = A;
+
+	ptTree(tree);
+	return;
+}
+
+// Update BF prior to rotation to determine if a rotation is necessary.
+static void updateBF(tree_t *tree, leaf_t *leaf){
+	int left = 0; 
+	int right = 0;
+	
+	if(leaf->left != NULL)
+		left = leaf->left->height;
+	if(leaf->right != NULL)
+		right = leaf->right->height;
+	
+	leaf->bf = left - right;
+	if(abs(leaf->bf) > 1){
+		if(leaf->bf == 2){
+			if(leaf->left->bf == 1)
+				rotation_LL(tree, leaf);
+			else
+				rotation_LR(tree, leaf);
+		}
+		else if(leaf->bf == -2){
+			if(leaf->right->bf == 1)
+				rotation_RL(tree, leaf);
+			else
+				rotation_RR(tree, leaf);
+		}
+		return;
+	}
+	if(leaf->parent == NULL)
+		return;
+	
+	if(leaf->parent->height <= leaf->height)
+		leaf->parent->height = leaf->height+1;
+	return updateBF(tree, leaf->parent);
+}
+
+// Update the height after a rotation from tree->root.
+static int updateHeight(tree_t *tree, leaf_t *root){
+	int left = 0; 
+	int right = 0;
+
+	root->children = 0;
+	
+	if(root->left != NULL){
+		left = updateHeight(tree, root->left);
+		if(left == -1)
+			return -1;
+		root->children++;
+	}
+	if(root->right != NULL){
+		right = updateHeight(tree, root->right);
+		if(right == -1)
+			return -1;
+		root->children++;
+	}
+
+	if(left > right)
+		root->height = left;
+	else
+		root->height = right;
+
+	root->bf = left - right;
+	if(abs(root->bf) > 1){
+		if(root->bf == 2){
+			if(root->left->bf == 1)
+				rotation_LL(tree, root);
+			else
+				rotation_LR(tree, root);
+		}
+		else if(root->bf == -2){
+			if(root->right->bf == 1)
+				rotation_RL(tree, root);
+			else
+				rotation_RR(tree, root);
+		}
+		return -1;
+	}
+	
+	return ++root->height;
+}
+
+void balanceTree(tree_t *tree, leaf_t *newLeaf){
+	if(tree->type != BST){
+		fprintf(stderr, "Cannot balance trees that are not BSTs.\n");
+		return;
+	}
+	if(newLeaf != NULL)
+		updateBF(tree, newLeaf);
+	int root_height = -1;
+	while(root_height == -1){
+		root_height = updateHeight(tree, tree->root);
+	}
+
+	return;
+}
+
 
 static void rm_no_children(tree_t *tree, leaf_t *leaf, leaf_t *parent){
+	while(leaf->child != NULL){
+		node_t *tmp = leaf->child->next;
+		if(leaf->child->data != NULL)
+			rmLeaf(tree, leaf->child->data);
+		else{
+			free(leaf->child);
+			leaf->child = tmp;
+		}
+	}
 	if(parent == NULL){
 		free(leaf->data);
 		leaf->data = NULL;
@@ -303,14 +594,6 @@ static void rm_no_children(tree_t *tree, leaf_t *leaf, leaf_t *parent){
 	// Free the leaf's data
 	free(leaf->data);
 	leaf->data = NULL;
-
-	// // Free child node_t
-	// if(tree->type = BST){
-	// 	free(leaf->child->next);
-	// 	leaf->child->next = NULL;
-	// 	free(leaf->child);
-	// 	leaf->child = NULL;
-	// }
 	
 	// Free the leaf from the parent's child node
 	free(kid->data);
@@ -328,7 +611,7 @@ static void rm_no_children(tree_t *tree, leaf_t *leaf, leaf_t *parent){
 		}
 		// Free the kid node
 		free(kid);
-		kid = NULL;
+		parent->child = kid = NULL;
 	}
 	else if(tree->type != BST){
 		// Unlink kid node
@@ -362,7 +645,6 @@ static void rm_1_child(tree_t *tree, leaf_t *leaf, leaf_t *parent){
 		parents_kid->data = leafs_kid->data;
 		if(tree->type == BST){
 			if(leaf == parent->left)
-	
 				parent->left = leafs_kid->data;
 			else
 				parent->right = leafs_kid->data;
@@ -397,13 +679,21 @@ static void rm_1_child(tree_t *tree, leaf_t *leaf, leaf_t *parent){
 }
 
 static void rm_2_children_bst(tree_t *tree, leaf_t *leaf){
+	// Get the least right-hand child
 	leaf_t *shift_leaf = leaf->right;
 	while(shift_leaf->left != NULL)
 		shift_leaf = shift_leaf->left;
+	
+	// Prepare for data transfer
 	memset(leaf->data, '\0', leaf->data_size);
 	leaf->data_size = shift_leaf->data_size;
+
+	// Transfer data
 	memcpy(leaf->data, shift_leaf->data, shift_leaf->data_size);
 	leaf->count = shift_leaf->count;
+
+	// Remove original copy
+	shift_leaf->count = 0;
 	rmLeaf(tree, shift_leaf);
 	// rmLeaf will reduce tree size; need to counter for recursion.
 	tree->size++;
@@ -467,16 +757,15 @@ void rmLeaf_Extended(tree_t *tree, leaf_t *leaf, leaf_t *child){
 		rm_multi_children(tree, leaf, parent, child);
 
 	tree->size--;
+	balanceTree(tree, NULL);
 
 	return;
 }
 
 
 void rmTree(tree_t **tree){
-	while((*tree)->size != 0){
+	while((*tree)->size != 0)
 		rmLeaf(*tree, (*tree)->root);
-		// ptTree(*tree);
-	}
 	free(*tree);
 	tree = NULL;
 }
