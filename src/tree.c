@@ -757,7 +757,8 @@ void rmLeaf_Extended(tree_t *tree, leaf_t *leaf, leaf_t *child){
 		rm_multi_children(tree, leaf, parent, child);
 
 	tree->size--;
-	balanceTree(tree, NULL);
+	if(tree->type == BST)
+		balanceTree(tree, NULL);
 
 	return;
 }
