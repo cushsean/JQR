@@ -6,7 +6,7 @@
 #include "list.h"
 #include "tree.h"
 
-void print_leaf(leaf_t *leaf){
+void print_bst_leaf(leaf_t *leaf){
 	if(leaf == NULL)
 		printf("\"NULL\"");
 	else
@@ -14,10 +14,26 @@ void print_leaf(leaf_t *leaf){
 	return;
 }
 
+void print_leaf(leaf_t *leaf){
+	if(leaf == NULL)
+		printf("\"NULL\"");
+	else{
+		print_str(leaf->data);
+		if(leaf->children > 0){
+			printf("\n\tChildren:\n");
+			node_t *curr = leaf->child;
+			while(curr != NULL){
+				printf("\t");
+				print_str(((leaf_t*)curr->data)->data);
+			}
+		}
+	}
+}
+
 
 int main(){
-	// // BST TREES
-	tree_t *tree = createTree(BST, cmp_str, print_leaf);
+	// BST TREES
+	tree_t *tree = createTree(BST, cmp_str, print_bst_leaf);
 	addLeaf_BST(tree, "SEAN", strlen("SEAN"));
 	addLeaf_BST(tree, "WILLIAM", strlen("WILLIAM"));
 	addLeaf_BST(tree, "Brad", strlen("Brad"));
@@ -30,6 +46,8 @@ int main(){
 	addLeaf_BST(tree, "SEAN", strlen("SEAN"));
 	addLeaf_BST(tree, "SEAN", strlen("SEAN"));
 
+
+	// printf("size  : %d\ndepth : %d\n\n", tree->size, tree->depth);
 	printf("Printing Tree...\n");
 	printf("size: %d\n", tree->size);
 	ptTree(tree);
@@ -75,12 +93,6 @@ int main(){
 	printf("Remove \"%s\"...\n", (char*)leaf->data);
 	rmLeaf(tree, leaf);
 
-	printf("Printing Tree...\n");
-	printf("size: %d\n", tree->size);
-	ptTree(tree);
-	
-	// Remove leaf right of root
-	printf("Remove leaf right of root...\n");
 	rmLeaf(tree, tree->root->right);
 
 	printf("Printing Tree...\n");
@@ -92,59 +104,57 @@ int main(){
 	printf("DONE\n\n");
 
 	
-	// // NON-BST TREES
-	// printf("Starting non-BST Trees...\n");
+	// NON-BST TREES
+	printf("Starting non-BST Trees...\n");
 
-	// tree = createTree(NORMAL, cmp_str, print_leaf);
+	tree = createTree(NORMAL, cmp_str, print_bst_leaf);
 	
-	// char *parent = NULL;
-	// char *child = "Grandma & Papa";
-	// addLeaf(tree, NULL, child, strlen(child));
-	// parent = "Grandma & Papa";
-	// child = "Uncle Randy & Aunt Mary";
-	// addLeaf(tree, findLeaf(tree, parent), child, strlen(child));
-	// child = "Uncle Dan & Aunt Christie";
-	// addLeaf(tree, findLeaf(tree, parent), child, strlen(child));
-	// child = "Mom & Dad";
-	// addLeaf(tree, findLeaf(tree, parent), child, strlen(child));
-	// parent = "Uncle Randy & Aunt Mary";
-	// child = "Jordan & Lina";
-	// addLeaf(tree, findLeaf(tree, parent), child, strlen(child));
-	// child = "Bethany & Devon";
-	// addLeaf(tree, findLeaf(tree, parent), child, strlen(child));
-	// parent = "Bethany & Devon";
-	// child = "Ellery";
-	// addLeaf(tree, findLeaf(tree, parent), child, strlen(child));
-	// child = "Lyla";
-	// addLeaf(tree, findLeaf(tree, parent), child, strlen(child));
-	// parent = "Uncle Dan & Aunt Christie";
-	// child = "Rachell";
-	// addLeaf(tree, findLeaf(tree, parent), child, strlen(child));
-	// child = "Tyler";
-	// addLeaf(tree, findLeaf(tree, parent), child, strlen(child));
-	// parent = "Mom & Dad";
-	// child = "Chelsea & Cody";
-	// addLeaf(tree, findLeaf(tree, parent), child, strlen(child));
-	// child = "Sean & Will";
-	// addLeaf(tree, findLeaf(tree, parent), child, strlen(child));
-	// child = "Zac";
-	// addLeaf(tree, findLeaf(tree, parent), child, strlen(child));
+	char *parent = NULL;
+	char *child = "Grandma & Papa";
+	addLeaf(tree, NULL, child, strlen(child));
+	parent = "Grandma & Papa";
+	child = "Uncle Randy & Aunt Mary";
+	addLeaf(tree, findLeaf(tree, parent), child, strlen(child));
+	child = "Uncle Dan & Aunt Christie";
+	addLeaf(tree, findLeaf(tree, parent), child, strlen(child));
+	child = "Mom & Dad";
+	addLeaf(tree, findLeaf(tree, parent), child, strlen(child));
+	parent = "Uncle Randy & Aunt Mary";
+	child = "Jordan & Lina";
+	addLeaf(tree, findLeaf(tree, parent), child, strlen(child));
+	child = "Bethany & Devon";
+	addLeaf(tree, findLeaf(tree, parent), child, strlen(child));
+	parent = "Bethany & Devon";
+	child = "Ellery";
+	addLeaf(tree, findLeaf(tree, parent), child, strlen(child));
+	child = "Lyla";
+	addLeaf(tree, findLeaf(tree, parent), child, strlen(child));
+	parent = "Uncle Dan & Aunt Christie";
+	child = "Rachell";
+	addLeaf(tree, findLeaf(tree, parent), child, strlen(child));
+	child = "Tyler";
+	addLeaf(tree, findLeaf(tree, parent), child, strlen(child));
+	parent = "Mom & Dad";
+	child = "Chelsea & Cody";
+	addLeaf(tree, findLeaf(tree, parent), child, strlen(child));
+	child = "Sean & Will";
+	addLeaf(tree, findLeaf(tree, parent), child, strlen(child));
+	child = "Zac";
+	addLeaf(tree, findLeaf(tree, parent), child, strlen(child));
 	
-	// printf("\nPrinting Tree...\n\n");
-	// ptTree(tree);
+	printf("\nPrinting Tree...\n\n");
+	ptTree(tree);
 
-	// printf("Remove \"Mom & Dad\"...\n");
-	// rmLeaf_Extended(tree, findLeaf(tree, "Mom & Dad"), 
-	// 					findLeaf(tree, "Chelsea & Cody"));
+	printf("Remove \"Mom & Dad\"...\n");
+	rmLeaf_Extended(tree, findLeaf(tree, "Mom & Dad"), 
+						findLeaf(tree, "Chelsea & Cody"));
 
-	// printf("\nPrinting Tree...\n\n");
-	// ptTree(tree);
+	printf("\nPrinting Tree...\n\n");
+	ptTree(tree);
 
-	// printf("Destroy the tree...\n");
-	// rmTree(&tree);
-	// printf("DONE\n\n");
-
-	// rmTree(&tree);
+	printf("Destroy the tree...\n");
+	rmTree(&tree);
+	printf("DONE\n\n");
 	return 0;
 }
 
