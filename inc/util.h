@@ -27,7 +27,7 @@ node_t* swap_node_singly(node_t *head, node_t *curr, node_t *NX, node_t *PR);
 /**
  * Hashing scheme that returns an unsigned long.
  */
-unsigned long hash(char *input, size_t size);
+unsigned long hash(void *input, size_t size);
 
 
 /**

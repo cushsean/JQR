@@ -12,20 +12,23 @@
 #define MATCH 0
 #define WORD_SIZE 128
 
-typedef struct hashSet{
+typedef struct bucket{
+	size_t hash;
 	void *key;
 	void *data;
-	size_t size;
-	struct hashSet *next;
-}hash_set;
+	struct bucket *next;
+}bucket;
 
 typedef struct hashTable{
-	struct hashSet *set;
-	size_t size;
+	struct bucket *set;
+	size_t tSize;
 	size_t nElem;
-	unsigned long (*hash)(char*, size_t);
+	size_t (*hash)(void*, size_t);
+	void (*cpykey)(void**, void*);
 	int (*cmp_key)(void*, void*);
-	void (*print_set)(hash_set);
+	size_t (*sizeof_key)(void*);
+	void (*free_data)(void*);
+	void (*print_set)(bucket);
 }hash_table;
 
 
@@ -33,14 +36,16 @@ typedef struct hashTable{
  * Allocates memory and set inital values for hashTable struct.
  * Sets inital size of table to 16.
  */
-hash_table* newHashTable(unsigned long (*hash)(char*, size_t), 
-	int (*cmp_key)(void*, void*), void (*ptr_set)(hash_set));
+hash_table* newHashTable(size_t (*hash)(void *key, size_t sizeof_key), 
+	void (*cpykey)(void **dest, void *src), 
+	int (*cmp_key)(void *key1, void *key2), size_t (*sizeof_key)(void *key), 
+	void (*free_data)(void *data), void (*ptr_set)(bucket set));
 
 
 /**
  * Inserts new set into hash table.
  */
-void insertHashSet(hash_table *table, void *data, size_t size);
+void insertHashSet(hash_table *table, void *key, void *data);
 
 
 /**
@@ -52,13 +57,13 @@ void growTable(hash_table *table);
 /**
  * Find the nth item in the hash table.
  */
-hash_set* find_nth_hashItem(hash_table *table, int n);
+bucket* find_nth_hashItem(hash_table *table, int n);
 
 
 /**
- * Find an item in the hash table.
+ * Find an item in the hash table. NULL is returned if key not found.
  */
-hash_set* find_hashItem(hash_table *table, void *item, size_t size);
+bucket* find_key(hash_table *table, void *key);
 
 
 /**
@@ -67,7 +72,7 @@ hash_set* find_hashItem(hash_table *table, void *item, size_t size);
  * 	0 - If the hash set is empty after freeing. (i.e. set.next == NULL)
  * 	1 - If the hash set was filled with the next set. (i.e. set.next != NULL)
  */
-int freeSet(hash_table *table, hash_set *set);
+int freeSet(hash_table *table, bucket *set);
 
 
 /**

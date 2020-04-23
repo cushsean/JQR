@@ -50,70 +50,116 @@
 
 #include "hash.h"
 
-hash_table* newHashTable(unsigned long (*hash)(char*, size_t), 
-							int (*cmp_key)(void*, void*),
-							void (*print_set)(hash_set)){
-	hash_table *table = malloc(sizeof(hash_table));
-	table->size = 16;
-	table->set = calloc(table->size, sizeof(hash_set));
+/**
+ * Local Function for inserting buckets where a bucket exists.
+ */
+static void shiftSet(hash_table *table, size_t index, 
+						size_t hash, void *key, void *data);
+
+hash_table* newHashTable(unsigned long (*hash)(void *key, size_t sizeof_key), 
+							void (*cpykey)(void **dest, void *src), 
+							int (*cmp_key)(void *key1, void *key2),
+							size_t (*sizeof_key)(void *key),
+							void (*free_data)(void *data),
+							void (*print_set)(bucket set)){
+	hash_table *table = calloc(1, sizeof(hash_table));
+	table->tSize = 16;
+	table->set = calloc(table->tSize, sizeof(bucket));
 	table->nElem = 0;
 	table->hash = hash;
+	table->cpykey = cpykey;
 	table->cmp_key = cmp_key;
+	table->sizeof_key = sizeof_key;
+	table->free_data = free_data;
 	table->print_set = print_set;
 	return table;
 }
 
 
-static void shiftSet(hash_table *table, size_t index){
-	hash_set *tmp = malloc(sizeof(hash_set));
+static void shiftSet(hash_table *table, size_t index, 
+						size_t hash, void *key, void *data){
+	// bucket *tmp = calloc(1, sizeof(bucket));
+
+	bucket *tmp = table->set+index;
+
+	while(tmp != NULL){
+		if(table->cmp_key(tmp->key, key) == 0){
+			// Key is alread in table, update data
+			table->free_data(tmp->data);
+			tmp->data = data;
+
+			return;
+		}
+		
+		tmp = tmp->next;
+	}
+
+	// Key is not in table
+	tmp = calloc(1, sizeof(bucket));
+
+	tmp->hash = table->set[index].hash;
 	tmp->key = table->set[index].key;
 	tmp->data = table->set[index].data;
-	tmp->size = table->set[index].size;
 	tmp->next = table->set[index].next;
+
+	table->set[index].hash = hash;
+	table->set[index].key = key;
+	table->set[index].data = data;
 	table->set[index].next = tmp;
 
 	return;
 }
 
 
-void insertHashSet(hash_table *table, void *user_data, size_t size){
-	if(table->nElem >= table->size*.75)
-		growTable(table);
-	void *data = malloc(size);
-	memcpy(data, user_data, size);
-	size_t *key = malloc(sizeof(size_t));
-	*key = table->hash(data, size);
-	size_t index = *key % table->size;
+static void insert_at(hash_table *table, size_t hash, void *key, void *data){
+	size_t index = hash % table->tSize;
 	if(table->set[index].key != NULL)
-		shiftSet(table, index);
-	table->set[index].key = key;
-	table->set[index].data = data;
-	table->set[index].size = size;
+		shiftSet(table, index, hash, key, data);
+	else{
+		table->set[index].hash = hash;
+		table->set[index].key = key;
+		table->set[index].data = data;
+	}
+
+	return;
+}
+
+
+void insertHashSet(hash_table *table, void *user_key, void *data){
+	// Grow table if at 75% cap.
+	if(table->nElem >= table->tSize*.75)
+		growTable(table);
+
+	// copy key
+	void *key = calloc(1, table->sizeof_key(user_key));
+	table->cpykey(&key, user_key);
+
+	// Hash key
+	size_t hash = table->hash(key, table->sizeof_key(key));
+
+	// Insert set into table
+	insert_at(table, hash, key, data);
 	table->nElem++;
+
 	return;
 }
 
 void growTable(hash_table *table){
 	// printf("The table needs to grow.\n");
-	table->size *= 2;
-	hash_set *old = table->set;
-	table->set = calloc(table->size, sizeof(hash_set));
-	for(int i=0; i<table->size/2; i++){
-		hash_set *tmp = old+i;
+	table->tSize *= 2;
+	bucket *old = table->set;
+	table->set = calloc(table->tSize, sizeof(bucket));
+	for(int i=0; i<table->tSize/2; i++){
+		bucket *tmp = old+i;
 		do{
 			if(tmp->key != NULL){
-				size_t index = *(size_t*)tmp->key % table->size;
-				if(table->set[index].key != NULL)
-					shiftSet(table, index);
-				table->set[index].key = tmp->key;
-				table->set[index].data = tmp->data;
-				table->set[index].size = tmp->size;
+				insert_at(table, tmp->hash, tmp->key, tmp->data);
 			}
 			tmp = tmp->next;
 		}while(tmp != NULL);
 		tmp = old[i].next;
 		while(tmp != NULL){
-			hash_set *tmp_next = tmp->next;
+			bucket *tmp_next = tmp->next;
 			free(tmp);
 			tmp = tmp_next;
 		}
@@ -125,13 +171,13 @@ void growTable(hash_table *table){
 	return;
 }
 
-hash_set* find_nth_hashItem(hash_table *table, int n){
+bucket* find_nth_hashItem(hash_table *table, int n){
 	if(table->nElem < n){
 		fprintf(stderr, "Table contains less than %d elements\n", n);
 		return NULL;
 	}
-	hash_set *target = NULL;
-	for(int i=0; n>0 && i<table->size; i++){
+	bucket *target = NULL;
+	for(int i=0; n>0 && i<table->tSize; i++){
 		target = table->set+i;
 		while(target != NULL){
 			if(target->key != NULL)
@@ -143,11 +189,11 @@ hash_set* find_nth_hashItem(hash_table *table, int n){
 	return target;
 }
 
-hash_set* find_hashItem(hash_table *table, void *item, size_t size){
-	size_t key = table->hash(item, size);
-	hash_set *target = table->set + key % table->size;
+bucket* find_key(hash_table *table, void *key){
+	size_t hash = table->hash(key, table->sizeof_key(key));
+	bucket *target = table->set + hash % table->tSize;
 	while(target != NULL){
-		if(table->cmp_key(target->key, &key))
+		if(table->cmp_key(target->key, key))
 			target = target->next;
 		else
 			break;
@@ -158,13 +204,13 @@ hash_set* find_hashItem(hash_table *table, void *item, size_t size){
 
 
 
-int freeSet(hash_table *table, hash_set *set){
+int freeSet(hash_table *table, bucket *set){
 	if(set->key == NULL)
 		return 0;
 
 	table->nElem -= 1;
 	free(set->key);
-	free(set->data);
+	table->free_data(set->data);
 	if(set->next == NULL){
 		set->key = NULL;
 		set->data = NULL;
@@ -173,7 +219,7 @@ int freeSet(hash_table *table, hash_set *set){
 	else{
 		set->key = set->next->key;
 		set->data = set->next->data;
-		hash_set *tmp = set->next->next;
+		bucket *tmp = set->next->next;
 		free(set->next);
 		set->next = tmp;
 		return 1;
@@ -181,112 +227,10 @@ int freeSet(hash_table *table, hash_set *set){
 }
 
 void freeTable(hash_table **table){
-	for(int i=0; i<(*table)->size; i++)
+	for(int i=0; i<(*table)->tSize; i++)
 		while(freeSet((*table), (*table)->set+i));
 	free((*table)->set);
 	(*table)->set = NULL;
 	free(*table);
 	*table = NULL;
 }
-
-//Old Functions Below
-// unsigned long hash(void *input, size_t size){
-// 	const int MULT = 97;
-// 	unsigned long key = 5;
-// 	unsigned char* str = malloc(size);
-// 	// strcpy(str, (unsigned char*)input);
-// 	str = (unsigned char*)input;
-// 	for(int flag=0; flag < 2; flag++){
-// 		while(*str != '\0'){\
-// 			key = key * MULT + *str;
-// 			str++;
-// 		}
-		
-// 		if(flag == 0){
-// 			sprintf(str, "%lu", key);
-// 		}
-// 	}
-// 	// h = h%LIMITER; //limits output LIMITER defined in hash.h
-// 	// free(str);
-// 	return key;
-// }
-
-// char** hash_table(){ 
-// 	char** table = (char**)malloc(LIMITER*sizeof(char*));
-// 	for(int i=0; i<LIMITER; i++)
-// 		table[i] = (char*)malloc(WORD_SIZE);
-// 	return table;
-// }
-
-// char** hash_insert(char** table, void* input, int* collisions){
-// 	char* str = malloc(128);
-// 	strcpy(str, (char*)input);
-// 	int len = strlen(str);
-// 	if(len > 0 && str[len-1] == '\n')
-// 		str[len-1] = '\0';
-	
-// 	unsigned long index = hash(str);
-// 	if(strcmp(table[index], "") == MATCH)
-// 		strcpy(table[index], str);
-// 	else{
-// 		(*collisions)++;
-// 		while(strcmp(table[index], "") != MATCH)
-// 			index++;
-// 		strcpy(table[index], str);
-// 	}
-	
-// 	free(str);
-// 	return table;
-// }
-
-// void hash_free(char** table){
-// 	for(int i=0; i<LIMITER; i++)
-// 		free(table[i]);
-// 	free(table);
-// 	return;
-// }
-
-// long hash_find_byValue(char** table, void* input){
-// 	char* str = malloc(128);
-// 	strcpy(str, (char*)input);
-// 	int len = strlen(str);
-// 	if(len > 0 && str[len-1] == '\n')
-// 		str[len-1] = '\0';
-	
-// 	unsigned long index = hash(str);
-// 	while(table[index] == NULL)
-// 		index++;
-// 	if(strcmp(table[index], str) == MATCH){
-// 		free(str);
-// 		return index;
-// 	}
-// 	else{
-// 		while(strcmp(table[index], str) != MATCH){
-// 			if(++index == LIMITER){
-// 				printf("%s not found in hash table.\n", str);
-// 				free(str);
-// 				return -1;
-// 			}
-// 		}
-// 		free(str);
-// 		return index;
-// 	}
-// }
-
-// long hash_find_byNumber(char** table, unsigned long input){
-// 	for(int i=0; i<LIMITER && input > 0; i++){
-// 		if(strcmp(table[i], "") != MATCH)
-// 			if(--input == 0)
-// 				return i;
-// 	}
-// 	return -1;
-// }
-
-// char** hash_rmItem(char** table, void* input){
-// 	long item_index = hash_find_byValue(table, input);
-// 	if(item_index != -1){
-// 		table[item_index] = NULL;
-// 		printf("%s has been removed from hash table.\n", (char*)input);
-// 	}
-// 	return table;
-// }

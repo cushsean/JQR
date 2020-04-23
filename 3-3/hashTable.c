@@ -10,13 +10,13 @@
 /**
  * Wrapper for the first level of printing sets.
  */
-void print_set(hash_set set);
+void print_set(bucket set);
 
 
 /**
  * Prints the set with a determined level for tabing.
  */
-void print_set_util(hash_set set, int level);
+void print_set_util(bucket set, int level);
 
 
 /**
@@ -26,30 +26,72 @@ void print_set_util(hash_set set, int level);
 void fill_hashTable(hash_table *table, int num);
 
 
-void print_set(hash_set set){
+/**
+ * User defined function for coping a key.
+ */
+void cpykey(void **dest, void *src);
+
+
+/**
+ * User defined function for freeing data.
+ */
+void free_data(void *data);
+
+/**
+ * User defined function to get size of the key.
+ */
+size_t sizeof_key(void *key);
+
+
+/**
+ * User defined function to compare keys.
+ */
+int cmpkey(void *key1, void *key2);
+
+
+int cmpkey(void *key1, void *key2){
+	return strcmp((char*)key1, (char*)key2);
+}
+
+
+size_t sizeof_key(void *key){
+	return strlen((char*)key);
+}
+
+void free_data(void *data){
+	free(data);
+	data = NULL;
+	return;
+}
+
+void cpykey(void **dest, void *src){
+	memcpy(*dest, src, strlen((char*)src));
+	return;
+}
+
+
+void print_set(bucket set){
 	print_set_util(set, 1);
 	printf("\n");
 	return;
 }
 
-void print_set_util(hash_set set, int level){
-	if((unsigned long*)set.key == NULL){
+void print_set_util(bucket set, int level){
+	if(set.key == NULL){
 		for(int i=0; i<level; i++)
 			printf("\t");
 		printf("EMPTY\n");
 	}
 	else{
-		unsigned long key = *(unsigned long*)set.key;
+		char* key = (char*)set.key;
 		char *data = (char*)set.data;
-		for(int n=0; n<3; n++){
+		for(int n=0; n<2; n++){
 			for(int i=0; i<level; i++)
 				printf("\t");
 			if(n==0)
-				printf("key  : %020lu\n", key);
+				printf("key  : %s\n", key);
 			else if(n==1)
 				printf("data : %s\n", data);
-			else if(n==2)
-				printf("size : %ld\n", set.size);
 		}
 		if(set.next != NULL){
 			for(int i=0; i<level; i++)
@@ -73,11 +115,15 @@ void fill_hashTable(hash_table *table, int num){
 	if(num == 0){
 		num = 102305; // Size of dictionary being used.
 	}
+
 	for(; num > 0; num--){
 		char word[128];
 		fgets(word, 127, dict);
 		word[strlen(word)-1] = '\0'; // Strips the newline off the word
-		insertHashSet(table, word, strlen(word));
+		
+		char *data = calloc(strlen(word), sizeof(char));
+		memcpy(data, word, strlen(word));
+		insertHashSet(table, word, data);
 	}
 	fclose(dict);
 
@@ -87,23 +133,33 @@ void fill_hashTable(hash_table *table, int num){
 
 int main(void){
 
-	hash_table *table = newHashTable(hash, cmp_ulong, print_set);
+	hash_table *table = newHashTable(hash, cpykey, cmpkey, sizeof_key,
+										free_data, print_set);
+	char *key = "CUSHMAN";
 	char *name = "SEAN";
-	insertHashSet(table, name, strlen(name));
-	name = "Ballon";
-	insertHashSet(table, name, strlen(name));
+	char *data = calloc(strlen(name), sizeof(char));
+	memcpy(data, name, strlen(name));
+	insertHashSet(table, key, data);
+	key = "Ballon";
+	name = "HOT AIR";
+	data = calloc(strlen(name), sizeof(char));
+	memcpy(data, name, strlen(name));
+	insertHashSet(table, key, data);
 	
+	// Expand the table
 	fill_hashTable(table, 46);
-	printf("Size: %ld\nElem: %ld\n\n", table->size, table->nElem);
+	printf("Size: %ld\nElem: %ld\n\n", table->tSize, table->nElem);
 
+	// Find an key
 	printf("Find the item \"Ballon\"...\n");
-	hash_set *set_ptr = find_hashItem(table, name, strlen(name));
+	key = "Ballon";
+	bucket *set_ptr = find_key(table, key);
 	if(set_ptr == NULL)
 		printf("Item not found.\n");
 	else
 		print_set(*set_ptr);
 
-	
+	// Find the nth item
 	int num = 16;
 	printf("Find item #%d...\n", num);
 	set_ptr = find_nth_hashItem(table, num);
@@ -112,8 +168,11 @@ int main(void){
 	else
 		print_set(*set_ptr);
 
+	// Remove the previously found item
+	printf("Size: %ld\nElem: %ld\n", table->tSize, table->nElem);
 	printf("Removing set with item \"%s\"...\n\n", (char*)set_ptr->data);
 	freeSet(table, set_ptr);
+	printf("Size: %ld\nElem: %ld\n\n", table->tSize, table->nElem);
 
 	printf("Find item #%d...\n", num);
 	set_ptr = find_nth_hashItem(table, num);
@@ -122,14 +181,7 @@ int main(void){
 	else
 		print_set(*set_ptr);
 	
-	// for(int i=0; i<table->size; i++){
-	// 	if(table->set[i].key != NULL){
-	// 		printf("Set %d:\n", i);
-	// 		print_set(table->set[i]);	
-	// 	}
-	// }
-	
-	printf("Size: %ld\nElem: %ld\n", table->size, table->nElem);
+	printf("Size: %ld\nElem: %ld\n", table->tSize, table->nElem);
 
 	freeTable(&table);
 	return 0;

@@ -97,14 +97,15 @@ node_t* swap_node_singly(node_t *head, node_t *curr, node_t *NX, node_t *PR){
 	return head;
 }
 
-unsigned long hash(char *input, size_t size){
+unsigned long hash(void *input, size_t size){
 	
 	unsigned long key = 0;
 	int c;
 
-	while(c = *input++)
+	char *str = (char*)input;
+
+	while(c = *str++)
 		key = c + (key << 6) + (key << 16) - key;
-	
 
 	// Double hash
 	char buf[21];
