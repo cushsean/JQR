@@ -1,0 +1,180 @@
+SECURE CODEING - 
+	Describe terms and concepts associated with secure coding practices:
+
+a.	Common string-handling functions
+		gets		- Gets a string from stdin until null-terminator or EOF
+		fgets		- Gets a string from stdin until null-terminator, EOF, or 
+						a specified number of charaters have been read-in
+		getchar		- Gets a single char from stdin
+
+		memchr		- Searches a block of memory for a specified value
+		memcmp		- Compares two specified blocks of memory
+		memcpy		- Copies a block of memory
+		memmove		- Moves a block of memory
+		memset		- Sets a block of memory to a specified value
+		strcat		- Concatenates onto a string
+		strchr		- Searches a string for a specified value
+		strcmp		- Compares two strings
+		strcpy		- Copys one string onto another
+		strcspn		- Scans a string for any contents of another string, 
+						returns the number of characters before a match is made
+		strerror	- Gets a standare error message based on the contents 
+						of errnum
+		strlen		- Returns the length of a string, not includeing 
+						the null-terminator
+		strncat		- Appends the first n charaters of one string onto another
+		strncmp		- Compares the first n charaters of two strings
+		strncpy		- Copies the first n charters of a string onto another
+		strpbrk		- Returns a pointer to the first matched charater between 
+						two strings
+		strrchr		- Returns the last occurance of a specified charater in 
+						a string
+		strspn		- Returns the inital length of a string that contains only
+						charaters from anohter string
+		strstr		- Locates a sub-string within a string
+		strtok		- Splits a string into tokens based on a specified delimiter
+
+
+b.	Which functions guarentee null terminated strings
+		strcat
+		strcpy
+		strerror
+		strncat
+		strncpy
+		gets
+		fgets
+
+		Most str* functions will return a null-terminator if the end of the 
+		source string is reached, assuming the source is null-terminated.
+
+		mem* functions do not acknowlege null-terminators as the "end" and 
+		therefore will not append one to the end of their return values.
+
+
+c.	An off-by-one error
+		When the bounds of an array/string are exeded by 1 byte. 
+		Would occure if strlen is run on a non-null-terminated string.
+
+
+d.	An Integer Overflow
+		Occures when you exceed the capacity of a data type.
+		Ex) signed char can contain values from -128 - 127. Assigning anything 
+		greater than 127 would result in an integer overflow, defining a signed 
+		char as 240 results in -16 due to the most significant bit denoting 
+		1's compliment. 
+
+
+e.	A buffer overflow
+		Occures when your program exceeds the allocated space on the stack for 
+		a buffer. This can lead to other areas of the stack being over written 
+		such as the return pointer which can then point to wrong location.
+
+f.	The concept of use-after-free
+		Reading from freed memory. When memory has been freed, it is no longer 
+		owned by the program and is not guarenteed to contain the same 
+		information as it did prior to being freed. The pointer that was freed
+		should always be overwriten with a different memory address or NULL 
+		before continuing. Not overwriting the pointer causes a hanging pointer 
+		to remain in operation.
+
+g.	Resource acquisition is initialization (RAII)
+		A practice in that binds the life cycle of a reesource, that must be 
+		allocated, to the life time of an object. Utilizies the contructor and 
+		destructor to allocate resources needed at the time of construction and 
+		free those resources when the object is destroyed.
+
+h.	The difference between a regular expression and a context-free grammer
+		Context-free grammer requires four things:
+			Terminals: Set of atomic symbols
+			Nonterminals: Pharse types
+			Productions: Phrase structure rules
+			Start symbol: Top-level phrase
+
+		Grammer: The context that make a language. The set of accepted elements
+		within the language. 
+
+		Terminals: Elements that do not change
+
+		Non-Terminals: Elements that change based on the production rules
+
+		Production Rules: A rule by which if you have specifed charater, what 
+		does it get replace with?
+			ex) A -> BDE
+				B -> AF
+				C -> A
+
+		Start symbol: The beginning.
+			ex)	AC
+				A -> BDE
+				C -> A
+				BDEA
+				B -> AF
+				D -> TERM
+				E -> TERM
+				A -> BDE
+				AFDEBDE
+				A -> BDE
+				F -> TERM
+				D -> TERM
+				E -> TERM
+				B -> AF
+				D -> TERM
+				E -> TERM
+				BDEFDEAFED
+				...
+				AC = BDEFDEFDEFDEFDEFDEAFDEFDEFED...
+
+		Bottom Line:
+			A context-free grammer is a set of rules that elements must adhear 
+			to inorder to be accepted.
+			A regular expression is a specific pattern that must be adheared to 
+			where every possible outcome is accounted for.
+			A regular expression is more specific that context-free grammer in 
+			that the content must satisfy the specific pattern set by the 
+			regular express where it only has to satisfy a set of rules set by 
+			the grammer to be accepted in the context-free grammer language.
+
+
+i.	The difference between input validation vs. input sanitization
+		Validation is when you ensure the values you are receiving are what you 
+		expect to receive. If you're expecting a name and you get digits, you 
+		probably did not get what you were expecting. If you expect a function 
+		to return 0 on success you should actually check that the function did 
+		not return an error value.
+
+		Sanitization is where you ensure the values you are receiving do not 
+		contain anything that would damage your program. This is most notible 
+		in data base quaries where you need to be careful not to pass a string 
+		contains certain charcaters that will begin to manipulate your database 
+		but instead escape them so they are inserted as data. In C this can be 
+		related to making sure the string does not exceed the buffer (though 
+		that might be validation as well), or handeling null-terminators that 
+		are located in the middle raw binary data.
+
+k. General low-level crypto basics
+						
+						Cryptography
+							  |
+				-----------------------------
+				|							|
+		  Symmetric Key				  Asymmetric Key
+		  Cryptography				  Cryptography
+		  		|
+				|----------------------------
+				|							|
+			 Clasical					  Modern
+				|							|
+		-----------------			-----------------
+		|				|			|				|
+  Transposition	   Substitution	  Stream		  Block
+
+
+	Symmetric Key: The same key is used to encrypt and decrypt
+		Transposition: Moving elements around
+		Substitiution: Substituting elements with different ones
+		Stream: Encryption is applied to each binary digit in a stream
+		Block: Encryption is applied to a block of binary data
+
+	Asymmetric Key: There are two keys, a private key and a public key. Only the 
+	private key needs to be kept secret. The public key is used to encrypt the 
+	data and the private key is used to decrypt the data.
