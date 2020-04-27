@@ -1,0 +1,173 @@
+3.7.2 - Network Fundamentals
+
+	Domain Name System (DNS) - port 53
+		DNSs translate domain names to IP addresses
+
+		Four diffent types of servers are involved in the system.
+			1. DNS Recursor - receives the query from the user and makes any 
+				additional requests needed.
+			2. Root Nameserver - Servers as a reference to other more specific
+				locations. The first step in the resolution.
+			3. TLD Nameservers - The Top Level Domain server handles the 
+				.com portion.
+			4. Authoritative Nameserver - If the first 3 servers passed the 
+				correct information, the Authoritative Nameserver will be able
+				to find the correct IP address for the domain name originally 
+				sent to the DNS Recursor.
+	
+	
+	Simple Mail Transfer Protocal (SMTP) - port 25, 465, 587, 2525, 25025
+		The standard mail sending protocal. An application layer protocol.
+
+		SMTP model is of two types:
+			1. End-to-end - Used to communicate between different organizations
+			2. Store-and-forward - Used within an organization
+			
+		A client will connect directly to the destinations SMTP server
+
+	
+	Internet Control Message Protocal (ICMP) - 
+		Used as a support protocal on network devices for sending the error 
+			messages and operations information.
+
+	
+	Dynamic Host Configuration Protocal (DHCP) - 67 (server), 68 (client)
+		An application layer protocal used to provide:
+			1. Subnet Mask
+			2. Router Address
+			3. DNS Address
+			4. Vendor Class Identifier
+
+		Based on a client-server model and based on discovery, offer, request, 
+			and ACK.
+
+		Uses UDP servcies. IP address is assigned from a pool of addresses.
+
+		The client and server exchange 4 DHCP messages in order to make a 
+			connection, also called DORA.
+			1. DHCP Discovery Message - Generaged by client to discover if there
+				are any DHCP servers present. Broadcast to all devices present 
+				in a network to find the DHCP server.
+			2. DHCP Offer Message - The server will respond to the client by 
+				broadcasting an offer message containing the IP address and 
+				any other TCP configuration information the client needs. If 
+				there are multiple DHCP servers on the network, the client will 
+				accept the first offer message it receives.
+			3. DHCP Request Message - When the client receives an offer message, 
+				it responds by broadcasting a request message in order to find 
+				any other machine on the network with the same IP address. If 
+				there are none, the message is received by the server as 
+				acceptance of the IP address.
+			4. DHCP Acknowledgement Message - Response to the request message 
+				confirming the acceptance.
+			5. DHCP Negative Acknowledgement Message - Response to the request 
+				message when no valid IP address is available.
+			6. DHCP Decline - Clinet-to-Server message sent when the client 
+				deams the IP configuration invalid.
+			7. DHCP Release - Client-to-Server message sent to release the IP 
+				configurations back to the pool.
+			8. DHCP Inform - Client-to-Server message when the client receives 
+				IP informaion manully and needs other configuration parameters.
+	
+--------------------------------------------------------------------------------
+
+3.1.23 - Terminology associated with multi-threaded programs
+
+	create - Starts a new thread for the multi-threaded processes. pthead 
+				uses pthread_create() to create a new thread while the syscall 
+				does the same with clone().
+
+	exit - Terminates the thread and does not return to the caller. pthread uses 
+			pthread_exit() to terminate a thread while keeping the process 
+			alive. The system uses exit() which will also terminate the process 
+			even if all threads have not terminated.
+
+--------------------------------------------------------------------------------
+
+3.2.9 - Terms and fundamentals associated with object-oriented programming using 
+			Python.
+
+	a. Class - A bundling of data and functionality creating a new type of 
+			object, allowing new instances of that object to be made. Where 
+			C structs allow a programmer to organize data, Python classes 
+			allow a programmer to organize data and operations for using 
+			that data.
+
+	b. Object - A collection of properties and methods that act on the data. 
+			Objects are created from classes that define their structure.
+
+	c. Difference between an object when discussing a class - A class is the 
+			ruling body of an object. An object is how you access the data and 
+			methods of a class. Multiple objects can be spawned from any class.
+
+	d. Advantage to object-oriented programming - There are four pillars fo OOP 
+			that define its advantage. These pillars work together to reduce 
+			complexity, increase reusablitly, isolate impact of change, reduce 
+			reducdancy, and simplify case dependant code.
+				1. Encapsulation - By grouping properties with methods that 
+					act on them we are able to associate methods with their 
+					properites and avoid having to link them together reducing 
+					the amount of parameters that must be passed between the 
+					methods and properties.
+				2. Abstraction - This is the practice of reducing the number of 
+					methods and properites that are visible outside the class. 
+					A similare practice can be done is C by creating static 
+					functions, however, this only reduces the functions to the 
+					file that it is relavent to, not to only the functions and 
+					variables that it applies to. Both properties and methods 
+					can be created as private to protect the outside world from 
+					having to worry about them. Not only does this simplify the 
+					use of the object but it also protects the object from the 
+					Impact of Change. Since all the private properties and 
+					methods are independent of anything outside the object, 
+					making a change to one class will have minor affects on 
+					another.
+				3. Inheritance - Allows you to inherent, or gain access to, 
+					properties and methods from another object, reducing the 
+					amount of redundant code requried to do similar tasks.
+				4. Polymorphism - Reduces the need to have long switch case 
+					statements by allowing a method to behave differently based 
+					on its environment.
+
+	e. Inheritance - Allows you to inherent, or gain acces to properties and 
+			methods from another object, reducing the amount of redundant code 
+			required to do simiar tasks. This definition could have inherented 
+			the definition of the 3rd pillar in object d rather than 
+			restating it.
+
+	f. The keyword "Super" - Allows the child class to access teh parent's 
+			class' init() property. This allows you to build classes that extend 
+			the functionality of previously built classes without the need to 
+			alter the existing class.
+
+	g. Initialization function of a constructor - The __init__() method of a 
+			class, is used to initialize data members of the class when an 
+			object of the class is created, giving every object of the class 
+			the same "start" point.
+
+	h. The keyword "self" - Represents the instance of the class. "self" can 
+			access the attributes and methods of the class. It binds attributes 
+			with the given arguments.
+
+	i. The getter and setter functions - Functions specifically designed to 
+			retrieve (get) or assign (set) a private property within an object. 
+			A way of treating the property as if it were public.
+
+	j. Attributes of a class - Attributes which are owned by the class itself. 
+			They are shared among all instances of the class, therefore, 
+			maintaining the same value across every instance.
+
+	k. Factory design patterns - A creational pattern that is used for creating 
+			an object that will be instantiated at runtime. Used when it is 
+			unknown how many or what type of objects will be needed until 
+			during runtime.
+
+	l. Singelton design patterns - Only one instance of the class can exist.
+
+	m. Adapter design patterns - Allows two incompatible interfaces to interact 
+			via a mediatory that translates what one interface wants and 
+			what another is offering.
+
+	n. Bridge design patterns - Allows the programmer to separate the 
+			abstraction from the implementation. This allows the abstracion and 
+			the implementation to be developed independently. 
