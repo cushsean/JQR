@@ -99,10 +99,12 @@ void showCerts(SSL *ssl){
 	return;
 }
 
-void servlet(SSL *ssl){
-	char buf[SIZEOF_BUF] = {0};
+
+
+void trans(SSL *ssl){
+	char buf[SIZEOF_BUF];
 	int sd;
-	int bytes;
+	int bytes;	
 
 	const char *serverResponse = 
 		"This is a TEST!!!!\n";
@@ -169,10 +171,13 @@ int main(int argc, char* argv[]){
 		printf("Connection: %s:%d\n", inet_ntoa(addr.sin_addr), 
 			ntohs(addr.sin_port));
 
-		ssl = SSL_new(ctx);
-		SSL_set_fd(ssl, client);
-		servlet(ssl);
-
+		if(!fork()){
+			close(server);
+			ssl = SSL_new(ctx);
+			SSL_set_fd(ssl, client);
+			trans(ssl);
+			exit(EXIT_SUCCESS);
+		}
 		// if(!fork()){
 		// 	// Children Only Zone
 		// 	close(server);

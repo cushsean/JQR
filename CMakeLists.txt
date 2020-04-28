@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 project(JQR VERSION 1.0)
-include_directories(inc)
+include_directories(inc /usr/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin)
 set(CMAKE_BUILD_TYPE Debug)
 
@@ -95,6 +95,14 @@ add_executable(hash "3-3/hashTable.c" ${HASH})
 
 #Other
 add_executable(secure "secureCoding.c")
+add_executable(ssl_client "ssl_client.c")
+TARGET_LINK_LIBRARIES(ssl_client ssl)
+TARGET_LINK_LIBRARIES(ssl_client crypto)
+add_executable(ssl_server "ssl_server.c")
+TARGET_LINK_LIBRARIES(ssl_server ssl)
+TARGET_LINK_LIBRARIES(ssl_server crypto)
+add_executable(thread "thread.c")
+TARGET_LINK_LIBRARIES(thread pthread)
 
 #test
 #set(TEST
