@@ -3,10 +3,13 @@
 #include <string.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <semaphore.h>
 
-#define THREADS (2)
+#define THREADS (3)
 
+// Use of mutex with semaphore.h syntex is directly below each pthread call.
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+// sem_t mutex;
 
 typedef struct meta{
 	char *line;
@@ -20,23 +23,9 @@ typedef struct meta{
  */
 void* findWord(void *group){
 	
-	// LOCK
-	pthread_mutex_lock(&mutex);
-
-	char *line = calloc(1, strlen(((meta*)group)->line));
-	// printf("COW\n");
-	memcpy(line, ((meta*)group)->line, strlen(((meta*)group)->line));
-	// printf("MOO\n");
-
-	char *word = calloc(128, sizeof(char));
-	// printf("CAT\n");
-	memcpy(word, ((meta*)group)->word, strlen(((meta*)group)->word));
-	// printf("MEOW\n");
-
-	// UNLOCK
-	pthread_mutex_unlock(&mutex);
+	char *line = ((meta*)group)->line;
+	char *word = ((meta*)group)->word;
 	char *start = line;
-
 	int local_count = 0;
 	
 	while(1==1){
@@ -68,17 +57,18 @@ void* findWord(void *group){
 	if(local_count > 0){
 		// LOCK
 		pthread_mutex_lock(&mutex);
+		// sem_wait(&mutex);
 
 		*((meta*)group)->count += local_count;
 
 		// UNLOCK
 		pthread_mutex_unlock(&mutex);
+		// sem_post(&mutex);
 	}
-
-
-	// line = start;
-	free(line);
-	free(word);
+	free(start);
+	start = NULL;
+	free(group);
+	group = NULL;
 	return NULL;
 }
 
@@ -89,12 +79,11 @@ int main(int argc, char **argv){
 		return EXIT_FAILURE;
 	}
 
-	meta *txt = calloc(1, sizeof(meta));
+	// meta *txt = calloc(1, sizeof(meta));
 	// txt->original = 1;
 
 	char *fileName = argv[1];
-	txt->word = argv[2];
-
+	
 	FILE *txtFile;
 	txtFile = fopen(fileName, "r");
 	if(txtFile == NULL){
@@ -104,16 +93,33 @@ int main(int argc, char **argv){
 
 	pthread_t *thread = calloc(THREADS, sizeof(pthread_t));
 
-	int lineSize = 128;
-	txt->line = calloc(lineSize, sizeof(char));
-	txt->count = calloc(1, sizeof(unsigned int));
+	// sem_init(&mutex, 0, 1);
+
+	
+	unsigned int *count = calloc(1, sizeof(unsigned int));
+	
 
 	while(feof(txtFile) == 0){
 		int t;
 		for(t = 0; t < THREADS && feof(txtFile) == 0; t++){
+			// Create struct
+			meta *txt = calloc(1, sizeof(meta));
+			txt->word = argv[2];
+			int lineSize = 128;
+			txt->line = calloc(lineSize, sizeof(char));
+
+			// LOCK
+			pthread_mutex_lock(&mutex);
+			// sem_wait(&mutex);
+
+			txt->count = count;
+
+			// UNLOCK
+			pthread_mutex_unlock(&mutex);
+			// sem_post(&mutex);
+
 			// Get a line of the script.
 			int i = 0;
-			usleep(60);
 			for(; (txt->line[i] = getc(txtFile)) != '\n' && 
 					txt->line[i] != EOF; i++){
 				if(i+1 == lineSize){
@@ -131,11 +137,12 @@ int main(int argc, char **argv){
 		}
 	}
 
-	printf("\n\n%s:%d\n", txt->word, *(txt->count));
+	printf("\n\n%s:%d\n", argv[2], *count);
 
-	free(txt->count);
-	free(txt->line);
-	free(txt);
+	// sem_destroy(&mutex);
+	free(count);
+	free(thread);
+	fclose(txtFile);
 
 	return EXIT_SUCCESS;
 }

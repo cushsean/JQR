@@ -103,6 +103,7 @@ TARGET_LINK_LIBRARIES(ssl_server ssl)
 TARGET_LINK_LIBRARIES(ssl_server crypto)
 add_executable(thread "thread.c")
 TARGET_LINK_LIBRARIES(thread pthread)
+TARGET_LINK_LIBRARIES(thread rt)
 
 #test
 #set(TEST
