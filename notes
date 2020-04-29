@@ -263,9 +263,68 @@
 
 			Frame size = Page size
 
-	d. Caching - 
+			Page Number (p): The number of bits required to represent the pages 
+				in logical address space or frame number.
 
-	e. Kernal and User-Mode Memory - 
+			Page Offset (d): The number of bits required to represent 
+				particular word in a page size of logical address space or 
+				page offset.
+
+			Frame Number (f): The number of bits required to reprent the frame 
+				of physical address space or frame number.
+
+			Frame Offset (d): Number of bits required to represent particular 
+				word in a frame or frame size of physical address space or 
+				word number of a frame or frame offset.
+
+			Translation look-aside Buffer (TLB): Small, fast, lookup cache used 
+				to store tag and value for each entry.
+
+			Each process gets its own page Tables.
+
+	d. Caching - Extreamly fast memory type used as a buffer between the 
+			relativly slow RAM and super fast CPU. Caching reduces the average 
+			time to access data from the main memory. Stores copies fo data 
+			from frequently used memory locations. Different from the chaches 
+			found on the CPU which store instructions and data.
+
+			Levels of memory:
+				1. Registers - Stores and accepts data that is immediatly stored 
+					in the CPU. Common use: accumulator, program counter, 
+					address register.
+				2. Cache memory - Fastest memory; tempory storagefor quick 
+					access to common data.
+				3. Main Memory - Non residual memory; main RAM block.
+				4. Secondary Memory - External memory; not fast but non-volital.
+
+	e. Kernal and User-Mode Memory - Kernal mode is reserved for the must 
+			trusted applications since it gets raw access to all the hardware 
+			componets on the system. Applications running in user mode that need 
+			access to kernal mode things must rely on API calls to "ask the 
+			kernal to do it"; this includes accessing physical memory. They 
+			reason for the separation is for stability. When an application 
+			running in user mode crashes, that application crashes and the user 
+			can recover from the crash and fix the problem. A common crash in 
+			user mode is trying to access memory that is not owned by that 
+			process, throwing a segfault. When there is a crash in kernal mode, 
+			however, the entire system crashes and there is no recovering; time 
+			to turn it off and back on. Looking at this from a memory 
+			perspective, the user's application, running in user-mode, has a set
+			block of memory that the kernal allocates to it. The application can 
+			do just about anything they want with this memory. As discussed 
+			before, if the application attempts to access memory that is not 
+			allocated to it, the system will throw a segfault and the 
+			application will crash. The kernal is the true owner of all memory 
+			and is responcible to allocating different blocks to the 
+			applications requesting it. The kernal is like the landlord and the 
+			user-mode applications are the tenents. Since the user-mode 
+			applications are dependant on the API calls to get the kernal to 
+			access the memory for them, it can be slow to r/w when compared to 
+			the kernal, who just can reachout and grab what it wants. This is 
+			why applications that require the fastest accesses are run in 
+			kernal mode. A common application that does this are graphic 
+			drivers. Windows Vista ran graphics drivers in user mode and users 
+			experianced a 10% speed reduction when running games.
 
 --------------------------------------------------------------------------------
 
@@ -398,10 +457,102 @@
 
 3.5.5 - Describe terms and concepts associated with OS Persistence.
 
-	a. Von Nuemann architecture - 
+	a. Von Nuemann architecture - Published by John von Nuemann in 1945.
+			This design is still widely used in computers today. It consistes of
+			a Control Unit, Arithmetic and Logic Unit (ALU), Memory Unit, 
+			Registers, and I/O. The insertruction data and program data are 
+			stored in the same memory.
 
-	b. Harvard architecture - 
+			CPU - Contains the ALU and CU as well as a variety of registers.
+
+			Registers - High speed areas of the CPU, all data is stored in a 
+				register in order for the CPU to use it.
+
+				MAR - Memory Address Register - Holds the memory location of 
+					data that needs to be accessed.
+				MDR - Memory Data Register - Holds data that is being 
+					transferred to or from memory.
+				AC - Accumulator - Where intermediate arithmetic and logic 
+					results are stored.
+				PC - Program Counter - Contains the address of the next 
+					instruction to be executed.
+				CIR - Current Instruction Register - Contains the current
+					instruction during processing.
+
+			Arithmetic and Logic Unit (ALU) - Performs the arithmetic (add, 
+				subtract, etc) and logical (AND, OR, NOT, etc) operations.
+
+			Control Unit (CU) - Controls the operations of the compute's ALU, 
+				memory, and I/O. Also provides the timing and control 
+				signals.
+
+			Buses - The paths that connect all the parts of the computer. 
+
+				Address Bus - Carries the addresses of data (but not the data) 
+					between the processor and the memory.
+				
+				Data Bus - Carries data between the processor, the memory unit
+					and the I/O devices.
+				
+				Contorl Bus - Carries control signals/commands from the CPU 
+					(and status signals from other devices) in order to 
+					control and coordinate all the activities within 
+					the computer.
+
+			Memory Unit - RAM. There is also secondary memory (HHD/SSD) that are 
+				slow to access.
+
+	b. Harvard architecture - Separates storage and signal pathways for 
+			instructions and data. This contrast the Von Nuemann architecture 
+			where these run on the same pathway. Modified Harvard architecture 
+			is commonly used today, where the system appears to operate strictly 
+			in a Von Nuemann architecture, however, the CPU separates the 
+			instructions from the data in separate caches. By separatign them, 
+			you get a dedicated pathway for each, although it is not strictly 
+			speaking a Harvard architecture. This modified method allows the 
+			system to store instructions and data in the same address in RAM 
+			causing them to be cached through the same pathway, but once cached 
+			in the separate cached spaces, the two types of data will have 
+			independent pathways. This creates a system the acts as a Von 
+			Nuemann system outside the CPU and a Harvard system within the CPU.
 
 	c. File systems - 
 
 	d. The boot process - 
+			
+			BIOS - Basic I/O System - executes MBR
+				Performs some systems integrity checks.
+				Searches, loads, and executes the boot loader program.
+				Once the boot loader is detected and loaded into memory, BIOS 
+					gives the controls to it.
+
+			MBR - Master Boot Record - executes GRUB
+				Located in the 1st sector of the bootable disk. Typically 
+					/dev/hda, or /dev/sda. Less than 512 bytes and has 3 
+					components: Primary boot loader (first 446 bytes), 
+					Partition table info (next 64 bytes), and MBR validation 
+					check (last 2 bytes). Also contains information about GRUB 
+					(or LILO). 
+
+			GRUB - Grand Unified Bootloader - executes Kernal
+				If there are multiple kernel images installed on the system, you 
+					can chose which one to execute. 
+
+			Kernal - Kernal - executes /sbin/init
+				Mounts the root file system as specified in the "root=" in 
+					grub.conf. Executes the /sbin/init program. initrd 
+					(Initial RAM Disk) is used as a temporary file system until 
+					the real root system is mounted. 
+
+			Init - Init - executes runlevel programs
+				Looks at /etc/inittab to decide the linux run level.
+					Levels:
+						0 - Halt
+						1 - Single user mode
+						2 - Multiuser, without NFS
+						3 - Full multiuser mode
+						4 - unused
+						5 - X11
+						6 - reboot
+
+			Runlevel - Runlevel programs are executed from /etc/rc.d/rc*.d/
