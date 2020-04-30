@@ -516,7 +516,10 @@
 			independent pathways. This creates a system the acts as a Von 
 			Nuemann system outside the CPU and a Harvard system within the CPU.
 
-	c. File systems - 
+	c. File systems - The logical storage of persistent data that is typically 
+			stored in a tree structure on either a Hard Drive Disk or Solid 
+			State Disk. File Systems must be mounted to a system before they can 
+			be accessed by the system.
 
 	d. The boot process - 
 			
@@ -552,7 +555,12 @@
 						2 - Multiuser, without NFS
 						3 - Full multiuser mode
 						4 - unused
-						5 - X11
+						5 - X11 (normal)
 						6 - reboot
 
 			Runlevel - Runlevel programs are executed from /etc/rc.d/rc*.d/
+				In the rc*.d directory there are programs that start with S 
+					and K. S programs are used during startup. K programs are 
+					used during shutdown; K for Kill. The number following these 
+					S's and K's are the sequence number denoting the order they 
+					should be executed. 
