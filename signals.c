@@ -52,6 +52,7 @@ int main(void){
 		fprintf(stderr, "Error creating child\n");
 	}
 
+	raise(SIGABRT);
 
 	return EXIT_SUCCESS;
 }
