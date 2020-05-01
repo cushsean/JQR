@@ -1,0 +1,33 @@
+// Simple monster schema to use flatbuffers
+
+namespace MyGame.Sample;
+
+enum Color:byte {Red = 0, Green, Blue = 2}
+
+union Equipment { Weapon } 
+
+struct Vec3{
+	x:float;
+	y:float;
+	z:float;
+}
+
+table Monster {
+	pos:Vec3; 
+	mana:short = 150;
+	hp:short = 100;
+	name:string;
+	friendly:bool = false;
+	inventory:[ubyte]; // Vector of scalars
+	color:Color = Blue; // Enum
+	weapons:[Weapon]; // Vector of scalars
+	equipped:Equipment; // Union
+}
+
+
+table Weapon{
+	name:string;
+	damage:short;
+}
+
+root_type Monster;
