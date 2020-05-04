@@ -43,6 +43,8 @@ b.	Which functions guarentee null terminated strings
 		strncpy
 		gets
 		fgets
+		sprintf
+		snprintf
 
 		Most str* functions will return a null-terminator if the end of the 
 		source string is reached, assuming the source is null-terminated.

@@ -1,54 +1,74 @@
-#include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
+#include <stdio.h>
 #include <time.h>
 
 #include "list.h"
-#include "sort.h"
 #include "util.h"
 
-#define LIST_SIZE (20)
+#define LIST_SIZE (18)
 
-static node_t* fill_list(node_t *head, int n){
-	srand(time(NULL));
-	node_t* curr = head;
-	for(int i = 0; i < n; i++){
-		int *num = malloc(sizeof(int));
-		*num = rand()%10;
-		curr->data = num;
-		curr = curr->next;
-	}
-	return head;
+void datacpy(void *dest, void *src){
+	*(int*)dest = *(int*)src;
+	return;
 }
 
-int main(){
-	node_t* list;
-	list = mkList(LIST_SIZE, SINGLY);
-	list = fill_list(list, LIST_SIZE);
-	ptList(list, print_int);
-	int num = 3;
-	printf("Find Node...\n");
-	node_t* tmp = find_node(list, &num, cmp_int);
-	if(tmp == NULL)
-		printf("ERROR: Value not found in list.\n");
-	else{
-		printf("Found: %p contains: ", tmp);
-		print_int(tmp->data);
-		printf("\n");
+void datafree(void **data){
+	free(*data);
+	*data = NULL;
+	return;
+}
+
+void data_print(void *data){
+	if(data == NULL)
+		printf("(null)");
+	else
+		printf("%d", *(int*)data);
+	return;
+}
+
+int main(void){
+	srand(time(NULL));
+
+	// Create a new list
+	llist *list = llist_create(SINGLY, TRUE, datacpy, cmp_int, datafree);
+
+	// Fill the list
+	for(int i = 0; i < LIST_SIZE; i++){
+		int *num = malloc(sizeof(int));
+		*num = rand()%10;
+		llist_insert(list, NULL, num, sizeof(int));
+		free(num);
+		num = NULL;
 	}
-	num = 5;
-	list = rmNode(list, find_node(list, &num, cmp_int));
-	ptList(list, print_int);
-	list = rmNode_by_value(list, &num, cmp_int, 1);
-	ptList(list, print_int);
-	int *value = malloc(sizeof(int));
-	num = 3;
-	*value = 19;
-	insert_node(list, &num, value);
-	ptList(list, print_int);
-	list = sort_bubble_list(list, cmp_int);
-	ptList(list, print_int);
-	rm_all_nodes(list);
-	return 0;	
+
+	llist_print(list, data_print);
+
+	int num = 4;
+	printf("Find the value %d in the list...\n", num);
+	printf("Found ");
+	data_print(llist_find(list, &num, 1));
+	printf("\n");
+
+	printf("Sorting the list...\n");
+	llist_sort(list);
+
+	llist_print(list, data_print);
+
+	num = 1;
+	while(llist_delete(list, &num))
+		num++;
+
+	printf("Delete first instance of %d from list...\n", num);
+
+	llist_print(list, data_print);
+
+	printf("Now put it back...\n");
+	int tmp = num-1;
+	llist_insert(list, &tmp, &num, sizeof(int));
+	
+	llist_print(list, data_print);
+
+	llist_destroy(&list);
+
+	return 0;
 }

@@ -113,6 +113,7 @@ int main(int argc, char **argv){
 			// sem_wait(&mutex);
 
 			txt->count = count;
+			// Look at r/w locks
 
 			// UNLOCK
 			pthread_mutex_unlock(&mutex);

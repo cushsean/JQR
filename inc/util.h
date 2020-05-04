@@ -19,9 +19,9 @@ void print_bin(char*, size_t);
  **/
 void print_int(void *num);
 
-node_t* swap_node(node_t *head, node_t *a, node_t *b);
+// node_t* swap_node(node_t *head, node_t *a, node_t *b);
 
-node_t* swap_node_singly(node_t *head, node_t *curr, node_t *NX, node_t *PR);
+// node_t* swap_node_singly(node_t *head, node_t *curr, node_t *NX, node_t *PR);
 
 
 /**

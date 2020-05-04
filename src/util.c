@@ -67,35 +67,35 @@ void print_int(void *num){
 	return;
 }
 
-node_t* swap_node(node_t *head, node_t *curr, node_t *NX){
+// node_t* swap_node(node_t *head, node_t *curr, node_t *NX){
 
-	if(curr->prev != NULL)
-		curr->prev->next = NX;
-	NX->prev = curr->prev;
-	if(NX->next != NULL && NX->type != SINGLY)
-		NX->next->prev = curr;
-	curr->next = NX->next;
-	NX->next = curr;
-	if(curr->type != SINGLY)
-		curr->prev = NX;
-	if(head == curr)
-		head = NX;
+// 	if(curr->prev != NULL)
+// 		curr->prev->next = NX;
+// 	NX->prev = curr->prev;
+// 	if(NX->next != NULL && NX->type != SINGLY)
+// 		NX->next->prev = curr;
+// 	curr->next = NX->next;
+// 	NX->next = curr;
+// 	if(curr->type != SINGLY)
+// 		curr->prev = NX;
+// 	if(head == curr)
+// 		head = NX;
 		
-	return head;
-}
+// 	return head;
+// }
 
 
-node_t* swap_node_singly(node_t *head, node_t *curr, node_t *NX, node_t *PR){
+// node_t* swap_node_singly(node_t *head, node_t *curr, node_t *NX, node_t *PR){
 
-	if(PR != NULL)
-		PR->next = NX;
-	curr->next = NX->next;
-	NX->next = curr;
-	if(head == curr)
-		head = NX;
+// 	if(PR != NULL)
+// 		PR->next = NX;
+// 	curr->next = NX->next;
+// 	NX->next = curr;
+// 	if(head == curr)
+// 		head = NX;
 		
-	return head;
-}
+// 	return head;
+// }
 
 unsigned long hash(void *input, size_t size){
 	
