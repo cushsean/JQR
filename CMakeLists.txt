@@ -8,10 +8,14 @@ set(TEST_PRG
 	src/encode.c
 )
 
-set(QUE
+set(linkedList
 	src/list.c
-	src/que.c
 	src/util.c
+)
+
+set(QUE
+	${linkedList}
+	src/que.c
 )
 
 set(TREE
@@ -29,11 +33,6 @@ set(SORT
 	src/util.c
 	src/sort.c
 	src/list.c
-)
-
-set(linkedList
-	src/list.c
-	src/util.c
 )
 
 set(STACK
@@ -86,7 +85,7 @@ set(HASH
 
 #3-3 Executables
 add_executable(linkedList "3-3/linkedList.c" ${linkedList})
-#add_executable(que "3-3/queTest.c" ${QUE})
+add_executable(que "3-3/queTest.c" ${QUE})
 #add_executable(stack "3-3/stackTest.c" ${STACK})
 #add_executable(tree "3-3/treeTest.c" ${TREE})
 #add_executable(graph "3-3/graphTest.c" ${GRAPH})

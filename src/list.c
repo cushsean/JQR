@@ -69,6 +69,78 @@ static void node_swap(llist *list, node_t *pr, node_t *n1,
 	return;
 }
 
+static void insert_at_head(llist *list, node_t *new_node){
+	new_node->next = list->head;
+	if(list->tail == NULL)
+		list->tail = new_node;
+	if(list->circle == TRUE){
+		if(list->type == DOUBLY)
+			new_node->prev = list->tail;
+		if(list->tail != NULL)
+			list->tail->next = new_node;
+	}
+	if(list->head != NULL && list->type == DOUBLY)
+		list->head->prev = new_node;
+
+	list->head = new_node;
+
+	return;
+}
+
+static void insert_node(llist *list, node_t *new_node, node_t *PR){
+	node_t *NX = PR->next;
+
+	new_node->next = NX;
+	PR->next = new_node;
+	if(list->type == DOUBLY){
+		new_node->prev = PR;
+		if(NX != NULL)
+			NX->prev = new_node;
+	}
+
+	// Update tail
+	if(PR == list->tail)
+		list->tail = new_node;
+
+	return;
+}
+
+
+static int delete_all_nodes(llist *list){
+	if(list->tail != NULL)
+		list->tail->next = NULL;
+	while(list->head != NULL){
+		node_t *next_node = list->head->next;
+
+		// Free data and node, setting head to next_node
+		list->datafree(&list->head->data);
+		free(list->head);
+		list->head = next_node;
+	}
+
+	// Set head and tail to NULL and size to 0
+	list->head = list->tail = NULL;
+	list->size = 0;
+
+	// Return Success
+	return 0;
+}
+
+
+static void* find_nth(llist *list, int n){
+	if(n == -1)
+		n = list->size;
+	if(n > list->size){
+		fprintf(stderr, "n is greater than the number of items in the list.\n");
+		return NULL;
+	}
+	node_t *curr = list->head;
+	for(; n > 0; n--)
+		curr = curr->next;
+	
+	return curr;
+}
+
 
 // PUBLIC FUNCTIONS
 
@@ -91,24 +163,35 @@ llist* llist_create(int type, int circularly,
 }
 
 
-void llist_insert(llist *list, void *insert_point, void *data, size_t size){
+void llist_insert(llist *list, int nth_mode, void *insert_point, 
+					void *data, size_t size){
 	node_t *new_node = node_create(list, data, size);
-	if(insert_point == NULL){
-		new_node->next = list->head;
-		if(list->tail == NULL)
-			list->tail = new_node;
-		if(list->circle == TRUE){
-			if(list->type == DOUBLY)
-				new_node->prev = list->tail;
-			if(list->tail != NULL)
-				list->tail->next = new_node;
-		}
-		if(list->head != NULL && list->type == DOUBLY)
-			list->head->prev = new_node;
+	if(nth_mode == TRUE){
+		int n = *(int*)insert_point;
+		if(n == -1)
+			n = list->size;
+		if(n > list->size){
+			fprintf(stderr, "The item number specified is greater than the ");
+			fprintf(stderr, "size of the list.\n");
 
-		list->head = new_node;	
+				// Free new_node
+				list->datafree(&new_node->data);
+				free(new_node);
+				new_node = NULL;
+				
+				// Return Failure
+				return;
+		}
+
+		node_t *PR = list->head;
+		
+		for(int i = 0; i < n-1; i++)
+			PR = PR->next;
+
+		insert_node(list, new_node, PR);
+			
 	}
-	else{
+	else if(insert_point != NULL){
 		node_t *curr = list->head;
 		while(list->datacmp(curr->data, insert_point) != 0){
 			if(curr == list->tail){
@@ -125,8 +208,11 @@ void llist_insert(llist *list, void *insert_point, void *data, size_t size){
 			}
 			curr = curr->next;
 		}
-		new_node->next = curr->next;
-		curr->next = new_node;
+		insert_node(list, new_node, curr);
+	}
+	else{
+		// nth_mode == FALSE && insert_point == NULL
+		insert_at_head(list, new_node);
 	}
 
 	list->size++;
@@ -134,8 +220,10 @@ void llist_insert(llist *list, void *insert_point, void *data, size_t size){
 }
 
 
-void* llist_find(llist *list, void *item, size_t instance){
-	
+void* llist_find(llist *list, int nth_mode, void *item, size_t instance){
+	if(nth_mode == TRUE){
+		return find_nth(list, *(int*)item);
+	}
 	if(list->head == NULL){
 		fprintf(stderr, "Head of list does not exist.\n");
 		// Return Failure
@@ -187,7 +275,7 @@ void llist_sort(llist *list){
 }
 
 
-int llist_delete(llist *list, void *data){
+int llist_delete(llist *list, int nth_mode, void *data){
 	if(list->head == NULL){
 		fprintf(stderr, "Head of list does not exist.\n");
 		// Return Failure
@@ -197,39 +285,34 @@ int llist_delete(llist *list, void *data){
 	// Delete All
 
 	if(data == NULL){
-		if(list->tail != NULL)
-			list->tail->next = NULL;
-		while(list->head != NULL){
-			node_t *next_node = list->head->next;
-
-			// Free data and node, setting head to next_node
-			list->datafree(&list->head->data);
-			free(list->head);
-			list->head = next_node;
-		}
-
-		// Set head and tail to NULL and size to 0
-		list->head = list->tail = NULL;
-		list->size = 0;
-
-		// Return Success
-		return 0;
+		return delete_all_nodes(list);
 	}
-	
-	// Remove first instance of data
 	
 	node_t *rm_node = list->head;
 	node_t *rm_prev = NULL;
-	while(list->datacmp(rm_node->data, data) != 0){
-		if(rm_node == list->tail){
-			fprintf(stderr, "There was no instance of \"data\"");
-			fprintf(stderr, " found in the linked list.\n");
-			// Return Failure
-			return 1;
+	
+	if(nth_mode == TRUE){
+		int n = *(int*)data;
+		for(; n > 0; n--){
+			rm_prev = rm_node;
+			rm_node = rm_node->next;
 		}
-		rm_prev = rm_node;
-		rm_node = rm_node->next;
 	}
+	else{	
+		// Find first instance of data
+		while(list->datacmp(rm_node->data, data) != 0){
+			if(rm_node == list->tail){
+				fprintf(stderr, "There was no instance of \"data\"");
+				fprintf(stderr, " found in the linked list.\n");
+				// Return Failure
+				return 1;
+			}
+			rm_prev = rm_node;
+			rm_node = rm_node->next;
+		}
+	}
+
+	// REMOVE NODE
 
 	if(rm_node == list->head){
 		// rm_node is the head node
@@ -271,7 +354,7 @@ void llist_destroy(llist **list){
 
 	// If head is not NULL delete entire list
 	if((*list)->head != NULL)
-		llist_delete(*list, NULL);
+		llist_delete(*list, FALSE, NULL);
 	
 	free(*list);
 	*list = NULL;
@@ -299,4 +382,14 @@ void llist_print(llist *list, void (*data_print)(void *data)){
 	printf("\n\n");
 
 	return;
+}
+
+
+size_t llist_size(llist *list){
+	return list->size;
+}
+
+
+int llist_cmp(llist *list, void *data1, void *data2){
+	return list->datacmp(data1, data2);
 }

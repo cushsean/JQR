@@ -15,7 +15,7 @@
 typedef struct llist llist;
 
 /**
- * Creates a linked list and returns a pointer to the list.
+ * Creates a linked list.
  * 
  * Returns a pointer to type llist.
  * 
@@ -46,9 +46,21 @@ llist* llist_create(int type, int circularly,
 
 /**
  * Inserts user data into the linked list following insert_point. 
- * If insert_point is NULL, the data will be inserted at the head of the list.
+ * 
+ * If nth_mode is set to TRUE, insert_point will be an intiger pointer 
+ * 	specifiying the nth item the list. The new data will be inserted after 
+ * 	the nth item.
+ *  Head can be specified by  0.
+ *  Tail can be specified by -1.
+ * 
+ * If nth_mode is set to FALSE, insert_point will be data already in the list 
+ * 	that the new data will be inserted after.
+ * 
+ * To insert at the Head of the list, set nth_mode to FALSE and 
+ * 	insert_point to NULL.
  */
-void llist_insert(llist *list, void *insert_point, void *data, size_t size);
+void llist_insert(llist *list, int nth_mode, void *insert_point, 
+					void *data, size_t size);
 
 
 /**
@@ -56,7 +68,7 @@ void llist_insert(llist *list, void *insert_point, void *data, size_t size);
  * 
  * Returns the nth instance of a match or NULL on Failure.
  */
-void* llist_find(llist *list, void *item, size_t nth_instance);
+void* llist_find(llist *list, int nth_mode, void *item, size_t nth_instance);
 
 
 /**
@@ -74,7 +86,7 @@ void llist_sort(llist *list);
  * Returns 0 if a node is deleted.
  * Returns 1 if data is not found and/or a node is not deleted.
  */
-int llist_delete(llist *list, void *data);
+int llist_delete(llist *list, int nth_mode, void *data);
 
 
 /**
@@ -87,5 +99,17 @@ void llist_destroy(llist **list);
  * Print the linked list.
  */
 void llist_print(llist *list, void (*data_print)(void *data));
+
+
+/**
+ * Get the size of the list.
+ */
+size_t llist_size(llist *list);
+
+
+/**
+ * Compare an item from the list with the item passed.
+ */
+int llist_cmp(llist *list, void *data1, void *data2);
 
 #endif /* LIST_H_CUHSMAN */

@@ -2,88 +2,59 @@
 #include "list.h"
 
 
-//3.3.5.a
-node_t* mkQue(int num){ //num is number of elements to create.
-	if(num < 1){
-		fprintf(stderr, "ERROR: Que length less than 1. NO QUE FORMED.\n");
-		return NULL;
-	}
-	return mkList(num, CIRCULARLY);
+struct queue{
+	void *data; // The data of the first item in the que.
+	llist *list; // A linked list of the ites in the que.
+};
+
+
+que_t* que_create(void (*datacpy)(void *dest, void *src),
+					int (*datacmp)(void *data1, void *data2),
+					void (*datafree)(void **data)){
+	que_t *que = llist_create(SINGLY, FALSE, datacpy, datacmp, datafree);
+	return que;
 }
 
-node_t* que_find_by_elem(node_t *first, int num){
-	if(que_get_size(first) < num || num < 1){
-		fprintf(stderr, "ERROR: Desired elem is invalid.\n");
-		return NULL;
-	}
-	for(--num; num>0; num--){
-		first = dQue(first);
-	}
-	return first;
+
+void que_push(que_t *que, void *data, size_t size){
+	int num = -1;
+	return llist_insert(que, TRUE, &num, data, size);
 }
 
-node_t* que_find_by_val(node_t *first, void *value, 
-	int (*cmp_ptr)(void*, void*)){
-	if(first != NULL){
-		while(first != NULL){
-			if((*cmp_ptr)(first->data, value) == 0)
-				return first;
-			first = dQue(first);
-		}
+
+void que_find_item(que_t *que, void *item){
+	if(item == NULL){
+		fprintf(stderr, "item is NULL\n");
+		return;
 	}
-	printf("Value not found.\n");
-	return NULL;
+	int num = 0;
+	while(llist_cmp(que, llist_find(que, TRUE, &num, 0), item) != 0)
+		que_pop(que);
+
+	return;
 }
 
-node_t* rm_que_item(node_t *first, void *value, int (*cmp_ptr)(void*,void*)){
-	while((*cmp_ptr)(first->data, value) != 0){
-		first = dQue(first);
-		if(first == NULL)
-			return NULL;
-	}
-	first = dQue(first);
-	return first;
+
+void que_find_nth(que_t *que, size_t n){
+	int num = 0;
+	for(; n > 0 && llist_find(que, TRUE, &num, 0) != NULL; n--)	
+		que_pop(que);
+	return;
+}	
+
+int que_pop(que_t *que){
+	int num = 0;
+	return llist_delete(que, TRUE, &num);
 }
 
-node_t* rmQue(node_t *first){
-	while(first != NULL){
-		first = dQue(first);
-	}
-	printf("Que has been destroyed\n");
-	return NULL;
+void que_destroy(que_t **que){
+	return llist_destroy(que);
 }
 
-int que_get_size(node_t* head){
-	int size = 0;
-	if(head == NULL)
-		return size;
-	node_t* curr = head;
-
-	do{
-		size++;
-		if(curr!=NULL){
-			curr = curr->next;
-		}
-	}while(curr != NULL && curr != head);
-	
-	return size;
+void que_print(que_t *que, void (*data_print)(void *data)){
+	return llist_print(que, data_print);
 }
 
-node_t* dQue(node_t* head){
-	int safe = 0;
-	node_t* tmp = head->next;
-	node_t* end = head->prev;
-	if(head->next != head)
-		safe = 1;
-	free(head->data);
-	head->data = NULL;
-	free(head);
-	head = NULL;
-	if(safe){
-		end->next = tmp;
-		tmp->prev = end;
-		return tmp;
-	}
-
-	return NULL;
+size_t que_size(que_t *que){
+	return llist_size(que);
 }
