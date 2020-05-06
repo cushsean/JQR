@@ -7,78 +7,104 @@
 
 #include "list.h"
 #include "util.h"
-#include "sort.h"
+
+#ifndef TRUE
+#define TRUE (1)
+#define FALSE (0)
+#endif
 
 #define MATCH 0
 #define WORD_SIZE 128
 
-typedef struct bucket{
-	size_t hash;
-	void *key;
-	void *data;
-	struct bucket *next;
-}bucket;
+typedef struct bucket bucket;
 
-typedef struct hashTable{
-	struct bucket *set;
-	size_t tSize;
-	size_t nElem;
-	size_t (*hash)(void*, size_t);
-	void (*cpykey)(void**, void*);
-	int (*cmp_key)(void*, void*);
-	size_t (*sizeof_key)(void*);
-	void (*free_data)(void*);
-	void (*print_set)(bucket);
-}hash_table;
+typedef struct hashTable hash_table;
 
 
 /**
- * Allocates memory and set inital values for hashTable struct.
- * Sets inital size of table to 16.
+ * Sets up the hash table.
+ * 
+ * Returns pointer to table with type hash_table.
+ * 
+ * hash: User defined function.
+ * 	Takes the key and sizeof the key as parameters and returns a hash of type
+ * 	size_t.
+ * 
+ * keycpy: User defined function.
+ * 	Copies the key from src to dest.
+ * 
+ * keycmp: User defined function.
+ * 
+ * 			Return:
+ * 				 1 if data1 > data2
+ * 				 0 if data1 == data2
+ * 				-1 if data1 < data2
+ * 
+ * datafree: User defined fucntion to free data stored in linked list.
+ * 	
  */
-hash_table* newHashTable(size_t (*hash)(void *key, size_t sizeof_key), 
-	void (*cpykey)(void **dest, void *src), 
-	int (*cmp_key)(void *key1, void *key2), size_t (*sizeof_key)(void *key), 
-	void (*free_data)(void *data), void (*ptr_set)(bucket set));
+hash_table* hashTable_create(size_t (*hash)(void *key), 
+	void (*keycpy)(void *dest, void *src), 
+	int (*keycmp)(void *key1, void *key2),  
+	void (*datafree)(void *data));
 
 
 /**
  * Inserts new set into hash table.
+ * 
+ * Size is the size of the key.
  */
-void insertHashSet(hash_table *table, void *key, void *data);
+void hashTable_insert(hash_table *table, void *key, void *data, size_t size);
 
 
 /**
- * Increase the size of the table by 2^n+1.
+ * Finds an item in the hash table and returns a void pointer to the data of 
+ * that item.
+ * 
+ * nth_mode:
+ * 		TRUE: Return a pointer to the data that is nth in the table. Key is an
+ * 				interger pointer.
+ * 		FALSE: Return a pointer ot the data that has a key that matches key.
+ * 
+ * Returns NULL on Failure.
  */
-void growTable(hash_table *table);
+void* hashTable_find(hash_table *table, int nth_mode, void *key);
 
 
 /**
- * Find the nth item in the hash table.
+ * Removes an item from the hash table.
+ * 
+ * nth_mode:
+ * 		TRUE: Removes the nth item in the hash table. key is an int pointer 
+ * 				containing n.
+ * 		FALSE: Removes the item in the hash table. key is the key for the item 
+ * 				to be removed.
+ * 
+ * To remove all items from the hash table, set nth_mode to FALSE and 
+ * 	set key to NULL. All items will be removed but the hash table will still 
+ * 	exist. To remove the hash table itself, call hashTable_destroy().
+ * 
+ * Returns 0 on success.
+ * Returns 1 on Failure.
  */
-bucket* find_nth_hashItem(hash_table *table, int n);
+int hashTable_delete(hash_table *table, int nth_mode, void* key);
 
 
 /**
- * Find an item in the hash table. NULL is returned if key not found.
+ * Removes all items from the hash table and destroies the table itself.
  */
-bucket* find_key(hash_table *table, void *key);
+void hashTable_destroy(hash_table **table);
 
 
 /**
- * Frees a hash_set.
- * Returns:
- * 	0 - If the hash set is empty after freeing. (i.e. set.next == NULL)
- * 	1 - If the hash set was filled with the next set. (i.e. set.next != NULL)
+ * Returns the number of elements in the hash table.
  */
-int freeSet(hash_table *table, bucket *set);
+size_t hashTable_size(hash_table *table);
 
 
 /**
- * Frees the hash tabel and sets array. Takes the address of the table in order
- * to set the table to NULL.
+ * Prints out the items in the hash table.
  */
-void freeTable(hash_table **table);
+void hashTable_print(hash_table *table, void (*print_data)(void *data));
 
 #endif /* HASH_H_CUSHMAN */

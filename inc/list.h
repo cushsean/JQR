@@ -4,8 +4,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#ifndef TRUE
 #define TRUE (1)
 #define FALSE (0)
+#endif
+
 #define DOUBLY (1)
 #define SINGLY (2)
 
@@ -30,7 +33,7 @@ typedef struct llist llist;
  * datacpy: User defined function to copy data from src to dest.
  * 
  * datacmp: User defined function to compare data1 and data2.
- 
+ *
  * 			Return:
  * 				 1 if data1 > data2
  * 				 0 if data1 == data2

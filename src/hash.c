@@ -1,54 +1,24 @@
-/*
-*	05FEB2020
-*	Need to modify hash_table to be an actual table
-*	instead of a hash_set as it currently is.
-*	The table should include both the KEY and DATA,
-*	both of which should be void*. The table should not
-*	start at 99999999 (LIMITER) like it is but rather 
-*	start small like 16 and grow at a rate of 2^n,
-*	n starting at 4 and increasing when num_elem is
-*	equal to 3/4 2^n. When the table_size increase,
-*	the index for each hash in the table will need to be
-*	increased as well. This will be done in the grow_table
-*	function. The elements of the table should be a struct
-*	that contains the key and any data. ex)
-*		struct bucket{
-*			void* key;
-*			void* data;
-*		}
-*	A separte struct should be used to hold the tables
-*	meta data. ex)
-*		struct hash_table{
-*			struct bucket* array;
-*			size_t table_size;
-*			size_t num_elem;
-*			ulong (*hash)(void*);
-*			void* (*key_cpy)(void*);
-*			int (*key_cmp)(void*, void*)
-*		}
-*	The following functions should be used to perform
-*	operations on the hash_table:
-*	1)	struct hash_table* new_hash_table(
-*			ulong (*hash)(void*),
-*			void* (*key_cpy)(void*),
-*			int (*key_cmp)(void*,void*)
-*		)
-*	2)	int insert_hash_table(
-*			struct hash_table*,
-*			void* key,
-*			void* value
-*		)
-*	3)	void* get_hash_table(
-*			struct hash_table*,
-*			void* key
-*		)
-*	4)	int rm_hash_table(
-*			struct hash_table*,
-*			void* key
-*		)
-*/
-
 #include "hash.h"
+
+struct bucket{
+	size_t hash;
+	void *key;
+	void *data;
+	struct bucket *next;
+};
+
+struct hashTable{
+	struct bucket *set;
+	size_t tSize;
+	size_t nElem;
+	size_t (*hash)(void*);
+	void (*cpykey)(void**, void*);
+	int (*cmp_key)(void*, void*);
+	void (*free_data)(void*);
+	void (*print_set)(bucket);
+};
+
+
 
 /**
  * Local Function for inserting buckets where a bucket exists.
@@ -56,25 +26,8 @@
 static void shiftSet(hash_table *table, size_t index, 
 						size_t hash, void *key, void *data);
 
-hash_table* newHashTable(unsigned long (*hash)(void *key, size_t sizeof_key), 
-							void (*cpykey)(void **dest, void *src), 
-							int (*cmp_key)(void *key1, void *key2),
-							size_t (*sizeof_key)(void *key),
-							void (*free_data)(void *data),
-							void (*print_set)(bucket set)){
-	hash_table *table = calloc(1, sizeof(hash_table));
-	table->tSize = 16;
-	table->set = calloc(table->tSize, sizeof(bucket));
-	table->nElem = 0;
-	table->hash = hash;
-	table->cpykey = cpykey;
-	table->cmp_key = cmp_key;
-	table->sizeof_key = sizeof_key;
-	table->free_data = free_data;
-	table->print_set = print_set;
-	return table;
-}
 
+// PRIVATE FUNCTIONS
 
 static void shiftSet(hash_table *table, size_t index, 
 						size_t hash, void *key, void *data){
@@ -83,9 +36,9 @@ static void shiftSet(hash_table *table, size_t index,
 	bucket *tmp = table->set+index;
 
 	while(tmp != NULL){
-		if(table->cmp_key(tmp->key, key) == 0){
+		if(table->keycmp(tmp->key, key) == 0){
 			// Key is alread in table, update data
-			table->free_data(tmp->data);
+			table->datafree(tmp->data);
 			tmp->data = data;
 
 			return;
@@ -111,6 +64,10 @@ static void shiftSet(hash_table *table, size_t index,
 }
 
 
+/**
+ * Inserts the key and data into the hash table based on the the size of the 
+ * table and the hash passed to the function.
+ */
 static void insert_at(hash_table *table, size_t hash, void *key, void *data){
 	size_t index = hash % table->tSize;
 	if(table->set[index].key != NULL)
@@ -125,26 +82,7 @@ static void insert_at(hash_table *table, size_t hash, void *key, void *data){
 }
 
 
-void insertHashSet(hash_table *table, void *user_key, void *data){
-	// Grow table if at 75% cap.
-	if(table->nElem >= table->tSize*.75)
-		growTable(table);
-
-	// copy key
-	void *key = calloc(1, table->sizeof_key(user_key));
-	table->cpykey(&key, user_key);
-
-	// Hash key
-	size_t hash = table->hash(key, table->sizeof_key(key));
-
-	// Insert set into table
-	insert_at(table, hash, key, data);
-	table->nElem++;
-
-	return;
-}
-
-void growTable(hash_table *table){
+static void growTable(hash_table *table){
 	// printf("The table needs to grow.\n");
 	table->tSize *= 2;
 	bucket *old = table->set;
@@ -171,7 +109,8 @@ void growTable(hash_table *table){
 	return;
 }
 
-bucket* find_nth_hashItem(hash_table *table, int n){
+static bucket* find_nth(hash_table *table, void *nth){
+	int n = *(int*)nth;
 	if(table->nElem < n){
 		fprintf(stderr, "Table contains less than %d elements\n", n);
 		return NULL;
@@ -186,11 +125,12 @@ bucket* find_nth_hashItem(hash_table *table, int n){
 			target = target->next;
 		}
 	}
-	return target;
+
+	return bucket;
 }
 
-bucket* find_key(hash_table *table, void *key){
-	size_t hash = table->hash(key, table->sizeof_key(key));
+static void* find_key(hash_table *table, void *key){
+	size_t hash = table->hash(key);
 	bucket *target = table->set + hash % table->tSize;
 	while(target != NULL){
 		if(table->cmp_key(target->key, key))
@@ -199,12 +139,10 @@ bucket* find_key(hash_table *table, void *key){
 			break;
 	}
 	return target;
-
 }
 
 
-
-int freeSet(hash_table *table, bucket *set){
+static int freeSet(hash_table *table, bucket *set){
 	if(set->key == NULL)
 		return 0;
 
@@ -226,11 +164,115 @@ int freeSet(hash_table *table, bucket *set){
 	}
 }
 
-void freeTable(hash_table **table){
-	for(int i=0; i<(*table)->tSize; i++)
-		while(freeSet((*table), (*table)->set+i));
-	free((*table)->set);
-	(*table)->set = NULL;
+static int delete_all(hash_table *table){
+	for(int i=0; i<table->tSize; i++)
+		while(freeSet(table, table->set+i));
+	free(table->set);
+	table->set = NULL;
+	return 1;
+}
+
+
+static void print_set(bucket set, void (*print_data)(void *data)){
+	print_set_util(set, 1, print_data);
+	printf("\n");
+	return;
+}
+
+
+static void print_set_util(bucket set, int level, 
+							void (*print_data)(void *data)){
+	if(set.key == NULL){
+		for(int i=0; i<level; i++)
+			printf("\t");
+		printf("EMPTY\n");
+	}
+	else{
+		for(int i=0; i<level; i++)
+			printf("\t");
+		(*print_data)(set.data);
+		if(set.next != NULL){
+			for(int i=0; i<level; i++)
+				printf("\t");
+			printf("Next :\n");
+			print_set_util(*(set.next), level+1);
+		}
+	}
+	return;
+}
+
+
+// PUBLIC FUNCTIONS
+
+
+hash_table* hashTable_create(unsigned long (*hash)(void *key), 
+							void (*keycpy)(void *dest, void *src), 
+							int (*keycmp)(void *key1, void *key2),
+							void (*datafree)(void *data)){
+	hash_table *table = calloc(1, sizeof(hash_table));
+	table->tSize = 16;
+	table->set = calloc(table->tSize, sizeof(bucket));
+	table->nElem = 0;
+	table->hash = hash;
+	table->keycpy = cpykey;
+	table->keycmp = cmp_key;
+	table->datafree = datafree;
+	return table;
+}
+
+
+void hashTable_insert(hash_table *table, void *user_key, void *data, 
+						size_t size){
+	// Grow table if at 75% cap.
+	if(table->nElem >= table->tSize*.75)
+		growTable(table);
+
+	// copy key
+	void *key = calloc(1, size);
+	table->keycpy(key, user_key);
+
+	// Hash key
+	size_t hash = table->hash(key);
+
+	// Insert set into table
+	insert_at(table, hash, key, data);
+	table->nElem++;
+
+	return;
+}
+
+void* hashTable_find(hash_table *table, int nth_mode, void *key){
+	if(nth_mode == TRUE)
+		return find_nth(table, key)->data;
+	else
+		return find_key(table, key)->data;
+}
+
+int hashTable_delete(hash_table *table, int nth_mode, void *key){
+	if(nth_mode == TRUE){
+		return freeSet(table, find_nth(table, key));
+	}
+	else if(key != NULL){
+		return freeSet(table, find_key(table, key));
+	}
+	else
+		return delete_all(table);
+}
+
+void hashTable_destroy(hash_table **table){
+	delete_all(*table);
 	free(*table);
 	*table = NULL;
+	return;
+}
+
+size_t hashTable_size(hash_table *table){
+	return table->nElem;
+}
+
+void hashTable_print(hash_table *table, void (*print_data)(void *data)){
+	for(int n = 0; n < table->tSize; n++){
+		print_set(table->set[n], print_data);
+	}
+	return;
 }

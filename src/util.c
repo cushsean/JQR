@@ -97,7 +97,7 @@ void print_int(void *num){
 // 	return head;
 // }
 
-unsigned long hash(void *input, size_t size){
+unsigned long hash(void *input){
 	
 	unsigned long key = 0;
 	int c;

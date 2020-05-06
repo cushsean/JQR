@@ -27,7 +27,7 @@ void print_int(void *num);
 /**
  * Hashing scheme that returns an unsigned long.
  */
-unsigned long hash(void *input, size_t size);
+unsigned long hash(void *input);
 
 
 /**
