@@ -46,15 +46,17 @@ void que_push(que_t *que, void *data, size_t size);
  * 
  * All items before the matched item will be popped (d qued).
  */
-void que_find_item(que_t *que, void *item);
+void* que_find_item(que_t *que, void *item);
 
 
 /**
  * Finds the nth item in the que.
  * 
+ * n is zero based.
+ * 
  * All items before the nth item will be popped (d qued).
  */
-void que_find_nth(que_t *que, size_t n);
+void* que_find_nth(que_t *que, size_t n);
 
 
 /**

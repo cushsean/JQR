@@ -3,31 +3,72 @@
 
 #include "list.h"
 
-/**
- * Creates a stack with num number of elements to be filled later.
- */
-node_t* mkStack(int num);
+typedef struct llist stack_t;
 
 
 /**
- * Adds an element to the top of the stack with value pointed to by value.
+ * Creates a stack.
+ * 
+ * Returns a pointer to type stack_t.
+ * 
+ * datacpy: User defined function to copy data from src to dest.
+ * 
+ * datacmp: User defined function to compare data1 and data2.
+ 
+ * 			Return:
+ * 				 1 if data1 > data2
+ * 				 0 if data1 == data2
+ * 				-1 if data1 < data2
+ * 
+ * datafree: User defined fucntion to free data stored in linked list.f
  */
-node_t* push(node_t *top, void *value);
+stack_t* stack_create(void (*datacpy)(void *dest, void *src), 
+					    int (*datacmp)(void *data1, void *data2),
+					    void (*datafree)(void **data));
 
 
 /**
- * Removed and frees the element on the top of the stack.
+ * Pushes an item onto the stack.
+ * 
+ * Size is size of data.
  */
-node_t* pop(node_t *top);
+void stack_push(stack_t *stack, void *data, size_t size);
 
 
 /**
- * Iterates throght the stack and returns the number of elements in the stack.
+ * Poppes an item off the stack.
+ * 
+ * Returns 0 on Success.
+ * Returns 1 on Failure.
  */
-int get_stack_size(node_t *top);
+int stack_pop(stack_t *stack);
 
 
 /**
- * Removes and frees every element in the stack.
+ * Poppes all items off the stack and frees the stack itself.
  */
-void rmStack(node_t *top);
+void stack_destroy(stack_t **stack);
+
+
+/**
+ * Prints the contents of the stack.
+ */
+void stack_print(stack_t *stack, void (*data_print)(void *data));
+
+
+/**
+ * Returns the number of items in the stack.
+ */
+size_t stack_size(stack_t *stack);
+
+
+/**
+ * Finds item in the stack. 
+ * 
+ * If nth_mode is TRUE, item will be an int pointer of the nth item that should 
+ * be returned. Items are zero based, therefore HEAd will be item 0. Tail can be 
+ * referenced as item -1.
+ * 
+ * If nth_mode is FALSE, the nth_instance of a match to item will be returned.
+ */
+void* stack_find(stack_t *stack, int nth_mode, void *item, size_t nth_instance);

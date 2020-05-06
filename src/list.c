@@ -88,10 +88,14 @@ static void insert_at_head(llist *list, node_t *new_node){
 }
 
 static void insert_node(llist *list, node_t *new_node, node_t *PR){
-	node_t *NX = PR->next;
+	node_t *NX = NULL;
+
+	if(PR != NULL)
+		NX = PR->next;
 
 	new_node->next = NX;
-	PR->next = new_node;
+	if(PR != NULL)
+		PR->next = new_node;
 	if(list->type == DOUBLY){
 		new_node->prev = PR;
 		if(NX != NULL)
@@ -99,7 +103,7 @@ static void insert_node(llist *list, node_t *new_node, node_t *PR){
 	}
 
 	// Update tail
-	if(PR == list->tail)
+	if(PR == list->tail && PR != NULL)
 		list->tail = new_node;
 
 	return;
@@ -138,7 +142,10 @@ static void* find_nth(llist *list, int n){
 	for(; n > 0; n--)
 		curr = curr->next;
 	
-	return curr;
+	if(curr == NULL)
+		return NULL;
+		
+	return curr->data;
 }
 
 
@@ -182,14 +189,16 @@ void llist_insert(llist *list, int nth_mode, void *insert_point,
 				// Return Failure
 				return;
 		}
-
-		node_t *PR = list->head;
-		
-		for(int i = 0; i < n-1; i++)
-			PR = PR->next;
-
-		insert_node(list, new_node, PR);
+		if(list->head == NULL)
+			insert_at_head(list, new_node);
+		else{
+			node_t *PR = list->head;
 			
+			for(int i = 0; i < n-1; i++)
+				PR = PR->next;
+
+			insert_node(list, new_node, PR);
+		}			
 	}
 	else if(insert_point != NULL){
 		node_t *curr = list->head;
@@ -284,7 +293,7 @@ int llist_delete(llist *list, int nth_mode, void *data){
 
 	// Delete All
 
-	if(data == NULL){
+	if(data == NULL || list->size == 1){
 		return delete_all_nodes(list);
 	}
 	

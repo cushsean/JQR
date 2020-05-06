@@ -22,24 +22,24 @@ void que_push(que_t *que, void *data, size_t size){
 }
 
 
-void que_find_item(que_t *que, void *item){
+void* que_find_item(que_t *que, void *item){
 	if(item == NULL){
 		fprintf(stderr, "item is NULL\n");
-		return;
+		return NULL;
 	}
 	int num = 0;
 	while(llist_cmp(que, llist_find(que, TRUE, &num, 0), item) != 0)
 		que_pop(que);
 
-	return;
+	return llist_find(que, TRUE, &num, 0);
 }
 
 
-void que_find_nth(que_t *que, size_t n){
+void* que_find_nth(que_t *que, size_t n){
 	int num = 0;
 	for(; n > 0 && llist_find(que, TRUE, &num, 0) != NULL; n--)	
 		que_pop(que);
-	return;
+	return llist_find(que, TRUE, &num, 0);
 }	
 
 int que_pop(que_t *que){

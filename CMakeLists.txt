@@ -15,6 +15,7 @@ set(linkedList
 
 set(QUE
 	${linkedList}
+	src/util.c
 	src/que.c
 )
 
@@ -36,9 +37,8 @@ set(SORT
 )
 
 set(STACK
+	${linkedList}
 	src/util.c
-	src/list.c
-	src/sort.c
 	src/stack.c
 )
 
@@ -86,7 +86,7 @@ set(HASH
 #3-3 Executables
 add_executable(linkedList "3-3/linkedList.c" ${linkedList})
 add_executable(que "3-3/queTest.c" ${QUE})
-#add_executable(stack "3-3/stackTest.c" ${STACK})
+add_executable(stack "3-3/stackTest.c" ${STACK})
 #add_executable(tree "3-3/treeTest.c" ${TREE})
 #add_executable(graph "3-3/graphTest.c" ${GRAPH})
 #add_executable(hash "3-3/hashTable.c" ${HASH})

@@ -30,7 +30,7 @@ int main(void){
 	srand(time(NULL));
 
 	// Create a new list
-	llist *list = llist_create(DOUBLY, TRUE, datacpy, cmp_int, datafree);
+	llist *list = llist_create(SINGLY, FALSE, datacpy, cmp_int, datafree);
 
 	// Fill the list
 	for(int i = 0; i < LIST_SIZE; i++){
@@ -77,6 +77,13 @@ int main(void){
 	num = 20;
 	tmp = -1;
 	llist_insert(list, TRUE, &tmp, &num, sizeof(int));
+
+	llist_print(list, data_print);
+
+	llist_delete(list, FALSE, NULL);
+
+	num = -1;
+	llist_insert(list, TRUE, &num, &num, sizeof(int));
 
 	llist_print(list, data_print);
 
