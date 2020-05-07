@@ -44,7 +44,7 @@ typedef struct hashTable hash_table;
  * 	
  */
 hash_table* hashTable_create(size_t (*hash)(void *key), 
-	void (*keycpy)(void *dest, void *src), 
+	void (*keycpy)(void **dest, void *src), 
 	int (*keycmp)(void *key1, void *key2),  
 	void (*datafree)(void *data));
 
@@ -63,7 +63,7 @@ void hashTable_insert(hash_table *table, void *key, void *data, size_t size);
  * 
  * nth_mode:
  * 		TRUE: Return a pointer to the data that is nth in the table. Key is an
- * 				interger pointer.
+ * 				interger pointer. nth is NOT zero based.
  * 		FALSE: Return a pointer ot the data that has a key that matches key.
  * 
  * Returns NULL on Failure.

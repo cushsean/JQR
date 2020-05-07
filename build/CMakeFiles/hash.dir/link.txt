@@ -1,0 +1,1 @@
+/usr/bin/cc -g   CMakeFiles/hash.dir/3-3/hashTable.c.o CMakeFiles/hash.dir/src/list.c.o CMakeFiles/hash.dir/src/util.c.o CMakeFiles/hash.dir/src/hash.c.o  -o bin/hash 

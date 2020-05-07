@@ -12,10 +12,9 @@ struct hashTable{
 	size_t tSize;
 	size_t nElem;
 	size_t (*hash)(void*);
-	void (*cpykey)(void**, void*);
-	int (*cmp_key)(void*, void*);
-	void (*free_data)(void*);
-	void (*print_set)(bucket);
+	void (*keycpy)(void**, void*);
+	int (*keycmp)(void*, void*);
+	void (*datafree)(void*);
 };
 
 
@@ -126,14 +125,14 @@ static bucket* find_nth(hash_table *table, void *nth){
 		}
 	}
 
-	return bucket;
+	return target;
 }
 
-static void* find_key(hash_table *table, void *key){
+static bucket* find_key(hash_table *table, void *key){
 	size_t hash = table->hash(key);
 	bucket *target = table->set + hash % table->tSize;
 	while(target != NULL){
-		if(table->cmp_key(target->key, key))
+		if(table->keycmp(target->key, key))
 			target = target->next;
 		else
 			break;
@@ -148,7 +147,7 @@ static int freeSet(hash_table *table, bucket *set){
 
 	table->nElem -= 1;
 	free(set->key);
-	table->free_data(set->data);
+	table->datafree(set->data);
 	if(set->next == NULL){
 		set->key = NULL;
 		set->data = NULL;
@@ -173,13 +172,6 @@ static int delete_all(hash_table *table){
 }
 
 
-static void print_set(bucket set, void (*print_data)(void *data)){
-	print_set_util(set, 1, print_data);
-	printf("\n");
-	return;
-}
-
-
 static void print_set_util(bucket set, int level, 
 							void (*print_data)(void *data)){
 	if(set.key == NULL){
@@ -191,13 +183,21 @@ static void print_set_util(bucket set, int level,
 		for(int i=0; i<level; i++)
 			printf("\t");
 		(*print_data)(set.data);
+		printf("\n");
 		if(set.next != NULL){
 			for(int i=0; i<level; i++)
 				printf("\t");
 			printf("Next :\n");
-			print_set_util(*(set.next), level+1);
+			print_set_util(*(set.next), level+1, print_data);
 		}
 	}
+	return;
+}
+
+
+static void print_set(bucket set, void (*print_data)(void *data)){
+	print_set_util(set, 1, print_data);
+	printf("\n");
 	return;
 }
 
@@ -206,7 +206,7 @@ static void print_set_util(bucket set, int level,
 
 
 hash_table* hashTable_create(unsigned long (*hash)(void *key), 
-							void (*keycpy)(void *dest, void *src), 
+							void (*keycpy)(void **dest, void *src), 
 							int (*keycmp)(void *key1, void *key2),
 							void (*datafree)(void *data)){
 	hash_table *table = calloc(1, sizeof(hash_table));
@@ -214,8 +214,8 @@ hash_table* hashTable_create(unsigned long (*hash)(void *key),
 	table->set = calloc(table->tSize, sizeof(bucket));
 	table->nElem = 0;
 	table->hash = hash;
-	table->keycpy = cpykey;
-	table->keycmp = cmp_key;
+	table->keycpy = keycpy;
+	table->keycmp = keycmp;
 	table->datafree = datafree;
 	return table;
 }
@@ -228,8 +228,8 @@ void hashTable_insert(hash_table *table, void *user_key, void *data,
 		growTable(table);
 
 	// copy key
-	void *key = calloc(1, size);
-	table->keycpy(key, user_key);
+	void *key;
+	table->keycpy(&key, user_key);
 
 	// Hash key
 	size_t hash = table->hash(key);
